@@ -51,6 +51,11 @@ services:
       - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
       # Nginx access.log 파서 설정
       - ./parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      # 컨테이너 재생성 후에도 읽기 위치와 전송 대기 청크 유지
+      - fluent-bit-state:/var/lib/fluent-bit
+
+volumes:
+  fluent-bit-state:
 
 networks:
   default:
