@@ -1,5 +1,26 @@
 import React from 'react';
 
+function formatRawLog(rawLog) {
+  if (!rawLog) return '-';
+
+  let parsed;
+  try {
+    parsed = JSON.parse(rawLog);
+  } catch {
+    return rawLog;
+  }
+
+  if (parsed && typeof parsed.headers === 'string') {
+    try {
+      parsed.headers = JSON.parse(parsed.headers);
+    } catch {
+      // JSON이 아닌 헤더는 원래 문자열 유지
+    }
+  }
+
+  return JSON.stringify(parsed, null, 2);
+}
+
 function LogDetailModal({
     isOpen,
     log,
@@ -115,7 +136,7 @@ function LogDetailModal({
                 overflowX: 'auto',
               }}
             >
-              {log.rawLog || '-'}
+              {formatRawLog(log.rawLog)}
             </pre>
           </>
         )}
