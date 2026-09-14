@@ -17,7 +17,7 @@ public class JwtUtilTest {
     private final JwtUtil jwtUtil = new JwtUtil();
 
     @Test
-    @DisplayName("1. JWT를 생성하면 username을 추출할 수 있다")
+    @DisplayName("JWT를 생성하면 username을 추출할 수 있다")
     void generateToken_thenExtractUsername(){
 
         String token = jwtUtil.generateToken("admin");
@@ -27,7 +27,7 @@ public class JwtUtilTest {
     }
 
     @Test
-    @DisplayName("2. 정상 JWT는 유효성 검사를 통과한다")
+    @DisplayName("정상 JWT는 유효성 검사를 통과한다")
     void validateToken_whenTokenIsValid_thenReturnTrue(){
 
         String token = jwtUtil.generateToken("admin");
@@ -37,7 +37,7 @@ public class JwtUtilTest {
     }
 
     @Test
-    @DisplayName("3. 변조된 JWT는 유효성 검사에 실패한다")
+    @DisplayName("변조된 JWT는 유효성 검사에 실패한다")
     void validateToken_whenTokenIsTampered_thenReturnFalse(){
 
         String token = jwtUtil.generateToken("admin");
@@ -53,7 +53,7 @@ public class JwtUtilTest {
     }
 
     @Test
-    @DisplayName("4. 만료된 JWT는 유효성 검사에 실패한다")
+    @DisplayName("만료된 JWT는 유효성 검사에 실패한다")
     void validateToken_whenTokenIsExpired_thenReturnFalse(){
 
         SecretKey key = (SecretKey) ReflectionTestUtils.getField(jwtUtil,"key");
@@ -70,7 +70,7 @@ public class JwtUtilTest {
     }
 
     @Test
-    @DisplayName("5. JWT 형식이 아니면 유효성 검사에 실패한다")
+    @DisplayName("JWT 형식이 아니면 유효성 검사에 실패한다")
     void validateToekn_whenTokenIsMalformed_thenReturnFalse(){
 
         assertThat(jwtUtil.validateToken("not-a-jwt")).isFalse();

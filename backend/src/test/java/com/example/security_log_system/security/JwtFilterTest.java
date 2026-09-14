@@ -38,7 +38,7 @@ public class JwtFilterTest {
     }
 
     @Test
-    @DisplayName("1. 유효한 JWT가 있으면 인증 정보를 SecurityContext에 등록한다")
+    @DisplayName("유효한 JWT가 있으면 인증 정보를 SecurityContext에 등록한다")
     void doFilter_whenTokenIsValid_thenSetAuthentication() throws Exception {
 
         // given
@@ -68,7 +68,7 @@ public class JwtFilterTest {
     }
 
     @Test
-    @DisplayName("2. JWT가 유효하지 않으면 인증 정보를 등록하지 않는다")
+    @DisplayName("JWT가 유효하지 않으면 인증 정보를 등록하지 않는다")
     void doFilter_whenTokenIsInValid_thenSetAuthentication() throws Exception {
 
         // given
@@ -95,7 +95,7 @@ public class JwtFilterTest {
     }
 
     @Test
-    @DisplayName("3 Authorization 헤더가 없으면 JWT 검증을 하지 않는다")
+    @DisplayName("Authorization 헤더가 없으면 JWT 검증을 하지 않는다")
     void doFilter_whenAuthorizationHearIsMissing_thenContinueFilterChain() throws Exception {
 
         // given
@@ -114,7 +114,7 @@ public class JwtFilterTest {
     }
 
     @Test
-    @DisplayName("4. Bearer 형식이 아니면 JWT 검증을 하지 않는다")
+    @DisplayName("Bearer 형식이 아니면 JWT 검증을 하지 않는다")
     void doFilter_whenHeaderIsNotBearer_thenContinuedoFilterChain() throws Exception{
 
         // given

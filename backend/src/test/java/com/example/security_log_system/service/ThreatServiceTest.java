@@ -157,6 +157,14 @@ public class ThreatServiceTest {
                 "Repeated_attack"
         );
 
+        // 저장소가 반환할 위협 객체 설정
+        DetectedThreat savedThreat = DetectedThreat.builder()
+                .id(10L)
+                .build();
+
+        when(threatRepository.save(any(DetectedThreat.class)))
+                .thenReturn(savedThreat);
+
         // when
         threatService.saveDetectedThreat(dto);
 
@@ -172,7 +180,8 @@ public class ThreatServiceTest {
         verify(blacklistService).addToBlacklist(
                 eq("192.168.0.10"),
                 contains("BRUTE_FORCE"),
-                eq(4)
+                eq(4),
+                same(savedThreat)
         );
         verify(notificationService).sendUrgentAlert(
                 eq("192.168.0.10"),
@@ -232,6 +241,14 @@ public class ThreatServiceTest {
 
         AiResponseDto aiResponseDto = aiResponseDto(1L, 0.9f, "192.168.0.10", "AI detected");
 
+        // 저장소가 반환할 위협 객체 설정
+        DetectedThreat savedThreat = DetectedThreat.builder()
+                .id(10L)
+                .build();
+
+        when(threatRepository.save(any(DetectedThreat.class)))
+                .thenReturn(savedThreat);
+
         // when
         when(logRepository.findById(1L)).thenReturn(Optional.of(logEntry));
 
@@ -256,9 +273,10 @@ public class ThreatServiceTest {
         ).count()).isEqualTo(1.0);
 
         verify(blacklistService).addToBlacklist(
-                "192.168.0.10",
-                "AI detected",
-                4
+                eq("192.168.0.10"),
+                eq("AI detected"),
+                eq(4),
+                same(savedThreat)
         );
 
         verify(notificationService).sendUrgentAlert(
