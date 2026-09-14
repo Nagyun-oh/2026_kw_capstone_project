@@ -29,7 +29,7 @@ public class AiResultConsumerTest {
     private AiResultConsumer Consumer;
 
     @Test
-    @DisplayName("1.AI 결과 메시지를 DTO로 변환하여 ThreatService에 전달한다")
+    @DisplayName("AI 결과 메시지를 DTO로 변환하여 ThreatService에 전달한다")
     void consume_whenMessageIsValid_thenCallThreatService() throws Exception{
 
         // given
@@ -55,7 +55,7 @@ public class AiResultConsumerTest {
     }
 
     @Test
-    @DisplayName("2.잘못된 JSON 메시지는 Service에 전달하지 않는다")
+    @DisplayName("잘못된 JSON 메시지는 Service에 전달하지 않는다")
     void consume_whenJSONIsInValid_thenNotCallThreatService() throws Exception{
 
         // given
@@ -75,7 +75,7 @@ public class AiResultConsumerTest {
     }
 
     @Test
-    @DisplayName("3.Service 처리에 실패해도 Consumer 예외를 외부로 던지지 않는다.")
+    @DisplayName("Service 처리에 실패해도 Consumer 예외를 외부로 던지지 않는다.")
     void consume_whenServiceFails_thenDoNotPropagateException() throws Exception{
 
         // given
