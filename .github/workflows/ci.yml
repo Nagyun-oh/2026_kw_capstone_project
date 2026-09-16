@@ -75,4 +75,4 @@ jobs:
         run: |
           docker compose -f backend/docker-compose.yml config --quiet
           docker compose -f waf/docker-compose.yml config --quiet
-          docker compose -f targets/juiceshop/docker-compose.yml config --quiet
+          docker compose -f waf/docker-compose.yml -f targets/juiceshop/docker-compose.yml config --quiet
