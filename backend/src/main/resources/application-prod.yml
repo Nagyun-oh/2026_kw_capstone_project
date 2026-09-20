@@ -1,0 +1,33 @@
+# prod 프로필에서 공통 설정에 덮어 적용
+spring:
+  datasource:
+    # 운영 접속 정보는 모두 외부에서 제공
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+
+  # 운영에서는 SQL 출력 비활성화
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  management:
+    # 운영에서는 상태 확인 endpoint만 HTTP로 노출
+    endpoints:
+      web:
+        exposure:
+          include:
+            - health
+
+    endpoint:
+      health:
+        show-details: never
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
