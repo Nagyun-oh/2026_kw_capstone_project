@@ -1,0 +1,24 @@
+# 기본적으로 모든 파일과 폴더 제외
+**
+
+# Gradle 실행 및 빌드 설정 파일 허용
+!gradlew
+!build.gradle
+!settings.gradle
+
+# Gradle Wrapper 허용
+!gradle/
+!gradle/**
+
+# 애플리케이션 코드와 리소스 허용
+!src/
+!src/main/
+!src/main/**
+
+# 허용된 경로 안에서도 비밀값 파일은 제외
+**/.env
+**/env.*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.jks
