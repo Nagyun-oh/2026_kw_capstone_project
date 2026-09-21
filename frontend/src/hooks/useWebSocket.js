@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import SockJS from 'sockjs-client';
 import {Client,ReconnectionTimeMode } from '@stomp/stompjs';
 import { toast } from 'react-toastify';
+import {WS_URL} from '../config';
 
 function useWebSocket(onThreatReceived) {
   // 새로운 위협이 들어왔을 때 테이블 테두리 강조
@@ -23,10 +24,10 @@ function useWebSocket(onThreatReceived) {
 
 
   useEffect(() => {
-    // const socket = new SockJS(process.env.REACT_APP_WS_URL);
+    
     const stompClient = new Client({
       // SockJS를 사용해 백엔드 WebSocket endpoint에 연결
-      webSocketFactory: () => new SockJS(process.env.REACT_APP_WS_URL),
+      webSocketFactory: () => new SockJS(WS_URL),
 
       // 재연결 로직을 지수적으로 증가시킨다. (지수 백오프)
       reconnectTimeMode: ReconnectionTimeMode.EXPONENTIAL,

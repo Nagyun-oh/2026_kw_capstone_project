@@ -19,6 +19,10 @@ import java.util.Map;
 @EnableKafka
 public class KafkaConsumerConfig {
 
+
+    @Value("${spring.kafka.consumer.auto-offset-reset}")
+    private String autoOffsetReset;
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
@@ -37,6 +41,12 @@ public class KafkaConsumerConfig {
         // 백엔드 로그 처리용 Consumer group.
         // 같은 group에 속한 Consumer들은 topic 메시지를 나누어 처리한다.
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+
+        // 유효한 커밋 offset이 없을 때 사용할 시작 위치
+        props.put(
+                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
+                autoOffsetReset
+        );
 
         // Kafka 메시지는 내부적으로 byte 데이터로 저장되기 때문에 Java 객체로 바꿔야 한다.
         // StringDeserializer는 Kafka에서 받은 byte 데이터를 String으로 변환한다.

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import {API_BASE_URL} from '../config';
 
 function useSecurityData() {
 
@@ -70,7 +71,7 @@ function useSecurityData() {
     }
 
     axios.get(
-      `${process.env.REACT_APP_API_BASE_URL}/api/v1/logs`,
+      `${API_BASE_URL}/api/v1/logs`,
       {params}
     )
     .then(response => {
@@ -92,7 +93,7 @@ function useSecurityData() {
 
   const fetchLogById = async id => {
     const response = await axios.get(
-      `${process.env.REACT_APP_API_BASE_URL}/api/v1/logs/${id}`
+      `${API_BASE_URL}/api/v1/logs/${id}`
     );
 
     return response.data;
@@ -110,7 +111,7 @@ function useSecurityData() {
     }
 
     axios.get(
-      `${process.env.REACT_APP_API_BASE_URL}/api/v1/threats`,
+      `${API_BASE_URL}/api/v1/threats`,
       {params}
     )
     .then(response => {
@@ -141,7 +142,7 @@ function useSecurityData() {
     }
 
     axios.get(
-      `${process.env.REACT_APP_API_BASE_URL}/api/v1/blacklist`,
+      `${API_BASE_URL}/api/v1/blacklist`,
       {params}
     )
     .then(response => {

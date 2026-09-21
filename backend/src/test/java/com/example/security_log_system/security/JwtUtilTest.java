@@ -1,10 +1,11 @@
 package com.example.security_log_system.security;
 
 import io.jsonwebtoken.Jwts;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import javax.crypto.SecretKey;
 
@@ -14,7 +15,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class JwtUtilTest {
 
-    private final JwtUtil jwtUtil = new JwtUtil();
+    // 단위 테스트 전용키 (실제 서비스에서는 사용 x)
+    private static final String TEST_SECRET =
+            Base64.getEncoder().encodeToString(
+                    "0123456789abcdef0123456789abcdef".getBytes(StandardCharsets.UTF_8)
+            );
+
+    private final JwtUtil jwtUtil = new JwtUtil(TEST_SECRET,86400000L);
 
     @Test
     @DisplayName("JWT를 생성하면 username을 추출할 수 있다")
