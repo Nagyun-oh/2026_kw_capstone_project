@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "purpose": "Dataset family labels and future XAI display text. Legacy signatures are display/reference hints, never model-grounded explanations.",
+  "references": [
+    "AI_v0/main.py",
+    "AI_v0/reason_verification.md",
+    "AI/reports/transformer_completion_report.md"
+  ],
+  "families": {
+    "sqli": {
+      "display_name_ko": "SQL 인젝션",
+      "risk_summary_ko": "입력값이 데이터베이스 질의 구조를 변경할 가능성",
+      "legacy_signatures": ["select", "union", "where", "sleep", "benchmark", "--"]
+    },
+    "xss": {
+      "display_name_ko": "크로스 사이트 스크립팅(XSS)",
+      "risk_summary_ko": "브라우저에서 실행될 수 있는 스크립트 또는 이벤트 속성 삽입 가능성",
+      "legacy_signatures": ["<script", "javascript:", "onerror", "onload", "<svg", "<img"]
+    },
+    "path_traversal": {
+      "display_name_ko": "경로 순회",
+      "risk_summary_ko": "허용된 디렉토리 밖의 파일에 접근할 가능성",
+      "legacy_signatures": ["../", "..\\", "%2e%2e", "etc/passwd", "boot.ini"]
+    },
+    "command_injection": {
+      "display_name_ko": "운영체제 명령어 인젝션",
+      "risk_summary_ko": "서버 운영체제 명령이 입력을 통해 실행될 가능성",
+      "legacy_signatures": ["exec", ";", "&&", "|", "${"]
+    },
+    "code_injection": {
+      "display_name_ko": "코드 인젝션",
+      "risk_summary_ko": "애플리케이션 코드나 표현식으로 해석될 입력이 삽입될 가능성",
+      "legacy_signatures": []
+    },
+    "xxe": {
+      "display_name_ko": "XML 외부 엔티티(XXE)",
+      "risk_summary_ko": "XML 외부 엔티티 처리로 파일 또는 내부 자원에 접근할 가능성",
+      "legacy_signatures": ["<!ENTITY", "SYSTEM", "PUBLIC"]
+    },
+    "log4shell": {
+      "display_name_ko": "Log4Shell/JNDI 인젝션",
+      "risk_summary_ko": "로그 문자열을 통해 JNDI 조회가 실행될 가능성",
+      "legacy_signatures": ["${jndi:"]
+    },
+    "shellshock": {
+      "display_name_ko": "Shellshock",
+      "risk_summary_ko": "환경 변수 형태의 입력을 통해 셸 명령이 실행될 가능성",
+      "legacy_signatures": ["() {"]
+    },
+    "ldap_injection": {
+      "display_name_ko": "LDAP 인젝션",
+      "risk_summary_ko": "LDAP 필터 구조가 입력값에 의해 변경될 가능성",
+      "legacy_signatures": []
+    },
+    "xpath_injection": {
+      "display_name_ko": "XPath 인젝션",
+      "risk_summary_ko": "XPath 질의 구조가 입력값에 의해 변경될 가능성",
+      "legacy_signatures": []
+    },
+    "ssi": {
+      "display_name_ko": "서버 사이드 인클루드 인젝션",
+      "risk_summary_ko": "SSI 지시문이 서버에서 해석될 가능성",
+      "legacy_signatures": ["<!--#"]
+    },
+    "broken_access_control": {
+      "display_name_ko": "접근제어 취약점/IDOR",
+      "risk_summary_ko": "요청 주체가 권한 없는 다른 사용자의 자원에 접근할 가능성",
+      "legacy_signatures": [],
+      "context_required": true
+    },
+    "credential_attack": {
+      "display_name_ko": "자격증명 공격",
+      "risk_summary_ko": "반복 인증 시도 또는 탈취된 자격증명 사용 가능성",
+      "legacy_signatures": [],
+      "sequence_context_required": true
+    },
+    "vulnerability_scanning": {
+      "display_name_ko": "취약점 스캔",
+      "risk_summary_ko": "여러 경로와 서비스를 반복 탐색하는 스캔 가능성",
+      "legacy_signatures": [],
+      "sequence_context_required": true
+    },
+    "http_request_smuggling": {
+      "display_name_ko": "HTTP 요청 스머글링",
+      "risk_summary_ko": "중간 장비와 백엔드가 요청 경계를 다르게 해석할 가능성",
+      "legacy_signatures": [],
+      "multi_message_context_required": true
+    },
+    "http_response_splitting": {
+      "display_name_ko": "HTTP 응답 분할",
+      "risk_summary_ko": "입력값이 응답 헤더 경계를 변경할 가능성",
+      "legacy_signatures": ["%0d%0a", "\\r\\n"]
+    },
+    "http_verb_tampering": {
+      "display_name_ko": "HTTP 메서드 변조",
+      "risk_summary_ko": "허용 정책을 우회하기 위해 요청 메서드를 변경했을 가능성",
+      "legacy_signatures": [],
+      "policy_context_required": true
+    },
+    "input_manipulation": {
+      "display_name_ko": "입력값 변조",
+      "risk_summary_ko": "애플리케이션이 기대하는 형식이나 범위를 벗어난 입력 가능성",
+      "legacy_signatures": []
+    },
+    "protocol_manipulation": {
+      "display_name_ko": "프로토콜 변조",
+      "risk_summary_ko": "비정상 프로토콜 표현으로 파서 또는 정책 차이를 유발할 가능성",
+      "legacy_signatures": []
+    },
+    "source_spoofing": {
+      "display_name_ko": "출처 위조",
+      "risk_summary_ko": "클라이언트 주소나 출처 관련 헤더가 위조됐을 가능성",
+      "legacy_signatures": [],
+      "network_context_required": true
+    }
+  }
+}

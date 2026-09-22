@@ -98,3 +98,6 @@ Thumbs.db
 # 내가 추가했다.
 AI/capstone/
 AI/catboost_info/
+# AI_new Transformer runtime Python source
+!AI_new/security_ai/data/
+!AI_new/security_ai/data/*.py
