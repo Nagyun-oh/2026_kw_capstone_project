@@ -144,8 +144,8 @@ Pandas/PyArrow 기반 반복 학습 속도 때문입니다. 공격 페이로드�
 **용량 문제로 데이터셋 원본과 대용량 pkl은 이 저장소에 포함하지 않습니다.**
 Kaggle에 업로드 후 아래에 링크를 남길 예정입니다.
 
-- 데이터셋: `(Kaggle 링크 채울 예정)`
-- 운영 모델 pkl: `(Kaggle 고정 버전 링크 채울 예정)`
+- 데이터셋: https://www.kaggle.com/datasets/hyunwook23/capstone-new2026/settings
+- 운영 모델 pkl: https://www.kaggle.com/datasets/hyunwook23/capstone-new2026/settings
 
 ## 7. 설치 및 실행 방법
 
