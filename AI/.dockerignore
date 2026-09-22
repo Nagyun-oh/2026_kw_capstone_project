@@ -1,0 +1,7 @@
+# 기본적으로 모든 파일 제외
+**
+
+# 서버 실행에 필요한 파일만 포함
+!requirements.txt
+!main.py
+!model_bundle_ultimate.pkl
