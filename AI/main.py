@@ -41,13 +41,25 @@ import threading
 import time
 from kafka import KafkaConsumer, KafkaProducer
 
+# ──────── AI 컨테이너화 ────────
+import os
+# ──────────────────────────────
+
 kafka_stop_event = threading.Event()
 kafka_consumer = None
 kafka_producer = None
 
-# AI 서버 로컬 실행 -> localhost:9092 (현재)
-# AI 서버 Docker 실행 -> kafka:29092 (AI 서버도 Docker 컨테이너에 올릴 시 이걸로 변경할 수도 있음)
-KAFKA_BOOTSTRAP_SERVERS = "localhost:9092"
+
+# 로컬 기본값은 localhost:9092.
+# Docker 실행 시 KAFKA-BOOTSTRAP_SERVERS = kafka:29092를 전달한다.
+KAFKA_BOOTSTRAP_SERVERS = [
+    server.strip()
+    for server in os.getenv(
+        "KAFKA_BOOTSTRAP_SERVERS",
+        "localhost:9092",
+    ).split(",")
+    if server.strip()
+]
 AI_REQUEST_TOPIC = "ai-request-topic"
 AI_RESULT_TOPIC = "ai-result-topic"
 AI_CONSUMER_GROUP = "ai-service-group"
@@ -162,20 +174,20 @@ def build_feature_row(req: HttpRequest) -> dict[str, object]:
     return {
         "method": method,
         "user_agent": user_agent,
-        #"url_path": url_path,
-        #"file_extension": file_extension,
-        #"url_len": url_len,
-        #"query_len": query_len,
+        "url_path": url_path,
+        "file_extension": file_extension,
+        "url_len": url_len,
+        "query_len": query_len,
         "body_len": body_len,
-        #"total_len": total_len,
-        #"path_depth": path_depth,
-        #"param_count": param_count,
+        "total_len": total_len,
+        "path_depth": path_depth,
+        "param_count": param_count,
         "special_char_count": special_char_count,
         "special_char_ratio": safe_ratio(special_char_count, total_len),
-        #"encoded_char_count": encoded_char_count,
+        "encoded_char_count": encoded_char_count,
         "digit_ratio": safe_ratio(digit_count, total_len),
         "alpha_ratio": safe_ratio(alpha_count, total_len),
-        #"has_keywords_query": has_any(decoded_query, ATTACK_KEYWORDS),
+        "has_keywords_query": has_any(decoded_query, ATTACK_KEYWORDS),
         "has_keywords_body": has_any(decoded_body, ATTACK_KEYWORDS),
         "sql_keyword_count": count_matches(combined, SQL_KEYWORDS),
         "xss_keyword_count": count_matches(combined, XSS_KEYWORDS),

@@ -48,49 +48,30 @@
 ```
 
 ## 로컬 실행 방법
-아래 명령은 Windows PowerShell 기준입니다.
 
-### Kafka/MySQL 실행
-```
-docker compose -f ./backend/docker-compose.yml up -d zookeeper kafka db
-```
+루트 [compose.yaml](compose.yaml)로 백엔드·프론트엔드·AI·MySQL·Kafka·Zookeeper·WAF·JuiceShop·Fluent Bit를 함께 실행합니다. 명령은 프로젝트 루트의 Windows PowerShell 기준입니다.
 
-### WAF/JuicShop 실행
-```
-docker compose -f ./waf/docker-compose.yml -f ../targets/juiceshop/docker-compose.yml up -d
-```
+**현재 구성은 기존 로컬 MySQL 데이터, Kafka·Zookeeper 볼륨, `security-net` 네트워크를 재사용합니다.** 신규 PC에서 저장소만 복제하면 바로 실행되는 구성은 아닙니다. `.env` 설정, AI 모델 준비, 저장 공간 확인을 먼저 진행하세요.
 
-### Backend 실행
-```
-cd backend
-.\gradlew bootRun
+자세한 준비·실행·중지·재빌드·검증·문제 해결 절차는 [인프라 및 실행 문서](docs/05_infra_deployment.md)를 참고하세요.
+
+준비와 기존 컨테이너 전환이 끝난 환경에서는 다음 명령을 사용합니다.
+
+```powershell
+docker compose --env-file .env -f compose.yaml config --quiet
+docker compose --env-file .env -f compose.yaml up -d --build
+docker compose --env-file .env -f compose.yaml ps -a
 ```
 
-### Swagger UI:
-```
-http://localhost:8080/swagger-ui/index.html
-```
+| 용도 | 접속 주소 |
+| --- | --- |
+| 대시보드 | http://localhost:3000 |
+| WAF를 통한 JuiceShop | http://localhost |
+| 백엔드 상태 | http://localhost:8080/actuator/health |
+| 백엔드 Swagger | http://localhost:8080/swagger-ui/index.html |
+| AI 상태 / Swagger | http://localhost:8000/health / http://localhost:8000/docs |
 
-### Frontend 실행
-```
-cd frontend
-npm install
-npm start
-```
-
-### React 개발 서버:
-```
-http://localhost:3000
-```
-
-### AI Service 실행
-```
-cd AI
-python -m venv .venv
-.\.venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
+기존 하위 Compose와 루트 Compose를 동시에 실행하지 마세요. 컨테이너 이름·포트가 겹치며, 동일한 DB·Kafka 저장 공간을 두 서버에서 동시에 사용하면 안 됩니다. 현재 WAF는 `DetectionOnly`이며 대시보드의 블랙리스트 등록이 WAF 자동 차단을 의미하지 않습니다.
 
 ## 주요 API
 
