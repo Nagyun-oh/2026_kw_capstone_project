@@ -63,14 +63,18 @@ docker compose version
 
 - 백엔드: Java 17, 기존 Spring 설정의 `prod` 프로파일 사용
 - 프론트: Node에서 빌드 후 Nginx로 제공
-- AI: Python 3.12 계열, `AI/requirements.txt` 사용
-- AI 모델: `AI/model_bundle_ultimate.pkl` 필요
+- AI: `AI_new/`(3모델 앙상블), Python 3.12 계열, `AI_new/requirements.txt` 사용
+- AI 모델: 아래 2개 파일 필요 (Git 제외, Kaggle 데이터셋 `hyunwook23/capstone-new2026` v2에서 받음)
+  - `AI_new/models/model_bundle_tree_schema.pkl`
+  - `AI_new/models/transformer/model_bundle.pkl` (Kaggle 파일명 `model_bundle.pkl`)
+- `attack_taxonomy.json`, `model_bundle.pkl.manifest.json`은 Git에 포함돼 있다.
 
 ```powershell
-Test-Path -LiteralPath ./AI/model_bundle_ultimate.pkl
+Test-Path -LiteralPath ./AI_new/models/model_bundle_tree_schema.pkl
+Test-Path -LiteralPath ./AI_new/models/transformer/model_bundle.pkl
 ```
 
-모델은 신뢰할 수 있는 팀원이 제공한 파일을 사용하고 학습 라이브러리 버전과 전처리 코드를 함께 확인한다. 현재 사용한 번들은 23개 피처와 4개 인코더를 요구한다. 모델 이름만 같다고 코드와 호환된다고 가정하지 않는다.
+받는 방법과 SHA-256 확인은 [AWS 배포 문서 3장](06_aws_deployment.md#3-코드와-모델-전달)과 같다. 트랜스포머 번들은 기동 시 매니페스트의 `bundle_sha256`과 비교하므로 해시가 다르면 AI가 기동되지 않는다. 모델 이름만 같다고 코드와 호환된다고 가정하지 않는다.
 
 ### 환경 변수
 
@@ -321,6 +325,8 @@ docker compose --env-file .env -f compose.yaml up -d backend
 
 ### AI `KeyError: 'url_path'`, `'url_len'`
 
+> 이전 `AI/`(단일 모델) 기준 사례다. 현재 배포 대상인 `AI_new/`에는 해당하지 않는다.
+
 모델 로딩 성공 이후 피처 생성 단계에서 실패한 사례다. 현재 번들의 `features`는 23개이며 인코더는 `method`, `user_agent`, `url_path`, `file_extension`이다. `build_feature_row()`에서 일부 항목이 주석 처리돼 후속 인코딩·피처 선택 과정에서 키를 찾지 못했다.
 
 ```powershell
@@ -381,4 +387,4 @@ docker exec security-ai-local python -c "import joblib; b=joblib.load('/app/mode
 - [Docker Compose 시작 순서](https://docs.docker.com/compose/how-tos/startup-order/)
 - [Docker Compose 볼륨](https://docs.docker.com/reference/compose-file/volumes/)
 - [프로젝트 WAF 문서](../waf/README.md)
-- [AI 서버 문서](../AI/README.md)
+- [AI 서버 문서](../AI_new/README.md)

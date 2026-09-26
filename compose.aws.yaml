@@ -108,7 +108,7 @@ services:
   # ────────────────── FastAPI AI ──────────────────────
   ai:
     build:
-      context: ./AI
+      context: ./AI_new
     image: security-ai:aws
     restart: unless-stopped
     depends_on:

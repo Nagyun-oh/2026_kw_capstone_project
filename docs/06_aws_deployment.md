@@ -93,23 +93,28 @@ proxy_pass http://backend:8080;
 
 EC2에서만 수정하고 Git에 반영하지 않으면 새 clone에서 오류가 재발한다. 문서 작성 시 로컬 파일에는 `security-backend:8080`이 남아 있어 **로컬 수정·커밋·push가 후속 작업**이다. 서비스 이름은 `backend`이며 이미지 이름과 혼동하지 않는다.
 
-AI 모델은 Git에서 제외돼 있다. 신뢰할 수 있는 팀원에게 받은 코드와 호환되는 `AI/model_bundle_ultimate.pkl`을 별도 전송한다. 로컬 DB 폴더나 과거 WAF 로그를 서버에 복사하지 않는다.
+AI 서비스는 `AI_new/`(3모델 앙상블)로 빌드한다. 모델 `.pkl`은 Git에서 제외돼 있으며 AI 팀이 공개 Kaggle 데이터셋 [hyunwook23/capstone-new2026](https://www.kaggle.com/datasets/hyunwook23/capstone-new2026)에 올린다. 데이터셋 전체(약 1.3GB)가 아니라 서빙에 필요한 2개 파일만 **버전을 고정해** EC2에서 직접 받는다. 로컬 DB 폴더나 과거 WAF 로그를 서버에 복사하지 않는다.
 
-**로컬 PowerShell (EC2 SSH 창이 아님):**
-
-```powershell
-scp -i "<KEY_PATH>" "C:\Projects\2026_kw_capstone_project\AI\model_bundle_ultimate.pkl" ubuntu@<EC2_PUBLIC_IP>:/home/ubuntu/2026_kw_capstone_project/AI/model_bundle_ultimate.pkl
-Get-FileHash -Algorithm SHA256 "C:\Projects\2026_kw_capstone_project\AI\model_bundle_ultimate.pkl"
-```
+| Kaggle 파일 (v2) | 저장 위치 | SHA-256 |
+| --- | --- | --- |
+| `model_bundle_tree_schema.pkl` | `AI_new/models/model_bundle_tree_schema.pkl` | `9a4dddb016831b92378cb393bba6fae12274bbb03d3cb44e07e5c004f9bd396d` |
+| `model_bundle.pkl` | `AI_new/models/transformer/model_bundle.pkl` | `fd062264ef61b7cef149d3b3802ffde0b08c17ea9102463a8931d174c8ff19a3` |
 
 **EC2:**
 
 ```bash
-sha256sum AI/model_bundle_ultimate.pkl
-chmod 644 AI/model_bundle_ultimate.pkl
+cd ~/2026_kw_capstone_project
+KAGGLE=https://www.kaggle.com/api/v1/datasets/download/hyunwook23/capstone-new2026
+curl -fL -o AI_new/models/model_bundle_tree_schema.pkl "$KAGGLE/model_bundle_tree_schema.pkl?datasetVersionNumber=2"
+curl -fL -o AI_new/models/transformer/model_bundle.pkl "$KAGGLE/model_bundle.pkl?datasetVersionNumber=2"
+sha256sum -c <<'EOF'
+9a4dddb016831b92378cb393bba6fae12274bbb03d3cb44e07e5c004f9bd396d  AI_new/models/model_bundle_tree_schema.pkl
+fd062264ef61b7cef149d3b3802ffde0b08c17ea9102463a8931d174c8ff19a3  AI_new/models/transformer/model_bundle.pkl
+EOF
+chmod 644 AI_new/models/model_bundle_tree_schema.pkl AI_new/models/transformer/model_bundle.pkl
 ```
 
-양쪽 해시를 비교한다. 대소문자 차이는 무시한다. 이번 모델은 약 1.77GB이며 모델 변경 시 새 파일의 해시를 다시 비교한다.
+두 줄 모두 `OK`여야 한다. `.pkl`은 로드 시 임의 코드를 실행할 수 있으므로 해시가 다르면 사용하지 않고 AI 팀에 확인한다. 트랜스포머 번들은 기동 시 Git에 포함된 `model_bundle.pkl.manifest.json`의 `bundle_sha256`과도 비교된다. 모델을 교체할 때는 Kaggle 버전 번호와 이 표의 해시를 함께 갱신한다.
 
 ## 4. 환경변수와 WAF 로그 디렉터리
 
@@ -267,7 +272,7 @@ git pull --ff-only
 sudo docker compose --env-file .env.aws -f compose.aws.yaml up -d --build --no-deps frontend
 ```
 
-backend 또는 ai 수정도 같은 방식이다. 환경변수 변경은 `restart`만으로 반영되지 않으므로 `up -d`로 적용한다.
+backend 또는 ai 수정도 같은 방식이다. 모델 버전이 바뀌면 3장의 다운로드·해시 확인 후 `ai`를 재빌드한다. 환경변수 변경은 `restart`만으로 반영되지 않으므로 `up -d`로 적용한다.
 
 ### WAF Permission denied
 

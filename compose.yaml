@@ -109,7 +109,7 @@ services:
   # ────────────────── FastAPI AI ──────────────────────
   ai:
     build:
-      context: ./AI
+      context: ./AI_new
     image: security-ai:local
     container_name: security-ai-local
     restart: unless-stopped

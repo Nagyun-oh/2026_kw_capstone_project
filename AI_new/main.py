@@ -34,6 +34,7 @@ FastAPI Server for Real-Time Web Attack Detection (3-Model Soft-Voting Ensemble)
 
 from pathlib import Path
 import json
+import os
 import sys
 import threading
 import time
@@ -58,8 +59,12 @@ kafka_consumer = None
 kafka_producer = None
 
 # AI 서버 로컬 실행 -> localhost:9092 (현재)
-# AI 서버 Docker 실행 -> kafka:29092 (AI 서버도 Docker 컨테이너에 올릴 시 이걸로 변경할 수도 있음)
-KAFKA_BOOTSTRAP_SERVERS = "localhost:9092"
+# AI 서버 Docker 실행 -> kafka:29092 (compose에서 KAFKA_BOOTSTRAP_SERVERS 환경변수로 전달)
+KAFKA_BOOTSTRAP_SERVERS = [
+    server.strip()
+    for server in os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092").split(",")
+    if server.strip()
+]
 AI_REQUEST_TOPIC = "ai-request-topic"
 AI_RESULT_TOPIC = "ai-result-topic"
 AI_CONSUMER_GROUP = "ai-service-group"
