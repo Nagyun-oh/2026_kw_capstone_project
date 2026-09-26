@@ -1,0 +1,187 @@
+name: security-platform-aws
+
+services:
+  # ────────────────── MySQL ──────────────────────
+  db:
+    image: mysql:8.0
+    restart: unless-stopped 
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+      MYSQL_DATABASE: security_db
+      MYSQL_USER: ${DB_USERNAME:?DB_USERNAME IS required}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - type: bind
+        source: ./docs/db/security-db-schema.sql
+        target: /docker-entrypoint-initdb.d/01-schema.sql
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          MYSQL_PWD="$${MYSQL_PASSWORD}"
+          mysql -h 127.0.0.1 -u "$${MYSQL_USER}" -D security_db
+          -e 'SELECT 1 FROM admin_users LIMIT 0;
+          SELECT 1 FROM network_logs LIMIT 0;
+          SELECT 1 FROM detected_threats LIMIT 0;
+          SELECT 1 FROM ip_blacklist LIMIT 0;' 
+          >/dev/null 2>&1
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+  # ────────────────── Zookeeper ──────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-log:/var/lib/zookeeper/log
+  # ────────────────── Kafka ──────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_started
+    environment:
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test:
+        - CMD
+        - kafka-topics
+        - --bootstrap-server
+        - kafka:29092
+        - --list
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 40s
+  # ────────────────── Spring Boot ──────────────────────
+  backend:
+    build:
+      context: ./backend
+    image: security-backend:aws
+    restart: unless-stopped
+    depends_on:
+      db: 
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: "jdbc:mysql://db:3306/security_db?serverTimezone=Asia/Seoul"
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRATION_MS : ${JWT_EXPIRATION_MS:-86400000}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:? CORS_ALLOWED_ORIGINS is required}
+  # ────────────────── React + Nginx ──────────────────────
+  frontend:
+    build:
+      context: ./frontend
+    image: security-frontend:aws
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+        restart: true
+    ports:
+      - "3000:80"
+  # ────────────────── FastAPI AI ──────────────────────
+  ai:
+    build:
+      context: ./AI
+    image: security-ai:aws
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c 
+        - "import json, urllib.request; data =
+        json.load(urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)); raise SystemExit(0 if data.get('model_loaded') is True else 1) "
+      interval: 15s
+      timeout: 10s
+      retries: 6
+      start_period: 60s
+  # ────────────────── 테스트 웹서버 ──────────────────────
+  juiceshop:
+    image: bkimminich/juice-shop
+    restart: unless-stopped
+    expose:
+      - "3000"
+  # ────────────────── WAF ──────────────────────
+  waf:
+      image: owasp/modsecurity-crs:nginx
+      restart: unless-stopped
+      depends_on:
+        juiceshop:
+          condition: service_started
+      ports:
+        - "80:8080"
+      environment:
+        BACKEND: http://juiceshop:3000
+        PORT: "8080"
+        MODSEC_RULE_ENGINE: DetectionOnly
+        PARANOIA: "2"
+        ANOMALY_INBOUND: "5"
+        ANOMALY_OUTBOUND: "4"
+        BLOCKING_PARANOIA: "1"
+      volumes:
+        - ./waf/rules/CUSTOM-001-ai-align.conf:/etc/modsecurity.d/owasp-crs/rules/CUSTOM-001-ai-align.conf
+        - ./waf/rules/CUSTOM-002-blacklist.conf:/etc/modsecurity.d/owasp-crs/rules/CUSTOM-002-blacklist.conf
+        - ./waf/logs:/var/log/nginx
+        - ./waf/nginx-logging.conf.template:/etc/nginx/templates/conf.d/logging.conf.template
+        - ./waf/nginx.conf.template:/etc/nginx/templates/nginx.conf.template
+        - ./waf/njs:/etc/nginx/njs
+
+
+
+  # ────────────────── WAF 로그 수집 ──────────────────────
+  fluent-bit:
+    image: fluent/fluent-bit:2.2
+    restart: unless-stopped
+    depends_on:
+      waf:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    volumes:
+      - ./waf/logs:/var/log/nginx:ro
+      - ./waf/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./waf/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+
+  # ────────────────── security-platform-aws 프로젝트의 새 볼륨 및 네트워크 생성 ──────────────────────
+volumes:
+  mysql-data:
+  kafka-data:
+  zookeeper-data:
+  zookeeper-log:
+networks:
+  default:
+  
