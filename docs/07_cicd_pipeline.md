@@ -9,7 +9,7 @@ GitHub Actions로 테스트·빌드를 자동화하고, `develop` 반영 시 단
 | CI (테스트·빌드·AI 기동 확인) | 적용 | [.github/workflows/ci.yml](../.github/workflows/ci.yml) |
 | 모델 버전 고정·검증 | 적용 | [AI_new/models.lock.json](../AI_new/models.lock.json), [scripts/fetch_models.py](../scripts/fetch_models.py) |
 | AWS·GitHub 사전 설정 | 진행 필요 (4~5장) | - |
-| CD (ECR push → EC2 배포) | 예정 | `.github/workflows/deploy.yml` |
+| CD (ECR push → EC2 배포) | 작성 완료, 수동 실행으로 첫 검증 예정 (8장) | [.github/workflows/deploy.yml](../.github/workflows/deploy.yml), [scripts/deploy.sh](../scripts/deploy.sh) |
 
 **변경 전:** EC2에 SSH 접속 → `git pull` → 모델 수동 전달 → EC2에서 이미지 빌드.
 
@@ -225,7 +225,60 @@ aws ecr get-login-password --region ap-northeast-2 \
 - [ ] EC2: `aws sts get-caller-identity`, ECR `Login Succeeded`, Fleet Manager `Online`
 - [ ] GitHub Variables 4개 등록
 
-## 7. 보안·비용 메모
+## 7. CD 동작 (`deploy.yml`)
+
+현재는 **수동 실행(`workflow_dispatch`)만** 가능하다. 첫 배포 검증 후 CI 성공 시 자동 배포하도록 트리거를 추가한다.
+
+| Job | 내용 |
+| --- | --- |
+| Resolve target | develop 브랜치·Variables 확인, 배포할 SHA 결정 (입력이 없으면 현재 develop) |
+| Build & push | backend·frontend·ai 이미지를 병렬 빌드해 `ECR_REGISTRY/security-<서비스>:<SHA>`로 push. AI는 빌드 전 모델 다운로드·검증 |
+| Deploy on EC2 | SSM으로 EC2에 명령 전달 → 결과·로그를 Actions 화면에 출력 |
+
+EC2에서 실행되는 순서:
+
+1. 저장소에 커밋되지 않은 수정이 있으면 **덮어쓰지 않고 중단**한다.
+2. ubuntu 계정으로 `git fetch` → 배포 SHA로 `git checkout --detach`. (설정 파일·스키마 SQL·WAF 규칙을 코드와 같은 버전으로 맞춤)
+3. `scripts/deploy.sh <SHA>` (root)
+   - ECR 로그인 → 앱 이미지 3개 pull → `compose up -d --no-build`
+   - `.env.aws`의 `IMAGE_REGISTRY_PREFIX`·`IMAGE_TAG` 두 줄만 갱신 (비밀값은 건드리지 않음)
+   - backend `/actuator/health`=UP, ai `/health` `model_loaded=true`, frontend HTTP 200을 최대 5분 확인
+   - 실패하면 최근 로그를 출력하고 실패 처리
+   - 성공하면 이전 배포의 앱 이미지를 정리
+
+EC2에서 더 이상 모델을 받거나 이미지를 빌드하지 않는다. 모델은 AI 이미지 안에 포함된다.
+
+## 8. 첫 배포와 롤백
+
+### 첫 배포 (수동 실행)
+
+1. 4~6장 설정 완료 확인.
+2. EC2 저장소에 수정 사항이 없는지 확인한다. (ubuntu 계정)
+   ```bash
+   cd ~/2026_kw_capstone_project && git status --short
+   ```
+   `.env.aws`, `waf/logs`, 모델 `.pkl`은 Git 제외 대상이라 표시되지 않는다. 다른 파일이 보이면 먼저 정리한다.
+3. GitHub → Actions → **Deploy to EC2** → **Run workflow** → Branch `develop`, sha는 비워 두고 실행. (Write 권한으로 실행 가능)
+4. 3개 job이 모두 성공하고 Summary에 `status: Success`가 표시되는지 확인한다.
+5. 대시보드 접속과 공격 요청 1건의 탐지 표시까지 확인한다. ([06 문서 6장](06_aws_deployment.md#6-전체-실행과-통합-검증))
+
+### 롤백
+
+Actions → **Deploy to EC2** → Run workflow에서 **이전에 성공한 배포의 SHA**를 입력해 실행한다. 빌드를 생략하고 ECR에 남아 있는 이미지로 교체한다. ECR은 최근 10개 이미지만 보관하므로 그보다 오래된 SHA는 입력한 SHA로 다시 빌드해야 한다.
+
+### CD를 쓸 수 없을 때 (수동 복구)
+
+EC2에서 ubuntu 계정으로 기존 방식(06 문서)대로 빌드할 수 있다. `.env.aws`에 CD가 기록한 `IMAGE_REGISTRY_PREFIX`·`IMAGE_TAG` 줄을 지우면 이미지 이름이 기존 `security-*:aws`로 돌아간다.
+
+```bash
+cd ~/2026_kw_capstone_project
+sed -i '/^IMAGE_REGISTRY_PREFIX=/d; /^IMAGE_TAG=/d' .env.aws
+git switch develop && git pull --ff-only
+python3 scripts/fetch_models.py
+sudo docker compose --env-file .env.aws -f compose.aws.yaml up -d --build
+```
+
+## 9. 보안·비용 메모
 
 - GitHub에는 장기 AWS 키가 없다. OIDC 토큰은 workflow 실행 동안만 유효하다.
 - `github-actions-deploy`는 이 저장소의 `develop`에서만, 3개 ECR 저장소와 1개 인스턴스에만 권한이 있다.

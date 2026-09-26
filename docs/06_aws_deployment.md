@@ -259,6 +259,8 @@ sudo docker compose --env-file .env.aws -f compose.aws.yaml ps -a
 
 ### 코드 변경 반영
 
+GitHub Actions CD를 설정했다면 [CI/CD 문서 8장](07_cicd_pipeline.md#8-첫-배포와-롤백)의 **Deploy to EC2** 실행이 기본 배포 방법이다. CD로 배포한 뒤에는 저장소가 배포 커밋에 고정(detached HEAD)되므로 아래 수동 절차 전에 `git switch develop`을 먼저 실행한다.
+
 EC2 수정이 남아 있으면 먼저 `git diff`로 확인하고 로컬/Git에 반영한다. 변경을 강제로 덮어쓰지 않는다. 정상 배포는 Git으로 변경을 가져온 뒤 해당 서비스만 재빌드한다.
 
 ```bash
