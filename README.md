@@ -73,6 +73,12 @@ docker compose --env-file .env -f compose.yaml ps -a
 
 기존 하위 Compose와 루트 Compose를 동시에 실행하지 마세요. 컨테이너 이름·포트가 겹치며, 동일한 DB·Kafka 저장 공간을 두 서버에서 동시에 사용하면 안 됩니다. 현재 WAF는 `DetectionOnly`이며 대시보드의 블랙리스트 등록이 WAF 자동 차단을 의미하지 않습니다.
 
+## AWS 배포
+
+[compose.aws.yaml](compose.aws.yaml)을 사용하는 단일 EC2 개발·시연 배포 절차는 [AWS 배포 및 운영 문서](docs/06_aws_deployment.md)를 참고하세요. 코드·AI 모델 전달, 실제 환경변수 설정, DB 초기화, WAF 디렉터리 권한, 서비스 검증, EC2 중지·재시작 절차를 포함합니다.
+
+2026-09-26 사용자 실행 결과로 외부 접근·AI 결과 조회 및 재시작 후 데이터 보존을 확인했습니다. 현재는 보안 그룹으로 접근 IP를 제한하는 시연 환경입니다. EC2에서 수정한 Nginx 프록시 주소를 저장소에도 반영해야 하는 후속 항목은 해당 문서에 명시했습니다.
+
 ## 주요 API
 
 | Method | Path | 설명 |

@@ -2,6 +2,8 @@
 
 이 문서는 루트 [compose.yaml](../compose.yaml)의 현재 구성을 기준으로 작성했다. 모든 PowerShell 명령은 저장소 루트에서 실행한다. 실제 비밀번호, JWT 키, 개인별 볼륨 이름은 문서에 기록하지 않는다.
 
+AWS에서는 별도 [AWS EC2 배포 및 운영 문서](06_aws_deployment.md)와 `compose.aws.yaml`을 사용한다. 아래 검증 기록은 로컬 전환 당시의 기록이며 AWS 최신 결과와 구분한다.
+
 ## 1. 적용 범위
 
 현재 구성은 기존 로컬 데이터를 보존하면서 개별 컨테이너를 `security-platform` Compose 프로젝트로 통합한 구성이다. AWS 배포 완료를 의미하지 않는다.
@@ -44,7 +46,7 @@
 | `waf` | `waf` | 테스트 요청 입구, `http://localhost` |
 | `fluent-bit` | `waf-fluent-bit` | WAF 로그를 Kafka로 전송 |
 
-대시보드와 JuiceShop은 서로 다른 화면이다. Nginx는 `/api/`와 `/ws-security`를 `security-backend-local:8080`으로 전달한다. Kafka 내부 주소의 포트는 호스트에 공개하지 않아도 같은 네트워크의 컨테이너끼리 접근할 수 있다.
+대시보드와 JuiceShop은 서로 다른 화면이다. Nginx는 `/api/`와 `/ws-security`를 백엔드로 전달한다. 로컬·AWS 공통 서비스 이름인 `backend:8080`을 사용해야 하며, 저장소 반영 상태는 AWS 문서의 배포 전 확인 항목을 참고한다. Kafka 내부 주소의 포트는 호스트에 공개하지 않아도 같은 네트워크의 컨테이너끼리 접근할 수 있다.
 
 ## 3. 실행 전 준비
 
@@ -350,7 +352,7 @@ docker exec security-ai-local python -c "import joblib; b=joblib.load('/app/mode
 | MySQL 경로 수정 후 백엔드 health | `UP` 확인 |
 | AI 피처 누락 수정 후 대시보드 | 원본 로그와 연결된 AI 탐지·블랙리스트 표시 및 사용자 동작 확인 |
 | 최종 수정 후 전체 중지·시작 및 기존 ID·새 요청 검증 | 절차 안내 완료, 최종 결과 기록 필요 |
-| AWS 배포 | 미진행 |
+| AWS 배포 | 이 로컬 기록 시점에는 미진행. 이후 결과는 [AWS 문서](06_aws_deployment.md) 참고 |
 
 - 현재 루트 Compose에는 Fluent Bit 상태 볼륨이 없다. 단순 중지·시작에는 내부 파일이 남지만 컨테이너 재생성 시 읽기 위치·버퍼를 잃을 수 있다. `Read_from_Head True`에 따라 기존 로그 재수집 및 중복 저장 가능성이 있다. 별도 `waf/docker-compose.yml`에는 상태 볼륨이 있으므로 두 구성을 혼동하지 않는다.
 - WAF는 `DetectionOnly`다. 대시보드 블랙리스트 등록과 WAF의 실제 차단은 별개이며 자동 연계는 아직 없다.
@@ -358,6 +360,8 @@ docker exec security-ai-local python -c "import joblib; b=joblib.load('/app/mode
 - Kafka는 단일 브로커·ZooKeeper 기반이다. KRaft 전환은 데이터 보존 여부와 업그레이드 경로를 정해 별도로 수행한다.
 
 ## 9. AWS 배포 전 준비
+
+아래는 로컬 전환 당시의 준비 목록이다. 실제 완료 상태와 남은 작업은 [AWS 문서](06_aws_deployment.md)를 기준으로 확인한다.
 
 현재 파일을 그대로 AWS용 최종 구성으로 사용하지 않는다.
 
