@@ -95,26 +95,23 @@ EC2에서만 수정하고 Git에 반영하지 않으면 새 clone에서 오류�
 
 AI 서비스는 `AI_new/`(3모델 앙상블)로 빌드한다. 모델 `.pkl`은 Git에서 제외돼 있으며 AI 팀이 공개 Kaggle 데이터셋 [hyunwook23/capstone-new2026](https://www.kaggle.com/datasets/hyunwook23/capstone-new2026)에 올린다. 데이터셋 전체(약 1.3GB)가 아니라 서빙에 필요한 2개 파일만 **버전을 고정해** EC2에서 직접 받는다. 로컬 DB 폴더나 과거 WAF 로그를 서버에 복사하지 않는다.
 
-| Kaggle 파일 (v2) | 저장 위치 | SHA-256 |
-| --- | --- | --- |
-| `model_bundle_tree_schema.pkl` | `AI_new/models/model_bundle_tree_schema.pkl` | `9a4dddb016831b92378cb393bba6fae12274bbb03d3cb44e07e5c004f9bd396d` |
-| `model_bundle.pkl` | `AI_new/models/transformer/model_bundle.pkl` | `fd062264ef61b7cef149d3b3802ffde0b08c17ea9102463a8931d174c8ff19a3` |
+받을 파일·Kaggle 버전·SHA-256은 [AI_new/models.lock.json](../AI_new/models.lock.json)에 고정돼 있다. CI·CD와 같은 스크립트를 사용한다.
+
+| Kaggle 파일 | 저장 위치 |
+| --- | --- |
+| `model_bundle_tree_schema.pkl` | `AI_new/models/model_bundle_tree_schema.pkl` |
+| `model_bundle.pkl` | `AI_new/models/transformer/model_bundle.pkl` |
 
 **EC2:**
 
 ```bash
 cd ~/2026_kw_capstone_project
-KAGGLE=https://www.kaggle.com/api/v1/datasets/download/hyunwook23/capstone-new2026
-curl -fL -o AI_new/models/model_bundle_tree_schema.pkl "$KAGGLE/model_bundle_tree_schema.pkl?datasetVersionNumber=2"
-curl -fL -o AI_new/models/transformer/model_bundle.pkl "$KAGGLE/model_bundle.pkl?datasetVersionNumber=2"
-sha256sum -c <<'EOF'
-9a4dddb016831b92378cb393bba6fae12274bbb03d3cb44e07e5c004f9bd396d  AI_new/models/model_bundle_tree_schema.pkl
-fd062264ef61b7cef149d3b3802ffde0b08c17ea9102463a8931d174c8ff19a3  AI_new/models/transformer/model_bundle.pkl
-EOF
-chmod 644 AI_new/models/model_bundle_tree_schema.pkl AI_new/models/transformer/model_bundle.pkl
+python3 scripts/fetch_models.py
 ```
 
-두 줄 모두 `OK`여야 한다. `.pkl`은 로드 시 임의 코드를 실행할 수 있으므로 해시가 다르면 사용하지 않고 AI 팀에 확인한다. 트랜스포머 번들은 기동 시 Git에 포함된 `model_bundle.pkl.manifest.json`의 `bundle_sha256`과도 비교된다. 모델을 교체할 때는 Kaggle 버전 번호와 이 표의 해시를 함께 갱신한다.
+두 파일 모두 `OK`여야 한다. 해시가 다르면 스크립트가 파일을 저장하지 않고 실패한다. `.pkl`은 로드 시 임의 코드를 실행할 수 있으므로 이 경우 사용하지 말고 AI 팀에 확인한다. 트랜스포머 번들은 기동 시 Git에 포함된 `model_bundle.pkl.manifest.json`의 `bundle_sha256`과도 비교된다.
+
+모델 교체 절차: AI 팀이 Kaggle에 새 버전을 올린 뒤 `models.lock.json`의 `version`과 각 `sha256`을 갱신하는 PR을 만든다. 트랜스포머를 바꾸면 매니페스트도 함께 갱신한다.
 
 ## 4. 환경변수와 WAF 로그 디렉터리
 
@@ -272,7 +269,7 @@ git pull --ff-only
 sudo docker compose --env-file .env.aws -f compose.aws.yaml up -d --build --no-deps frontend
 ```
 
-backend 또는 ai 수정도 같은 방식이다. 모델 버전이 바뀌면 3장의 다운로드·해시 확인 후 `ai`를 재빌드한다. 환경변수 변경은 `restart`만으로 반영되지 않으므로 `up -d`로 적용한다.
+backend 또는 ai 수정도 같은 방식이다. 모델 버전이 바뀌면 `python3 scripts/fetch_models.py` 실행 후 `ai`를 재빌드한다. 환경변수 변경은 `restart`만으로 반영되지 않으므로 `up -d`로 적용한다.
 
 ### WAF Permission denied
 
@@ -317,7 +314,7 @@ sudo docker compose --env-file .env.aws -f compose.aws.yaml restart frontend
 - [ ] 이미지 태그/digest 고정과 부하·비용 측정.
 - [ ] 관리자 인증·권한 및 HTTPS 적용 후 공개 범위 재검토.
 - [ ] 필요한 경우 테스트 데이터 초기화 스크립트 추가. 현재는 미구현.
-- [ ] CI/CD 및 자동 기동 검증.
+- [ ] CI/CD 및 자동 기동 검증. 진행 상황은 [CI/CD 문서](07_cicd_pipeline.md) 참고.
 
 DB의 `DELETE`는 AUTO_INCREMENT를 초기화하지 않는다. 화면 건수와 고유 ID는 다르며, 삭제 후 ID가 이어지는 것은 정상이다. Kafka 메시지가 logId를 참조하므로 표시 번호를 위해 기존 ID를 재사용하지 않는다.
 
