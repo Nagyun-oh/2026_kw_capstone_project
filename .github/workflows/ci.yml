@@ -61,9 +61,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          # AI_new/Dockerfile의 python:3.12 이미지와 버전을 맞춘다.
+          python-version: '3.12'
       - name: Compile Python sources without executing or training
-        run: python -m compileall -q AI
+        run: python -m compileall -q AI_new
 
   compose:
     name: Compose configuration

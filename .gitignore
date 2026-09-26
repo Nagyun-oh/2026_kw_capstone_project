@@ -73,6 +73,7 @@ data/
 datasets/
 *.csv
 *.jsonl
+*.parquet
 
 # 프로젝트 데이터 파일
 cisc_anomalousTraffic_test.txt
@@ -89,6 +90,8 @@ mysql_data/
 # ========================
 .DS_Store
 Thumbs.db
+# Windows에서 내려받은 파일에 생기는 ADS 흔적
+*:Zone.Identifier
 
 # ========================
 # IDE (기타)
