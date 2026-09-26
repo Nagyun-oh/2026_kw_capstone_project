@@ -39,7 +39,8 @@
 ```
 ├── backend/              # Spring Boot 백엔드
 ├── frontend/             # React 대시보드
-├── AI/                   # FastAPI AI 분석 서비스
+├── AI_new/               # FastAPI AI 분석 서비스 (3모델 앙상블, 배포 대상)
+├── AI/                   # 이전 단일 모델 AI 서비스 (배포에 사용하지 않음)
 ├── docs/                 # 문서 목록
 ├── dev_tools/            # 테스트 도구 및 개발 보조 스크립트
 ├── waf/                  # WAF 관련 실험/문서
