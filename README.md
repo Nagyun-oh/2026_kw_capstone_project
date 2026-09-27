@@ -80,6 +80,8 @@ docker compose --env-file .env -f compose.yaml ps -a
 
 2026-09-26 사용자 실행 결과로 외부 접근·AI 결과 조회 및 재시작 후 데이터 보존을 확인했습니다. 현재는 보안 그룹으로 접근 IP를 제한하는 시연 환경입니다. EC2에서 수정한 Nginx 프록시 주소를 저장소에도 반영해야 하는 후속 항목은 해당 문서에 명시했습니다.
 
+GitHub Actions CI(백엔드 테스트, 프론트 빌드, AI 이미지 기동 확인)와 EC2 자동 배포를 위한 AWS 설정은 [CI/CD 문서](docs/07_cicd_pipeline.md)를 참고하세요.
+
 ## 주요 API
 
 | Method | Path | 설명 |

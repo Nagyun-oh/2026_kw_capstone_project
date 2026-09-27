@@ -1,0 +1,17 @@
+{
+  "source": "kaggle-dataset",
+  "dataset": "hyunwook23/capstone-new2026",
+  "version": 2,
+  "files": [
+    {
+      "name": "model_bundle_tree_schema.pkl",
+      "path": "models/model_bundle_tree_schema.pkl",
+      "sha256": "9a4dddb016831b92378cb393bba6fae12274bbb03d3cb44e07e5c004f9bd396d"
+    },
+    {
+      "name": "model_bundle.pkl",
+      "path": "models/transformer/model_bundle.pkl",
+      "sha256": "fd062264ef61b7cef149d3b3802ffde0b08c17ea9102463a8931d174c8ff19a3"
+    }
+  ]
+}

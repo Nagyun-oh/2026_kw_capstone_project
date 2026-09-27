@@ -64,17 +64,17 @@ docker compose version
 - 백엔드: Java 17, 기존 Spring 설정의 `prod` 프로파일 사용
 - 프론트: Node에서 빌드 후 Nginx로 제공
 - AI: `AI_new/`(3모델 앙상블), Python 3.12 계열, `AI_new/requirements.txt` 사용
-- AI 모델: 아래 2개 파일 필요 (Git 제외, Kaggle 데이터셋 `hyunwook23/capstone-new2026` v2에서 받음)
+- AI 모델: 아래 2개 파일 필요 (Git 제외, Kaggle 데이터셋 `hyunwook23/capstone-new2026`에서 받음)
   - `AI_new/models/model_bundle_tree_schema.pkl`
   - `AI_new/models/transformer/model_bundle.pkl` (Kaggle 파일명 `model_bundle.pkl`)
+- Kaggle 버전과 SHA-256은 `AI_new/models.lock.json`에 고정돼 있다.
 - `attack_taxonomy.json`, `model_bundle.pkl.manifest.json`은 Git에 포함돼 있다.
 
 ```powershell
-Test-Path -LiteralPath ./AI_new/models/model_bundle_tree_schema.pkl
-Test-Path -LiteralPath ./AI_new/models/transformer/model_bundle.pkl
+python scripts/fetch_models.py
 ```
 
-받는 방법과 SHA-256 확인은 [AWS 배포 문서 3장](06_aws_deployment.md#3-코드와-모델-전달)과 같다. 트랜스포머 번들은 기동 시 매니페스트의 `bundle_sha256`과 비교하므로 해시가 다르면 AI가 기동되지 않는다. 모델 이름만 같다고 코드와 호환된다고 가정하지 않는다.
+스크립트가 lock에 적힌 버전만 받고 SHA-256이 일치할 때만 저장한다. 이미 받은 파일은 해시만 확인한다. 트랜스포머 번들은 기동 시 매니페스트의 `bundle_sha256`과 비교하므로 해시가 다르면 AI가 기동되지 않는다. 모델 이름만 같다고 코드와 호환된다고 가정하지 않는다.
 
 ### 환경 변수
 

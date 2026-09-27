@@ -1,5 +1,9 @@
 name: security-platform-aws
 
+# 앱 이미지(backend/frontend/ai) 이름
+# - CD 배포: scripts/deploy.sh가 .env.aws에 IMAGE_REGISTRY_PREFIX(ECR 주소/)와 IMAGE_TAG(git SHA)를 기록한다.
+# - 수동 빌드: 두 값이 없으면 기존처럼 security-*:aws 이름으로 EC2에서 빌드한다.
+
 services:
   # ────────────────── MySQL ──────────────────────
   db:
@@ -75,7 +79,7 @@ services:
   backend:
     build:
       context: ./backend
-    image: security-backend:aws
+    image: ${IMAGE_REGISTRY_PREFIX:-}security-backend:${IMAGE_TAG:-aws}
     restart: unless-stopped
     depends_on:
       db: 
@@ -97,7 +101,7 @@ services:
   frontend:
     build:
       context: ./frontend
-    image: security-frontend:aws
+    image: ${IMAGE_REGISTRY_PREFIX:-}security-frontend:${IMAGE_TAG:-aws}
     restart: unless-stopped
     depends_on:
       backend:
@@ -109,7 +113,7 @@ services:
   ai:
     build:
       context: ./AI_new
-    image: security-ai:aws
+    image: ${IMAGE_REGISTRY_PREFIX:-}security-ai:${IMAGE_TAG:-aws}
     restart: unless-stopped
     depends_on:
       kafka:
