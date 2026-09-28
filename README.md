@@ -20,7 +20,7 @@
 
 ## 시스템 아키텍처
 
-<img src="docs/images/img.png" alt="시스템 아키텍처" width="900" height="400">
+<img src="docs/images/capstone_architecture.png" alt="시스템 아키텍처" width="800" height="400">
 
 ## 기술 스택
 
