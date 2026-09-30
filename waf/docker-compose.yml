@@ -13,6 +13,7 @@ services:
       - PORT=8080
       # ModSecurity 룰 엔진 활성화(On), 탐지만 하려면 DetectionOnly 사용
       - MODSEC_RULE_ENGINE=DetectionOnly
+      - MODSEC_AUDIT_LOG=/var/log/nginx/waf-audit.log
       # CRS 탐지 민감도(1~4). 높을수록 탐지 룰이 많아지고 오탐 가능성도 증가
       - PARANOIA=2
       # 요청(inbound) 누적 이상 점수가 이 값 이상이면 차단
@@ -51,6 +52,7 @@ services:
       - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
       # Nginx access.log 파서 설정
       - ./parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - ./waf-detection.lua:/fluent-bit/etc/waf-detection.lua:ro
       # 컨테이너 재생성 후에도 읽기 위치와 전송 대기 청크 유지
       - fluent-bit-state:/var/lib/fluent-bit
 

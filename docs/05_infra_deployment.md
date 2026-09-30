@@ -20,8 +20,8 @@ AWS에서는 별도 [AWS EC2 배포 및 운영 문서](06_aws_deployment.md)와 
 
 ```text
 테스트 요청 → WAF → JuiceShop
-              ↓ access.log / error.log
-           Fluent Bit → Kafka (log-topic / waf-error-topic)
+              ↓ access.log / waf-audit.log
+           Fluent Bit → Kafka (log-topic / waf-detection-topic)
                             ↓
                          Spring Boot → MySQL
                             ↓              ↑
