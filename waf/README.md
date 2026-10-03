@@ -10,9 +10,10 @@ waf/
   rules/
     CUSTOM-001-ai-align.conf      # AI 모델 특성과 맞춘 커스텀 룰
     CUSTOM-002-blacklist.conf     # IP 블랙리스트 룰
-  logs/                           # Nginx access/error 로그
-  fluent-bit.conf                 # access.log/error.log -> Kafka 전송 설정
-  parsers.conf                    # Nginx access.log/error.log 파서
+  logs/                           # Nginx access/error 및 ModSecurity 감사 로그
+  fluent-bit.conf                 # access.log/감사 로그 -> Kafka 전송 설정
+  waf-detection.lua               # 감사 JSON에서 탐지 필드만 추출
+  parsers.conf                    # 로그 파서
   scripts/rotate-logs.sh           # 삭제/압축 없는 로그 교체, --dry-run 지원
   scripts/rotation.cron.example    # 12시간 간격 예약 예시 (기본 비활성)
   MEETING_NOTES.md                 # 백엔드 협의 사항과 적용 전 확인 목록
@@ -41,11 +42,11 @@ Client -> WAF (port 80) -> Juice Shop (port 3000)
 
 ## 로그 파이프라인
 
-WAF는 `/var/log/nginx/access.log`에 요청 로그를 남기고, `/var/log/nginx/error.log`에 Nginx 오류와 ModSecurity 탐지 상세 로그를 남깁니다. 두 경로는 호스트의 `waf/logs/` 폴더와 연결되어 있고, Fluent Bit가 각 파일을 읽어서 Kafka로 전송합니다.
+Nginx는 `/var/log/nginx/access.log`에 완료된 요청을 기록합니다. ModSecurity는 `RelevantOnly` 감사 JSON을 `/var/log/nginx/waf-audit.log`에 기록합니다. 이 파일에는 규칙 탐지 외에 관련 HTTP 오류도 들어올 수 있으므로, Fluent Bit의 Lua 필터가 규칙 ID가 있는 요청만 선별하고 요청·응답 본문, 헤더, 쿼리 문자열을 제거합니다. `/var/log/nginx/error.log`는 Nginx 운영 오류용으로 남겨두며 Kafka로 보내지 않습니다.
 
 ```text
-WAF/Nginx access.log -> Fluent Bit -> Kafka topic(log-topic)
-WAF/Nginx error.log  -> Fluent Bit -> Kafka topic(waf-error-topic)
+WAF/Nginx access.log -> Fluent Bit -> Kafka topic(log-topic) -> AI 분석
+ModSecurity waf-audit.log -> Fluent Bit 탐지 필터 -> Kafka topic(waf-detection-topic)
 ```
 
 확인 명령:
@@ -53,17 +54,17 @@ WAF/Nginx error.log  -> Fluent Bit -> Kafka topic(waf-error-topic)
 ```bash
 curl "http://localhost/rest/products/search?q=test"
 docker exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic log-topic --from-beginning --timeout-ms 8000 --max-messages 5
-docker exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic waf-error-topic --from-beginning --timeout-ms 8000 --max-messages 5
+docker exec kafka kafka-console-consumer --bootstrap-server kafka:29092 --topic waf-detection-topic --from-beginning --timeout-ms 8000 --max-messages 5
 ```
 
 ## 로그 보관과 교체: 1단계
 
-이번 단계는 수집 상태 영속화와 원본 보관 기능을 제공한다. **자동 삭제와 압축은 구현하지 않았다.** 저장소를 받는 것만으로 예약 작업이 설치되지는 않는다. `modsec_audit.log`는 교체 대상이 아니다. Docker 자체 출력 로그의 자동 삭제 정책도 이번에는 추가하지 않는다.
+이번 단계는 수집 상태 영속화와 원본 보관 기능을 제공한다. **자동 삭제와 압축은 구현하지 않았다.** 저장소를 받는 것만으로 예약 작업이 설치되지는 않는다. 새 `waf-audit.log`는 기존 교체 스크립트의 대상이 아니므로 운영 배포 전에 보관·교체 정책을 정해야 한다. Docker 자체 출력 로그의 자동 삭제 정책도 이번에는 추가하지 않는다.
 
 현재 개발 환경에는 2026-09-06에 수집기 설정을 적용하고 로그를 1회 교체했다. `jinseob` 사용자의 crontab에 KST 매일 00:00/12:00 교체를 등록했으며 출력은 `waf/logs/rotation-scheduler.log`에 누적한다. WSL과 Docker가 실행 중일 때 동작한다. `crontab -l`로 확인하고, 중지하려면 `crontab -e`에서 해당 WAF 작업 줄만 주석 처리한다. 이 호스트 설정은 Git으로 다른 PC에 전달되지 않는다.
 
 - `fluent-bit-state` named volume에 입력별 SQLite 읽기 위치와 파일시스템 버퍼를 저장한다. `DB.sync Full`, `storage.sync full`을 사용한다.
-- 두 Kafka 출력은 재시도 소진과 메시지 시간 만료를 피하도록 설정한다. 토픽 이름과 메시지 포맷은 유지한다.
+- 두 Kafka 출력은 재시도 소진과 메시지 시간 만료를 피하도록 설정한다. WAF 탐지 토픽은 `waf-detection-topic`이며 기존 `waf-error-topic`의 운영 오류 메시지와 구분한다.
 - `access.log`, `error.log`를 교체할 때 `logs/archive/<UTC 시각>-<프로세스 ID>/`로 이동한 뒤 Nginx 로그를 다시 연다. 원본 내용은 비우지 않는다.
 - 보관 파일과 읽기 위치 DB는 Kafka/DB 저장 완료 증명이 아니다. 특히 Kafka 출력의 librdkafka 메모리 큐는 파일시스템 버퍼와 다르므로, 강제 종료 때 미전송 데이터가 자동 복구된다고 보장할 수 없다.
 

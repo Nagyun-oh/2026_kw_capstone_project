@@ -152,6 +152,7 @@ services:
         BACKEND: http://juiceshop:3000
         PORT: "8080"
         MODSEC_RULE_ENGINE: DetectionOnly
+        MODSEC_AUDIT_LOG: /var/log/nginx/waf-audit.log
         PARANOIA: "2"
         ANOMALY_INBOUND: "5"
         ANOMALY_OUTBOUND: "4"
@@ -179,6 +180,7 @@ services:
       - ./waf/logs:/var/log/nginx:ro
       - ./waf/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
       - ./waf/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - ./waf/waf-detection.lua:/fluent-bit/etc/waf-detection.lua:ro
 
   # ────────────────── security-platform-aws 프로젝트의 새 볼륨 및 네트워크 생성 ──────────────────────
 volumes:
@@ -188,4 +190,3 @@ volumes:
   zookeeper-log:
 networks:
   default:
-  
