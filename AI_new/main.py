@@ -32,6 +32,7 @@ FastAPI Server for Real-Time Web Attack Detection (3-Model Soft-Voting Ensemble)
   (앙상블이 아니라 트래픽이 조용히 분할되는 결과가 된다). 상세: ai_team_sync/DECISIONS_LOG.md.
 """
 
+from ipaddress import ip_address
 from pathlib import Path
 import json
 import os
@@ -143,6 +144,47 @@ def tree_to_vector(row: dict) -> np.ndarray:
         else:
             v.append(row[f])
     return np.array([v], dtype=np.float32)
+
+
+def _max_length(field: str) -> int:
+    """PredictRequest 필드에 선언된 max_length (스키마와 상한 값을 한 곳에서만 관리)."""
+    for meta in PredictRequest.model_fields[field].metadata:
+        limit = getattr(meta, "max_length", None)
+        if limit is not None:
+            return limit
+    raise KeyError(f"{field} has no max_length")
+
+
+USER_AGENT_LIMIT = _max_length("user_agent")
+
+
+def _fit_predict_fields(req: HttpRequest) -> dict:
+    """트랜스포머 입력(PredictRequest)의 길이·형식 제약에 맞춘 값을 만든다.
+
+    제약을 넘는 값이 그대로 들어가면 검증 오류로 판정 전체가 버려지고 결과가 발행되지 않는다
+    (예: User-Agent 4,097자 이상 → 탐지 우회). 상한까지 잘라 판정을 계속한다.
+    트리·스키마 모델과 규칙 게이트는 원본 값을 그대로 쓴다.
+    """
+    fields = {
+        "method": req.method or "GET",
+        "url_path": req.url_path or "/",
+        "query_params": req.query_params,
+        "body_content": req.body_content,
+        "user_agent": req.user_agent,
+        "timestamp": req.timestamp,
+    }
+    for name, value in fields.items():
+        limit = _max_length(name)
+        if len(value) > limit:
+            print(f"[AI] log_id={req.log_id} {name} {len(value)}자 → {limit}자로 잘라 판정")
+            fields[name] = value[:limit]
+
+    # 형식이 잘못된 IP도 검증 오류를 일으킨다. IP는 트랜스포머 입력이 아니므로 비워서 넘긴다.
+    try:
+        fields["ip_address"] = str(ip_address(req.ip_address.strip())) if req.ip_address.strip() else ""
+    except ValueError:
+        fields["ip_address"] = ""
+    return fields
 
 
 def _logit(p, eps=1e-6):
@@ -257,6 +299,11 @@ def run_predict(req: HttpRequest) -> ThreatResponse:
     # -> 3모델을 합쳐도 결합 임계값(0.965)이 보수적이라 이런 명백한 공격을 놓칠 수 있음이
     #    실측으로 확인돼서 유지한다 (features_v2.py, main_v2.py와 동일한 설계).
     hits = rule_hits(row)
+    # 정상 브라우저 User-Agent는 수백 자 이내다. 트랜스포머 입력 상한을 넘는 길이 자체를
+    # 탐지 사유로 삼아, 길이를 늘려 판정을 피하는 시도를 공격으로 남긴다.
+    if len(req.user_agent) > USER_AGENT_LIMIT:
+        hits.append(("OVERSIZED_USER_AGENT",
+                     f"비정상적으로 긴 User-Agent({len(req.user_agent)}자 > {USER_AGENT_LIMIT}자)"))
 
     # 2단계 — 3모델 통계적 판정
     #
@@ -276,11 +323,7 @@ def run_predict(req: HttpRequest) -> ThreatResponse:
     # ModelRuntime.predict()를 통해서 호출한다 -- 내부적으로 self._lock(RLock)으로 감싸고
     # 점수 유효성(0<=score<=1, finite)까지 검증한다. explainer.score()를 직접 부르면 이
     # 보호를 우회하게 되고, Kafka 워커 스레드와 HTTP 요청이 동시에 들어올 때 안전하지 않다.
-    predict_request = PredictRequest(
-        log_id=req.log_id, method=req.method or "GET", url_path=req.url_path or "/",
-        query_params=req.query_params, body_content=req.body_content,
-        user_agent=req.user_agent, ip_address=req.ip_address, timestamp=req.timestamp,
-    )
+    predict_request = PredictRequest(log_id=req.log_id, **_fit_predict_fields(req))
     transformer_p = float(transformer_runtime.predict(predict_request).threat_score)
 
     combined = float(soft_vote([transformer_p, tree_p, schema_p], ENSEMBLE_WEIGHTS))
@@ -361,7 +404,8 @@ def kafka_worker():
                 group_id=AI_CONSUMER_GROUP,
                 auto_offset_reset="earliest",
                 enable_auto_commit=True,
-                value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+                # value_deserializer로 JSON을 풀면 실패가 메시지 루프 밖(이터레이터 안)에서 터져
+                # 같은 메시지를 무한히 다시 읽는다. 원본 바이트만 받고 아래 try 안에서 푼다.
             )
             # 2) Kafka Producer 생성
             kafka_producer = KafkaProducer(
@@ -377,10 +421,17 @@ def kafka_worker():
                     break
 
                 try:
+                    request_message = json.loads(record.value.decode("utf-8"))
+                except (AttributeError, UnicodeDecodeError, json.JSONDecodeError) as e:
+                    # JSON이 아니거나 값이 없는 메시지는 건너뛴다 (offset은 다음 메시지와 함께 커밋됨).
+                    print(f"[Kafka AI Error] JSON이 아닌 메시지 건너뜀 "
+                          f"partition={record.partition} offset={record.offset}: {e}")
+                    continue
+
+                try:
                     # ai-request-topic 메시지 수신
                     # -> 예측
                     # -> ai-result-topic으로 결과 전송
-                    request_message = record.value
                     result_message = handle_kafka_message(request_message)
 
                     kafka_producer.send(
