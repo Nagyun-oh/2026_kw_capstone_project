@@ -182,6 +182,8 @@ services:
       - ./waf/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
       - ./waf/parsers.conf:/fluent-bit/etc/parsers.conf:ro
       - ./waf/waf-detection.lua:/fluent-bit/etc/waf-detection.lua:ro
+      # 읽기 위치(DB)와 전송 대기 버퍼를 보존해 컨테이너 재생성 시 로그 전체 재전송을 막는다.
+      - fluent-bit-state:/var/lib/fluent-bit
 
   # ────────────────── 기존 저장 공간 연결 ──────────────────────
 volumes:
@@ -197,11 +199,9 @@ volumes:
     external: true
     name: ${ZOOKEEPER_LOG_VOLUME:?ZOOKEEPER_LOG_VOLUME is required}
 
-  # 보안 팀원이 상태 이전 여부와 실제 볼륨 이름을 확정해야 함.
-  # 실행 전에 해당 볼륨이 준비돼 있어야 함.
-  # fluent-bit-state:
-  # external: true
-  # name: ${FLUENT_BIT_STATE_VOLUME:-security-fluent-bit-state}
+  # Fluent Bit 읽기 위치·버퍼. 이전할 기존 상태가 없어 external이 아닌 일반 볼륨으로 자동 생성한다.
+  # down -v로 지우면 다음 기동 때 Read_from_Head True에 따라 로그를 처음부터 다시 보낸다.
+  fluent-bit-state:
 
   # ────────────────── 기존 Docker 네트워크 재사용 ──────────────────────
 networks:

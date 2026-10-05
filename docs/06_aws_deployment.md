@@ -311,7 +311,19 @@ sudo docker compose --env-file .env.aws -f compose.aws.yaml restart frontend
 ## 9. 후속 작업
 
 - [ ] EC2에서 고친 Nginx 주소를 로컬·Git에도 반영하고 재현 확인.
-- [ ] Fluent Bit 읽기 위치·버퍼 영속화 및 로그 보관·중복 처리 정책 확정.
+- [x] Fluent Bit 읽기 위치·버퍼 영속화 (`fluent-bit-state` 볼륨).
+- [ ] 로그 보관·중복 처리(백엔드 중복 방지 키) 정책 확정.
+
+> **`fluent-bit-state` 볼륨이 처음 적용되는 배포 전 1회 작업**
+> 첫 배포에서는 볼륨이 비어 있어 Fluent Bit가 EC2의 기존 `access.log`를 처음부터 다시 보내고, 로그·위협이 중복 저장된다. Deploy 워크플로를 실행하기 전에 EC2에서 기존 access 로그를 보관 폴더로 옮긴다.
+>
+> ```bash
+> cd /home/ubuntu/2026_kw_capstone_project
+> sudo docker compose --env-file .env.aws -f compose.aws.yaml exec waf sh -c \
+>   'd=/var/log/nginx/archive/$(date -u +%Y%m%dT%H%M%SZ) && mkdir -p "$d" && mv /var/log/nginx/access.log "$d/" && nginx -s reopen'
+> ```
+>
+> `waf/scripts/rotate-logs.sh`는 로컬 컨테이너 이름(`waf`, `waf-fluent-bit`)을 사용하므로 EC2에서는 위 명령을 쓴다.
 - [ ] DB 백업·복구 검증. EC2 중지·시작 성공은 백업이 아님.
 - [ ] 이미지 태그/digest 고정과 부하·비용 측정.
 - [ ] 관리자 인증·권한 및 HTTPS 적용 후 공개 범위 재검토.

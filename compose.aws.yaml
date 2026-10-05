@@ -181,6 +181,8 @@ services:
       - ./waf/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
       - ./waf/parsers.conf:/fluent-bit/etc/parsers.conf:ro
       - ./waf/waf-detection.lua:/fluent-bit/etc/waf-detection.lua:ro
+      # 읽기 위치(DB)와 전송 대기 버퍼를 보존해 컨테이너 재생성 시 로그 전체 재전송을 막는다.
+      - fluent-bit-state:/var/lib/fluent-bit
 
   # ────────────────── security-platform-aws 프로젝트의 새 볼륨 및 네트워크 생성 ──────────────────────
 volumes:
@@ -188,5 +190,6 @@ volumes:
   kafka-data:
   zookeeper-data:
   zookeeper-log:
+  fluent-bit-state:
 networks:
   default:
