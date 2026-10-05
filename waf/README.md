@@ -66,6 +66,7 @@ docker exec kafka kafka-console-consumer --bootstrap-server kafka:29092 --topic 
 - `fluent-bit-state` named volume에 입력별 SQLite 읽기 위치와 파일시스템 버퍼를 저장한다. `DB.sync Full`, `storage.sync full`을 사용한다.
 - 두 Kafka 출력은 재시도 소진과 메시지 시간 만료를 피하도록 설정한다. WAF 탐지 토픽은 `waf-detection-topic`이며 기존 `waf-error-topic`의 운영 오류 메시지와 구분한다.
 - `access.log`, `error.log`를 교체할 때 `logs/archive/<UTC 시각>-<프로세스 ID>/`로 이동한 뒤 Nginx 로그를 다시 연다. 원본 내용은 비우지 않는다.
+- tail 입력의 줄 길이 상한은 `access.log` 512KB, `waf-audit.log` 8MB다. 기본값(32KB)에서는 긴 줄 하나가 파일 감시 전체를 멈췄으므로(`requires a larger buffer size ... Skipping file`), 상한을 넘는 줄은 `Skip_Long_Lines On`으로 그 줄만 건너뛴다. 건너뛴 줄은 Fluent Bit 로그에 `Skipping long lines` 경고로 남는다.
 - 보관 파일과 읽기 위치 DB는 Kafka/DB 저장 완료 증명이 아니다. 특히 Kafka 출력의 librdkafka 메모리 큐는 파일시스템 버퍼와 다르므로, 강제 종료 때 미전송 데이터가 자동 복구된다고 보장할 수 없다.
 
 ### 최초 적용 주의 사항
