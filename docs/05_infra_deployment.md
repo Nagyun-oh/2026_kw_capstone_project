@@ -11,7 +11,7 @@ AWS에서는 별도 [AWS EC2 배포 및 운영 문서](06_aws_deployment.md)와 
 - 기존 MySQL 데이터 폴더와 스키마가 필요하다. `ddl-auto: validate`이므로 빈 DB에서 테이블을 자동 생성하지 않는다.
 - Kafka·Zookeeper 데이터 볼륨과 `security-net`은 `external: true`로 선언돼 있어 사전에 존재해야 한다.
 - AI 모델 파일은 Git에 포함되지 않으며 별도로 준비해야 한다.
-- Fluent Bit 상태 볼륨은 이번 구성에서 제외했다.
+- Fluent Bit 읽기 위치·버퍼는 `fluent-bit-state` 볼륨에 보존한다. Compose가 자동 생성하며 사전 준비는 필요 없다.
 - 각 호스트 포트는 `127.0.0.1`에 바인딩돼 로컬 PC에서 접근한다.
 
 신규 PC나 AWS에서는 저장 공간·DB 스키마·모델을 별도로 준비해야 한다. 기존 로컬 볼륨 이름을 복사하거나 빈 폴더를 만드는 것만으로 기존 환경이 복원되지는 않는다.
@@ -360,7 +360,17 @@ docker exec security-ai-local python -c "import joblib; b=joblib.load('/app/mode
 | 최종 수정 후 전체 중지·시작 및 기존 ID·새 요청 검증 | 절차 안내 완료, 최종 결과 기록 필요 |
 | AWS 배포 | 이 로컬 기록 시점에는 미진행. 이후 결과는 [AWS 문서](06_aws_deployment.md) 참고 |
 
-- 현재 루트 Compose에는 Fluent Bit 상태 볼륨이 없다. 단순 중지·시작에는 내부 파일이 남지만 컨테이너 재생성 시 읽기 위치·버퍼를 잃을 수 있다. `Read_from_Head True`에 따라 기존 로그 재수집 및 중복 저장 가능성이 있다. 별도 `waf/docker-compose.yml`에는 상태 볼륨이 있으므로 두 구성을 혼동하지 않는다.
+- Fluent Bit 읽기 위치(`access.db`, `audit.db`)와 버퍼는 `fluent-bit-state` 볼륨에 보존한다. 이 볼륨이 없던 이전 구성에서는 컨테이너가 재생성될 때마다 `Read_from_Head True`에 따라 `access.log` 전체가 다시 전송돼 로그·위협이 중복 저장됐다.
+- 볼륨을 처음 붙이는 기동(또는 `down -v`로 볼륨을 지운 뒤)은 상태가 비어 있어 기존 로그를 한 번 더 처음부터 보낸다. 백엔드에 중복 방지 키가 생기기 전까지는 아래 전환 절차로 기존 `access.log`를 먼저 보관한다.
+
+  ```powershell
+  # 1) 실행 중인 access/error 로그를 waf/logs/archive/로 옮기고 Nginx가 새 파일을 열게 한다 (WSL 셸)
+  wsl bash waf/scripts/rotate-logs.sh
+  # 2) 볼륨을 붙여 Fluent Bit만 재생성한다
+  docker compose --env-file .env -f compose.yaml up -d fluent-bit
+  ```
+
+  `waf-audit.log`는 교체 대상이 아니므로 처음부터 다시 읽는다. 이 경로의 이벤트(`waf-detection-topic`)는 아직 저장하는 컨슈머가 없어 DB 중복은 생기지 않는다.
 - WAF는 `DetectionOnly`다. 대시보드 블랙리스트 등록과 WAF의 실제 차단은 별개이며 자동 연계는 아직 없다.
 - AI 수정 사항이 로컬에만 남아 있으면 GitHub 코드로 같은 결과를 재현할 수 없다. 배포 전 팀원과 확인해 필요한 환경 변수 연결·피처 수정 사항을 반영한다.
 - Kafka는 단일 브로커·ZooKeeper 기반이다. KRaft 전환은 데이터 보존 여부와 업그레이드 경로를 정해 별도로 수행한다.
@@ -378,7 +388,8 @@ docker exec security-ai-local python -c "import joblib; b=joblib.load('/app/mode
 - [ ] 외부 접근 주소에 맞춰 CORS·포트 바인딩·보안 그룹 구성. DB·Kafka를 외부 공개하지 않음.
 - [ ] 인증 보호 범위를 검토하고 첫 테스트 배포는 접근 대상을 제한.
 - [ ] WAF·JuiceShop을 AWS 테스트 구성에 포함할지 결정.
-- [ ] Fluent Bit 상태 보존과 로그 보관·중복 처리 방침을 보안 담당자와 확정.
+- [x] Fluent Bit 상태 보존 (`fluent-bit-state` 볼륨).
+- [ ] 로그 보관·중복 처리(백엔드 중복 방지 키) 방침을 보안 담당자와 확정.
 - [ ] 이미지 버전 고정 및 취약점 점검, 백업·복구 절차 확인.
 - [ ] 수동 배포 및 전체 연동 검증 후 CI/CD 자동화.
 
