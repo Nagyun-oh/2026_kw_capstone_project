@@ -1,10 +1,12 @@
 package com.example.security_log_system.dto;
 
 import com.example.security_log_system.entity.DetectedThreat;
+import com.example.security_log_system.util.UtcDateTime;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @Builder
@@ -16,7 +18,7 @@ public class ThreatResponseDto {
     private String severity;
     private String description;
     private boolean checked;
-    private LocalDateTime detectedAt;
+    private OffsetDateTime detectedAt;
 
     public static ThreatResponseDto from(DetectedThreat threat){
         return ThreatResponseDto.builder()
@@ -27,7 +29,7 @@ public class ThreatResponseDto {
                 .severity(threat.getSeverity())
                 .description(threat.getDescription())
                 .checked(threat.isChecked())
-                .detectedAt(threat.getDetectedAt())
+                .detectedAt(UtcDateTime.toOffset(threat.getDetectedAt()))
                 .build();
     }
 }

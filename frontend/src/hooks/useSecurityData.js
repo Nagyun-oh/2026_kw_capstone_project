@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
-import {API_BASE_URL} from '../config';
+import apiClient from '../api/apiClient';
 
 function useSecurityData() {
 
@@ -32,7 +31,7 @@ function useSecurityData() {
     number:0,
     totalPages:0,        // 전체 페이지 수
     totalElements:0,    // 전체 개수
-    size:20,            // 한 페이지의 최대 데이터 개수
+    size:10,            // 한 페이지의 최대 데이터 개수
   });
 
   const [threats, setThreats] = useState([]);
@@ -40,7 +39,7 @@ function useSecurityData() {
     number:0,
     totalPages:0,
     totalElements:0,
-    size:20,
+    size:10,
   });
 
   const [blacklists, setBlacklists] = useState([]);
@@ -48,14 +47,14 @@ function useSecurityData() {
     number:0,
     totalPages:0,
     totalElements:0,
-    size:20,
+    size:10,
   });
  
   /* == 조회 함수 ( 전체 로그, 위협, 블랙리스트) == */
   const fetchLogs = (page =0, search = logSearch) => {
     const params = {
       page,
-      size:20
+      size:10
     };
 
     if(search.ip.trim()){
@@ -70,8 +69,8 @@ function useSecurityData() {
       params.statusCode = Number(search.statusCode);
     }
 
-    axios.get(
-      `${API_BASE_URL}/api/v1/logs`,
+    apiClient.get(
+      '/api/v1/logs',
       {params}
     )
     .then(response => {
@@ -92,15 +91,15 @@ function useSecurityData() {
   };
 
   const fetchLogById = async id => {
-    const response = await axios.get(
-      `${API_BASE_URL}/api/v1/logs/${id}`
+    const response = await apiClient.get(
+      `/api/v1/logs/${id}`
     );
 
     return response.data;
   };
 
   const fetchThreats = (page =0, search = threatSearch) => {
-    const params = {page, size:20};
+    const params = {page, size:10};
 
     if(search.threatType.trim()){
       params.threatType = search.threatType.trim();
@@ -110,8 +109,8 @@ function useSecurityData() {
       params.severity = search.severity;
     }
 
-    axios.get(
-      `${API_BASE_URL}/api/v1/threats`,
+    apiClient.get(
+      '/api/v1/threats',
       {params}
     )
     .then(response => {
@@ -132,7 +131,7 @@ function useSecurityData() {
   };
 
   const fetchBlacklists = (page =0, search = blacklistSearch) => {
-    const params = {page,size:20};
+    const params = {page,size:10};
 
     if(search.ip.trim()){
       params.ip = search.ip.trim();
@@ -141,8 +140,8 @@ function useSecurityData() {
       params.dangerLevel = Number(search.dangerLevel);
     }
 
-    axios.get(
-      `${API_BASE_URL}/api/v1/blacklist`,
+    apiClient.get(
+      '/api/v1/blacklist',
       {params}
     )
     .then(response => {

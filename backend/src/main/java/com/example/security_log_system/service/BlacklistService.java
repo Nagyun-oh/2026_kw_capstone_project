@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.security_log_system.util.UtcDateTime;
 
 import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,7 @@ public class BlacklistService {
                 .ipAddress(ip)
                 .reason(reason)
                 .dangerLevel(dangerLevel)
-                .createdAt(LocalDateTime.now())
+                .createdAt(UtcDateTime.now())
                 .build();
 
         blacklistRepository.save(blacklist);

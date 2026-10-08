@@ -91,8 +91,6 @@ if (-not (Test-Path -LiteralPath .env)) {
 | `DB_USERNAME` | 현재 로컬 구성은 `root` 사용 |
 | `DB_PASSWORD` | 기존 MySQL에 실제 설정된 root 비밀번호 |
 | `MYSQL_DATA_DIR` | 기존 데이터 경로. 현재 기본값은 `./backend/mysql_data` |
-| `JWT_SECRET` | 랜덤 32바이트를 Base64로 인코딩한 키 |
-| `JWT_EXPIRATION_MS` | 기본값 `86400000` (24시간) |
 | `CORS_ALLOWED_ORIGINS` | 현재 대시보드 주소 `http://localhost:3000` |
 | `KAFKA_DATA_VOLUME` | 기존 Kafka `/var/lib/kafka/data` 볼륨의 실제 이름 |
 | `ZOOKEEPER_DATA_VOLUME` | 기존 Zookeeper `/var/lib/zookeeper/data` 볼륨의 실제 이름 |
@@ -100,7 +98,6 @@ if (-not (Test-Path -LiteralPath .env)) {
 
 `.env.example`의 키·비밀번호·볼륨 이름은 실행 가능한 실제 값이 아니다. 현재 Compose는 `DB_PASSWORD`를 MySQL 초기 root 비밀번호와 백엔드 접속 비밀번호에 함께 사용한다. 별도 앱 계정으로 전환할 때는 설정도 분리해야 한다. 기존 DB에서는 `.env` 수정만으로 계정 비밀번호가 변경되지 않는다.
 
-JWT 키가 없다면 아래 명령으로 생성해 클립보드에 복사한 뒤 `.env`의 `JWT_SECRET`에 붙여넣는다. 이후 같은 값을 재사용한다. 키를 바꾸면 이전 키로 발급한 토큰은 유효하지 않다.
 
 ```powershell
 $keyBytes = New-Object byte[] 32
@@ -340,12 +337,22 @@ docker exec security-ai-local python -c "import joblib; b=joblib.load('/app/mode
 | 증상 | 확인할 항목 |
 | --- | --- |
 | `NoBrokersAvailable` | Kafka health, 같은 네트워크, AI의 환경 변수 연결 및 최신 이미지 |
-| `WeakKeyException` | JWT 키가 Base64 디코딩 후 최소 32바이트인지 확인 |
 | `external volume ... not found` | 실제 기존 볼륨 이름과 `.env` 비교 |
 | 컨테이너 이름 충돌 | 기존 컨테이너 상태·이름 확인. 데이터를 지우는 것으로 해결하지 않음 |
 | `mapping values are not allowed` | 오류 줄과 앞줄의 들여쓰기 및 `external: true`처럼 콜론 뒤 공백 확인 |
 | `no such service: build` | `up -d build`가 아닌 `up -d --build` 사용 |
 | PowerShell HTTP 명령 실패 | `Invoke-RestMethod` 철자와 URL 확인. Markdown 링크 표기 대신 URL 문자열만 입력 |
+
+### 세션 인증
+
+- 로그인 상태는 서버의 HTTP 세션과 JSESSIONID 쿠키로 유지한다.
+- 로그인 전에 `/api/v1/auth/csrf`에서 CSRF 토큰을 조회한다.
+- POST 등 변경 요청에는 응답의 headerName과 token을 사용한다.
+- 로그인·로그아웃 후에는 CSRF 토큰을 다시 조회한다.
+- 세션은 30분 동안 사용하지 않으면 만료된다.
+- 현재 세션은 서버 메모리에 저장하므로 백엔드 재시작 후 재로그인이 필요하다.
+- 로컬 HTTP 환경에서는 Secure 쿠키 옵션을 비활성화한다.
+- 운영 환경에서는 HTTPS와 Secure 쿠키를 사용한다.
 
 ## 8. 현재 검증 기록과 제한 사항
 
@@ -374,7 +381,7 @@ docker exec security-ai-local python -c "import joblib; b=joblib.load('/app/mode
 - [ ] MySQL을 신규 초기화할지, 백업을 복원할지 결정하고 스키마 준비 (`validate` 유지).
 - [ ] AWS의 데이터 경로, Kafka·Zookeeper 볼륨, 네트워크를 준비. 로컬 볼륨 식별자는 AWS에 존재하지 않음.
 - [ ] AI 모델 및 호환되는 코드·의존성 버전을 함께 준비.
-- [ ] AWS용 DB 비밀번호·JWT 키 관리, 앱 DB 계정 권한 분리.
+- [ ] AWS용 DB 비밀번호 관리, 앱 DB 계정 권한 분리.
 - [ ] 외부 접근 주소에 맞춰 CORS·포트 바인딩·보안 그룹 구성. DB·Kafka를 외부 공개하지 않음.
 - [ ] 인증 보호 범위를 검토하고 첫 테스트 배포는 접근 대상을 제한.
 - [ ] WAF·JuiceShop을 AWS 테스트 구성에 포함할지 결정.

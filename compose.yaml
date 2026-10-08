@@ -89,10 +89,9 @@ services:
       DB_URL: "jdbc:mysql://db:3306/security_db?serverTimezone=Asia/Seoul"
       DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
-      JWT_EXPIRATION_MS : ${JWT_EXPIRATION_MS:-86400000}
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+      SESSION_COOKIE_SECURE: "false"
   # ────────────────── React + Nginx ──────────────────────
   frontend:
     build:

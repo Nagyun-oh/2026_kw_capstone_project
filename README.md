@@ -11,7 +11,7 @@
 - Kafka 기반 보안 로그 수집 및 비동기 처리
 - FastAPI 기반 AI 추론 서비스 연동
 - Spring Boot 백엔드의 로그, 위협, 블랙리스트 관리 API
-- JWT 기반 관리자 인증
+- HTTP 세션 기반 관리자 인증 및 CSRF 보호
 - MySQL 기반 로그 및 탐지 결과 저장
 - React 대시보드에서 로그, 탐지 이벤트, 차단 IP 현황 표시
 - WebSocket/STOMP 기반 실시간 알림 구조
@@ -86,9 +86,12 @@ GitHub Actions CI(백엔드 테스트, 프론트 빌드, AI 이미지 기동 확
 
 | Method | Path | 설명 |
 | --- | --- | --- |
-| POST | `/api/v1/auth/login` | 관리자 로그인 및 JWT 발급 |
+| GET | `/api/v1/auth/csrf` | CSRF 토큰 조회 |
+| POST | `/api/v1/auth/login` | 관리자 로그인 및 세션 인증 정보 저장 |
+| GET | `/api/v1/auth/me` | 현재 로그인한 관리자 정보 조회 |
+| POST | `/api/v1/auth/logout` | 세션 무효화 및 로그아웃 |
 | POST | `/api/v1/auth/register` | 관리자 계정 생성 |
-| GET | `/api/v1/logs` | 로그 목록 조회, pagination 적용 |
+| GET | `/api/v1/logs` | 로그 목록 조회 |
 | GET | `/api/v1/logs/{id}` | 로그 번호별 검색 |
 | GET | `/api/v1/threats` | 탐지된 위협 목록 조회 |
 | POST | `/api/v1/threats/detect` | AI 탐지 결과 HTTP 수신, 보조/테스트용 |
