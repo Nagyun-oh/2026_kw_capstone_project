@@ -93,10 +93,13 @@ services:
       DB_URL: "jdbc:mysql://db:3306/security_db?serverTimezone=Asia/Seoul"
       DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
-      JWT_EXPIRATION_MS : ${JWT_EXPIRATION_MS:-86400000}
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:? CORS_ALLOWED_ORIGINS is required}
+      APP_BOOTSTRAP_ADMIN_ENABLED: ${APP_BOOTSTRAP_ADMIN_ENABLED:-false}
+      APP_BOOTSTRAP_ADMIN_USERNAME: ${APP_BOOTSTRAP_ADMIN_USERNAME:-}
+      APP_BOOTSTRAP_ADMIN_PASSWORD: ${APP_BOOTSTRAP_ADMIN_PASSWORD:-}
+      SESSION_COOKIE_SECURE: "true"
+      SERVER_FORWARD_HEADERS_STRATEGY: native
   # ────────────────── React + Nginx ──────────────────────
   frontend:
     build:
@@ -108,7 +111,7 @@ services:
         condition: service_started
         restart: true
     ports:
-      - "3000:80"
+      - "127.0.0.1:3000:80"
   # ────────────────── FastAPI AI ──────────────────────
   ai:
     build:
@@ -147,7 +150,7 @@ services:
         juiceshop:
           condition: service_started
       ports:
-        - "80:8080"
+        - "8081:8080"
       environment:
         BACKEND: http://juiceshop:3000
         PORT: "8080"

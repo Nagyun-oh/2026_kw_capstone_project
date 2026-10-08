@@ -3,6 +3,7 @@ import SockJS from 'sockjs-client';
 import {Client,ReconnectionTimeMode } from '@stomp/stompjs';
 import { toast } from 'react-toastify';
 import {WS_URL} from '../config';
+import apiClient from '../api/apiClient';
 
 function useWebSocket(onThreatReceived) {
   // 새로운 위협이 들어왔을 때 테이블 테두리 강조
@@ -22,8 +23,9 @@ function useWebSocket(onThreatReceived) {
     callbackRef.current = onThreatReceived;
   }, [onThreatReceived]);
 
-
   useEffect(() => {
+
+    let disposed = false;
     
     const stompClient = new Client({
       // SockJS를 사용해 백엔드 WebSocket endpoint에 연결
@@ -106,10 +108,45 @@ function useWebSocket(onThreatReceived) {
     });
 
     setConnectionStatus("connecting");
+
+    // 최초 연결과 재연결 전에 인증 상태·CSRF 토큰 확인
+    stompClient.beforeConnect = async() => {
+
+      try{
+        // 세션이 유효한 관리자인지 확인
+        await apiClient.get("/api/v1/auth/me");
+
+        if(disposed || !stompClient.active) return;
+
+        const{data} = await apiClient.get("/api/v1/auth/csrf");
+
+        if(disposed || !stompClient.active) return;
+
+        if(!data.headerName || !data.token){
+          throw new Error('CSRF 토큰을 가져오지 못했습니다.');
+        }
+
+        // HTTP 헤더가 아니라 STOMP CONNECT 헤더
+        stompClient.connectHeaders = {
+          [data.headerName]: data.token,
+        };
+      }catch (error){
+        // 인증 확인이나 토큰 준비에 실패하면 연결 시도 중단
+        await stompClient.deactivate();
+
+        if(!disposed){
+          setConnectionStatus('error');
+        }
+
+      }
+    }
     // WebSocket 연결 시작
     stompClient.activate();
 
+    // 정리 함수
     return () => {
+      disposed = true;
+
       if(highlightTimerRef.current){
         clearTimeout(highlightTimerRef.current);
       }

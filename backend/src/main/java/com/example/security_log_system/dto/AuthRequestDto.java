@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class LogRequestDto {
+public class AuthRequestDto {
 
     @NotBlank(message = "username is required.")
     private String username;

@@ -5,13 +5,10 @@ import com.example.security_log_system.dto.LogResponseDto;
 import com.example.security_log_system.dto.LogSearchCondition;
 import com.example.security_log_system.exception.GlobalExceptionHandler;
 import com.example.security_log_system.service.LogService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,6 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -118,7 +116,7 @@ public class LogControllerTest {
                 .requestUrl("/admin")
                 .statusCode(200)
                 .rawLog("sample log")
-                .createdAt(LocalDateTime.now())
+                .createdAt(OffsetDateTime.parse("2026-10-07T02:57:52Z"))
                 .build();
     }
 }

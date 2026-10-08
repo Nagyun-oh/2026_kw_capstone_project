@@ -31,3 +31,8 @@ spring:
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+  bootstrap-admin:
+    enabled: ${APP_BOOTSTRAP_ADMIN_ENABLED:false}
+    username: ${APP_BOOTSTRAP_ADMIN_USERNAME:}
+    password: ${APP_BOOTSTRAP_ADMIN_PASSWORD:}

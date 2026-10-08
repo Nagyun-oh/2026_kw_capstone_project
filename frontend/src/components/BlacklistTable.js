@@ -1,25 +1,29 @@
-import React,{useState} from 'react';
+import { useState } from 'react';
+import TablePagination from './TablePagination';
 
-function BlacklistTable({ blacklists,pageInfo,onPageChange,onSearch,onReset,onViewLog }) {
-  const [form,setForm] = useState({
-    ip: "",
-    dangerLevel: "",
+const DANGER_LEVELS = {
+  1: { label: 'MEDIUM', tone: 'info' },
+  2: { label: 'MEDIUM', tone: 'info' },
+  3: { label: 'HIGH', tone: 'warning' },
+  4: { label: 'CRITICAL', tone: 'danger' },
+  5: { label: 'CRITICAL', tone: 'danger' },
+};
+
+function BlacklistTable({
+  blacklists,
+  pageInfo,
+  onPageChange,
+  onSearch,
+  onReset,
+  onViewLog,
+}) {
+  const [form, setForm] = useState({
+    ip: '',
+    dangerLevel: '',
   });
 
-  const getDangerLevelLabel = dangerLevel => {
-    if(dangerLevel >=4){
-      return 'CRITICAL';
-    }
-
-    if(dangerLevel >=3){
-      return 'HIGH';
-    }
-
-    return 'MEDIUM';
-  };
-
   const handleChange = event => {
-    const {name, value} = event.target;
+    const { name, value } = event.target;
 
     setForm(previous => ({
       ...previous,
@@ -32,133 +36,166 @@ function BlacklistTable({ blacklists,pageInfo,onPageChange,onSearch,onReset,onVi
     onSearch(form);
   };
 
-  const handleReset = () =>{
-    const emptyForm = {ip: "", dangerLevel: ""};
-    setForm(emptyForm);
+  const handleReset = () => {
+    setForm({ ip: '', dangerLevel: '' });
     onReset();
   };
+
   return (
-    <section style={{ backgroundColor: 'white', padding: '15px', borderRadius: '10px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
-      <form onSubmit={handleSubmit}>
-        <input
-          name="ip"
-          value={form.ip}
-          onChange={handleChange}
-          placeholder="IP address"
-        />
+    <section className="data-panel" aria-label="차단 목록 IP">
+      <header className="data-panel__header">
+        <div>
+          <h2>차단 목록 IP</h2>
+          <p>목록에 등록된 IP와 등록 사유, 연관 위협을 확인하세요.</p>
+        </div>
 
-        <select
-          name="dangerLevel"
-          value={form.dangerLevel}
-          onChange={handleChange}
-        >
-          <option value="">All danger levels</option>
-          {[1, 2, 3, 4, 5].map(level => (
-            <option key={level} value={level}>{level}</option>
-          ))}
-        </select>
+        <span className="data-count">
+          목록 기준 {pageInfo.totalElements.toLocaleString('ko-KR')}건
+        </span>
+      </header>
 
-        <button type="submit">검색</button>
-        <button type="button" onClick={handleReset}>초기화</button>
-    </form>
-      <h2 style={{ color: '#333' }}>🚫 차단 IP ({pageInfo.totalElements})</h2>
-      <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead style={{ backgroundColor: '#f8f9fa' }}>
-          <tr>
-            <th>원인 위협</th>
-            <th>원본 로그</th>
-            <th>IP 주소</th>
-            <th>차단 사유</th>
-            <th>위험도</th>
-          </tr>
-        </thead>
-        <tbody>
-          {blacklists.map(b => (
-            <tr key={b.id} style={{ textAlign: 'center' }}>
-              <td>
-                {b.sourceThreatId !=null
-                ? `#${b.sourceThreatId}`
-                : '-'
-              }
-              </td>
-              <td>
-                {b.logId !=null ? (
-                <button
-                  type="button"
-                  onClick={() => onViewLog(b.logId)}
-                  title = {`원본 로그 #${b.logId} 보기`}
-                  aria-label = {`원본 로그 #${b.logId} 보기`}
-                >
-                    #{b.logId}
-                </button>  
-                ) : b.sourceThreatId != null ?(
-                  `원본 로그 없음`
-                ) : (
-                  `수동 등록`
-                )}
-              </td>
+      <form className="data-filters" onSubmit={handleSubmit}>
+        <label className="data-field data-field--wide">
+          <span>IP 주소</span>
+          <input
+            name="ip"
+            value={form.ip}
+            onChange={handleChange}
+            placeholder="예: 192.168.0.1"
+          />
+        </label>
 
-              <td style={{ fontWeight: 'bold' }}>{b.ipAddress}</td>
-              <td>{b.reason}</td>
-              <td
-                style = {{
-                  color: b.dangerLevel >=4 ? 'red' : 'orange',
-                  fontWeight: 'bold',
-                }}
-              >
-                {getDangerLevelLabel(b.dangerLevel)} ({b.dangerLevel})
-                </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-           {/* 페이지 버튼 */}
-      <div style = {{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: "12px",
-        marginTop:"16px",
-      }}>
-        <button
-          type = "button"
-          title = "이전 페이지"
-          aria-label='이전 페이지'
-          disabled= {pageInfo.number === 0}
-          onClick={() =>
-            onPageChange(pageInfo.number-1)
-          }
-          style={{width: "36px",height:"36px"}}
-        >
-          {"<"}
-        </button>
+        <label className="data-field">
+          <span>위험도</span>
+          <select
+            name="dangerLevel"
+            value={form.dangerLevel}
+            onChange={handleChange}
+          >
+            <option value="">전체 위험도</option>
+            {[1, 2, 3, 4, 5].map(level => (
+              <option key={level} value={level}>
+                {DANGER_LEVELS[level].label} ({level})
+              </option>
+            ))}
+          </select>
+        </label>
 
-          <span>
-            {pageInfo.totalPages === 0
-              ? 0
-              : pageInfo.number +1}
-            {" / "}
-            {pageInfo.totalPages}
-          </span>
+        <div className="data-filters__actions">
+          <button
+            type="submit"
+            className="dashboard-button dashboard-button--primary"
+          >
+            검색
+          </button>
 
           <button
-            type = "button"
-            title='다음 페이지'
-            aria-label='다음 페이지'
-            disabled={
-              pageInfo.number+1 >= pageInfo.totalPages
-             }
-             onClick={ () =>
-                onPageChange(pageInfo.number+1)
-             }
-             style={{width: "36px",height:"36px"}}
+            type="button"
+            className="dashboard-button dashboard-button--secondary"
+            onClick={handleReset}
           >
-            {">"}
+            초기화
           </button>
-             
-          <span>전체 {pageInfo.totalElements}건</span>
+        </div>
+      </form>
+
+      <div
+        className="data-table-scroll"
+        role="region"
+        aria-label="차단 목록 데이터 표"
+        tabIndex={0}
+      >
+        <table className="data-table data-table--blacklist">
+          <colgroup>
+            <col className="data-column-ip" />
+            <col className="data-column-id" />
+            <col className="data-column-reference" />
+            <col />
+            <col className="data-column-severity" />
+          </colgroup>
+
+          <thead>
+            <tr>
+              <th scope="col">IP 주소</th>
+              <th scope="col">원인 위협</th>
+              <th scope="col">원본 로그</th>
+              <th scope="col">등록 사유</th>
+              <th scope="col">위험도</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {blacklists.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="data-empty">
+                  표시할 차단 목록이 없습니다.
+                  검색하거나 전체 데이터를 새로고침해주세요.
+                </td>
+              </tr>
+            ) : (
+              blacklists.map(entry => {
+                const danger = DANGER_LEVELS[entry.dangerLevel];
+
+                return (
+                  <tr key={entry.id}>
+                    <td className="data-mono data-ip">
+                      {entry.ipAddress || '—'}
+                    </td>
+
+                    <td className="data-muted">
+                      {entry.sourceThreatId != null
+                        ? `#${entry.sourceThreatId}`
+                        : '—'}
+                    </td>
+
+                    <td>
+                      {entry.logId != null ? (
+                        <button
+                          type="button"
+                          className="data-reference-button"
+                          onClick={() => onViewLog(entry.logId)}
+                          aria-label={`원본 로그 ${entry.logId} 상세 보기`}
+                        >
+                          #{entry.logId}
+                        </button>
+                      ) : (
+                        <span className="data-muted">
+                          {entry.sourceThreatId != null
+                            ? '원본 로그 없음'
+                            : '수동 등록'}
+                        </span>
+                      )}
+                    </td>
+
+                    <td className="data-description">
+                      {entry.reason || '—'}
+                    </td>
+
+                    <td>
+                      <span
+                        className={`data-badge data-badge--${
+                          danger?.tone ?? 'neutral'
+                        }`}
+                      >
+                        {danger
+                          ? `${danger.label} (${entry.dangerLevel})`
+                          : '미지정'}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
 
+      <TablePagination
+        pageInfo={pageInfo}
+        itemCount={blacklists.length}
+        onPageChange={onPageChange}
+        label="차단 목록"
+      />
     </section>
   );
 }

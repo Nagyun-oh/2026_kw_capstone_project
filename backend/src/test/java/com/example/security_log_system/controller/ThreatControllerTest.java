@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,7 +71,7 @@ public class ThreatControllerTest {
                 .severity("CRITICAL")
                 .description("SQL injection pattern detected")
                 .checked(false)
-                .detectedAt(LocalDateTime.now())
+                .detectedAt(OffsetDateTime.parse("2026-10-07T02:57:52Z"))
                 .build();
 
         Page<ThreatResponseDto> result = new PageImpl<>(List.of(threat),pageable,1);

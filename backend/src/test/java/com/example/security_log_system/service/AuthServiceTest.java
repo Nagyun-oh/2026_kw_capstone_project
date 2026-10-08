@@ -1,10 +1,10 @@
 package com.example.security_log_system.service;
 
 
-import com.example.security_log_system.dto.LogRequestDto;
+import com.example.security_log_system.dto.AuthRequestDto;
 import com.example.security_log_system.entity.AdminUser;
 import com.example.security_log_system.repository.AdminUserRepository;
-import com.example.security_log_system.security.JwtUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,20 +12,25 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.List;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-/*
-    AuthServiceTest
-    - 로그인 성공 시 JWT 반환
-    - 유저 없음 → Optional.empty()
-    - 비밀번호 불일치 → Optional.empty()
-    - 관리자 등록 성공 시 저장
-    - 중복 아이디면 저장하지 않음
-* */
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
@@ -36,78 +41,97 @@ public class AuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private JwtUtil jwtUtil;
-
     @InjectMocks
     private AuthService authService;
 
-    @Test
-    @DisplayName("유효한 로그인 정보 입력 시 JWT 토큰을 반환한다")
-    void login_whenValidCredentials_thenReturnToken() {
-        LogRequestDto request = loginRequest("admin","1234");
+    @Mock
+    private AuthenticationManager authenticationManager;
 
-        AdminUser user = AdminUser.builder()
-                .username("admin")
-                .password("encoded-password")
-                .role("ROLE_ADMIN")
-                .build();
+    @Mock
+    private SessionAuthenticationStrategy sessionAuthenticationStrategy;
 
-        when(adminUserRepository.findByUsername("admin")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("1234","encoded-password")).thenReturn(true);
-        when(jwtUtil.generateToken("admin")).thenReturn("jwt-token");
+    @Mock
+    private SecurityContextRepository securityContextRepository;
 
-        Optional<String> result = authService.login(request);
-
-        assertThat(result).contains("jwt-token");
-
-        verify(adminUserRepository).findByUsername("admin");
-        verify(passwordEncoder).matches("1234","encoded-password");
-        verify(jwtUtil).generateToken("admin");
+    @AfterEach
+    void tearDown(){
+        SecurityContextHolder.clearContext();
     }
 
     @Test
-    @DisplayName("존재하지 않는 사용자로 로그인 시 빈 Optional을 반환하고 인증을 중단한다")
-    void login_whenUserNotFound_thenReurnEmpty() {
-        LogRequestDto request = loginRequest("unknown","1234");
+    @DisplayName("로그인 성공 시 세션 보호 처리 후 인증 정보를 저장한다")
+    void loginWithSession_whenSuccess_thenSaveContext(){
+        AuthRequestDto loginRequest = loginRequest("admin","1234");
 
-        when(adminUserRepository.findByUsername("unknown")).thenReturn(Optional.empty());
+        var request = new MockHttpServletRequest();
+        var response = new MockHttpServletResponse();
 
-        Optional<String>result = authService.login(request);
+        var authentication = UsernamePasswordAuthenticationToken.authenticated(
+                "admin",
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
-        assertThat(result).isEmpty();
+        when(authenticationManager.authenticate(any()))
+                .thenReturn(authentication);
 
-        verify(adminUserRepository).findByUsername("unknown");
-        verifyNoInteractions(passwordEncoder,jwtUtil);
+        var result = authService.loginWithSession(
+                loginRequest,
+                request,
+                response
+        );
+
+        assertThat(result).isSameAs(authentication);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isSameAs(authentication);
+
+        ArgumentCaptor<SecurityContext> contextCaptor =
+                ArgumentCaptor.forClass(SecurityContext.class);
+
+        var order = inOrder(
+                sessionAuthenticationStrategy,
+                securityContextRepository
+        );
+
+        order.verify(sessionAuthenticationStrategy)
+                .onAuthentication(authentication,request,response);
+
+        order.verify(securityContextRepository)
+                .saveContext(
+                        contextCaptor.capture(),
+                        same(request),
+                        same(response)
+                );
+
+        assertThat(contextCaptor.getValue().getAuthentication()).isSameAs(authentication);
     }
 
     @Test
-    @DisplayName("로그인 시 비밀번호가 일치하지 않으면 빈 Optional을 반환하고 JWT를 생성하지 않는다")
-    void login_whenPasswordMismatch_thenReturnEmpty(){
-        LogRequestDto request = loginRequest("admin","wrong-password");
+    @DisplayName("인증 실패 시 세션 보호 처리와 인증 정보 저장을 수행하지 않는다")
+    void loginWithSession_whenFailed_thenDoNotSaveContext(){
 
-        AdminUser user = AdminUser.builder()
-                .username("admin")
-                .password("encoded-password")
-                .role("ROLE_ADMIN")
-                .build();
+        AuthRequestDto loginRequest =
+                loginRequest("admin","wrong-password");
 
-        when(adminUserRepository.findByUsername("admin")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("wrong-password","encoded-password")).thenReturn(false);
+        var request = new MockHttpServletRequest();
+        var response = new MockHttpServletResponse();
 
-        Optional<String> result = authService.login(request);
+        when(authenticationManager.authenticate(any()))
+                .thenThrow(new BadCredentialsException("Bad credentials"));
 
-        assertThat(result).isEmpty();
+        assertThatThrownBy(() ->
+                authService.loginWithSession(
+                        loginRequest,
+                        request,
+                        response
+                )
+        ).isInstanceOf(BadCredentialsException.class);
 
-        verify(adminUserRepository).findByUsername("admin");
-        verify(passwordEncoder).matches("wrong-password","encoded-password");
-        verifyNoInteractions(jwtUtil);
+        verifyNoInteractions(sessionAuthenticationStrategy,securityContextRepository);
     }
 
     @Test
     @DisplayName("회원가입시 사용자 이름이 중복되지 않으면 비밀번호를 암호화하여 관리자를 저장하고 true를 반환한다")
     void registerAdmin_whenUsernameNotExists_thenSaveUserAndReturnTrue(){
-        LogRequestDto request = loginRequest("admin","1234");
+        AuthRequestDto request = loginRequest("admin","1234");
 
         when(adminUserRepository.findByUsername("admin")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("1234")).thenReturn("encoded-password");
@@ -128,7 +152,7 @@ public class AuthServiceTest {
     @Test
     @DisplayName("회원가입시 사용자 이름이 이미 존재하면 관리자를 저장하지 않고 false를 반환한다")
     void registerAdmin_whenUsernameExists_thenReturnFalse() {
-        LogRequestDto request = loginRequest("admin","1234");
+        AuthRequestDto request = loginRequest("admin","1234");
 
         AdminUser existingUser = AdminUser.builder()
                 .username("admin")
@@ -148,8 +172,8 @@ public class AuthServiceTest {
 
     }
 
-    private LogRequestDto loginRequest(String username, String password) {
-        LogRequestDto request = new LogRequestDto();
+    private AuthRequestDto loginRequest(String username, String password) {
+        AuthRequestDto request = new AuthRequestDto();
         ReflectionTestUtils.setField(request, "username", username);
         ReflectionTestUtils.setField(request, "password", password);
         return request;

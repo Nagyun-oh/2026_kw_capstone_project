@@ -1,11 +1,14 @@
 package com.example.security_log_system.config;
 
+import com.example.security_log_system.security.SessionWebSocketHandlerDecorator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import com.example.security_log_system.security.SessionWebSocketHandshakeInterceptor;
+import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
 import java.util.List;
 
@@ -21,7 +24,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     // 프론트엔드가 WebSocket 연결을 시작할 주소를 등록하는 메서드
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry){
-        registry.addEndpoint("/ws-security")             // 리액트가 접속할 주소
+        registry.addEndpoint("/ws-security")
+                .addInterceptors(new SessionWebSocketHandshakeInterceptor())
                 .setAllowedOrigins(allowedOrigins.toArray(new String[0]))    // CORS 허용
                 .withSockJS();
     }
@@ -31,5 +35,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry){
         registry.enableSimpleBroker("/topic");  // React가 서버 알림을 구독할 때
         registry.setApplicationDestinationPrefixes("/app");    // React가 서버로 보낼 때
+    }
+
+    @Override
+    public void configureWebSocketTransport(
+            WebSocketTransportRegistration registration
+    ){
+        registration.addDecoratorFactory(
+                handler -> new SessionWebSocketHandlerDecorator(handler)
+        );
     }
 }
