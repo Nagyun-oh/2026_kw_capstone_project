@@ -57,9 +57,8 @@
 | 22 | SSH 관리 | 관리자 공인 IPv4/32 |
 | 80 | 인증서 HTTP-01 검증 및 HTTPS 리다이렉트 | 0.0.0.0/0 |
 | 443 | HTTPS 대시보드 | 접속을 허용할 사용자 공인 IPv4/32 |
-| 8081 | WAF → JuiceShop | 테스트 참여자 공인 IPv4/32 |
 
-프론트의 3000번은 `127.0.0.1:3000:80`으로 바인딩한다. 외부 브라우저는 443번에 접속하고, 호스트 Nginx가 EC2 내부에서 3000번으로 전달한다. HTTPS 화면 접속 확인 후 기존 3000번 인바운드 규칙을 제거한다. 80번 전체 허용은 **WAF를 8081번으로 이동한 뒤** 적용한다.
+WAF의 8081번은 `127.0.0.1:8081:8080`으로 바인딩하므로 보안 그룹에서 8081 인바운드 규칙을 두지 않는다(기존 규칙은 삭제). 프론트의 3000번은 `127.0.0.1:3000:80`으로 바인딩한다. 외부 브라우저는 443번에 접속하고, 호스트 Nginx가 EC2 내부에서 3000번으로 전달한다. HTTPS 화면 접속 확인 후 기존 3000번 인바운드 규칙을 제거한다. 80번 전체 허용은 **WAF를 8081번으로 이동한 뒤** 적용한다.
 
 `192.168.x.x`, 핫스팟의 `172.20.10.x` 같은 사설 IP를 입력하지 않는다. 팀원은 실제 접속할 PC에서 공인 IPv4를 확인한다. Wi-Fi·VPN·핫스팟 변경 시 다시 확인한다. DB·Kafka·AI·백엔드 포트를 외부에 추가 개방하지 않는다.
 
@@ -101,9 +100,12 @@ sudo docker compose version
                    ├─ /api/        → backend:8080
                    └─ /ws-security → backend:8080
 
-테스트 요청 → http://security-monitor-kw.duckdns.org:8081
-             → WAF → JuiceShop
+테스트 요청 → https://<JuiceShop용 호스트명> (호스트 Nginx, TLS 종료)
+             → http://127.0.0.1:8081
+               → WAF → JuiceShop
 ```
+
+WAF는 Docker 게이트웨이(`WAF_TRUSTED_PROXY`)를 거친 호스트 Nginx의 `X-Forwarded-For`를 실제 클라이언트 IP로 복원하여 로그의 `remote_addr`에 기록한다. 8081번을 외부에 열면 헤더 위조가 가능하므로 loopback 바인딩을 유지한다.
 
 DuckDNS의 `current ip`에는 **EC2의 현재 공인 IPv4**를 등록한다. 보안 그룹 소스에는 **접속자의 공인 IPv4**를 넣는다. DuckDNS 토큰은 공유하거나 Git에 저장하지 않는다. EC2 주소가 변경되면 DNS 레코드를 갱신해야 하며, 자동 갱신은 별도 구성이다.
 
@@ -112,6 +114,27 @@ DuckDNS의 `current ip`에는 **EC2의 현재 공인 IPv4**를 등록한다. 보
 ```powershell
 Resolve-DnsName -Name "security-monitor-kw.duckdns.org" -Type A
 ```
+
+#### JuiceShop용 호스트 Nginx 설정과 WAF_TRUSTED_PROXY
+
+`.env.aws`에 게이트웨이 주소를 설정한다(`aws.env.example` 참고).
+
+```bash
+docker network inspect security-platform-aws_default -f '{{(index .IPAM.Config 0).Gateway}}'
+# 출력값을 .env.aws의 WAF_TRUSTED_PROXY=<값> 으로 기록
+```
+
+호스트 Nginx의 JuiceShop 서버 블록에서 클라이언트가 보낸 `X-Forwarded-For`를 덮어쓴다.
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:8081;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $remote_addr;
+}
+```
+
+`sudo nginx -t && sudo systemctl reload nginx` 후 WAF 컨테이너를 재생성한다. 검증: 브라우저 접속 시 로그에 본인 공인 IP가 남고, `curl -H "X-Forwarded-For: 1.2.3.4" ...`를 보내도 `1.2.3.4`가 기록되지 않으며, `curl http://<EC2 IP>:8081/`은 실패해야 한다. 기존 DB 기록은 변경되지 않는다.
 
 ### 2-2. 호스트 Nginx와 인증서 최초 설정
 
@@ -392,7 +415,7 @@ curl -I http://127.0.0.1:3000/
 브라우저 접속 주소:
 
 - 대시보드: `https://security-monitor-kw.duckdns.org`
-- WAF → JuiceShop: `http://security-monitor-kw.duckdns.org:8081`
+- WAF → JuiceShop: 호스트 Nginx에 구성한 JuiceShop용 HTTPS 주소(8081 직접 접속 불가)
 
 새 인증 이미지 배포 후 브라우저 개발자 도구에서 다음을 검증한다. 쿠키 값·CSRF 토큰·비밀번호를 캡처나 문서에 포함하지 않는다.
 
