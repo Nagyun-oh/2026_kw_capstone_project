@@ -150,9 +150,14 @@ services:
         juiceshop:
           condition: service_started
       ports:
-        - "8081:8080"
+        # 호스트 Nginx만 접근하도록 loopback에 바인딩한다. 외부에 열린 채로 X-Forwarded-For를
+        # 신뢰하면 클라이언트가 IP를 위조할 수 있으므로 127.0.0.1 바인딩을 유지해야 한다.
+        - "127.0.0.1:8081:8080"
       environment:
         BACKEND: http://juiceshop:3000
+        # 신뢰할 프록시(Docker 게이트웨이를 거친 호스트 Nginx)가 보낸 X-Forwarded-For만 실제 IP로 복원한다.
+        SET_REAL_IP_FROM: ${WAF_TRUSTED_PROXY:?WAF_TRUSTED_PROXY is required}
+        REAL_IP_HEADER: X-Forwarded-For
         PORT: "8080"
         MODSEC_RULE_ENGINE: DetectionOnly
         MODSEC_AUDIT_LOG: /var/log/nginx/waf-audit.log
