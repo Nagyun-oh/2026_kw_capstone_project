@@ -19,7 +19,7 @@ function BlacklistTable({
 }) {
   const [form, setForm] = useState({
     ip: '',
-    dangerLevel: '',
+    severity: '',
   });
 
   const handleChange = event => {
@@ -37,7 +37,7 @@ function BlacklistTable({
   };
 
   const handleReset = () => {
-    setForm({ ip: '', dangerLevel: '' });
+    setForm({ ip: '', severity: '' });
     onReset();
   };
 
@@ -68,14 +68,14 @@ function BlacklistTable({
         <label className="data-field">
           <span>위험도</span>
           <select
-            name="dangerLevel"
-            value={form.dangerLevel}
+            name="severity"
+            value={form.severity}
             onChange={handleChange}
           >
             <option value="">전체 위험도</option>
-            {[1, 2, 3, 4, 5].map(level => (
-              <option key={level} value={level}>
-                {DANGER_LEVELS[level].label} ({level})
+            {['MEDIUM','HIGH','CRITICAL'].map(severity => (
+              <option key={severity} value={severity}>
+                {severity}
               </option>
             ))}
           </select>
@@ -177,9 +177,7 @@ function BlacklistTable({
                           danger?.tone ?? 'neutral'
                         }`}
                       >
-                        {danger
-                          ? `${danger.label} (${entry.dangerLevel})`
-                          : '미지정'}
+                        {danger?.label ?? '미지정'}
                       </span>
                     </td>
                   </tr>
