@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -34,6 +35,21 @@ public final class BlacklistSpecification {
                 ));
             }
 
+            if(StringUtils.hasText(condition.getSeverity())){
+                String severity = condition.getSeverity().toUpperCase(Locale.ROOT);
+
+                switch(severity){
+                    case "MEDIUM" ->
+                            predicates.add(root.get("dangerLevel").in(1,2));
+                    case "HIGH" ->
+                            predicates.add(root.get("dangerLevel").in(3));
+                    case "CRITICAL" ->
+                            predicates.add(root.get("dangerLevel").in(4,5));
+                    default ->
+                            throw new IllegalArgumentException("Invalid severity");
+                }
+
+            }
           return builder.and(predicates.toArray(Predicate[]::new));
         };
     }

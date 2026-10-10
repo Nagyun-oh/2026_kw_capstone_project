@@ -17,7 +17,7 @@ function useSecurityData() {
 
   const EMPTY_BLACKLIST_SEARCH = {
     ip: "",
-    dangerLevel: "",
+    severity: "",
   };
 
   const [logSearch,setLogSearch] = useState(EMPTY_LOG_SEARCH);
@@ -136,8 +136,8 @@ function useSecurityData() {
     if(search.ip.trim()){
       params.ip = search.ip.trim();
     }
-    if(search.dangerLevel !== ""){
-      params.dangerLevel = Number(search.dangerLevel);
+    if(search.severity !== ""){
+      params.severity = search.severity;
     }
 
     apiClient.get(
