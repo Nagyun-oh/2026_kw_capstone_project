@@ -93,6 +93,15 @@ Request  (Spring → FastAPI): method, url_path, query_params, body_content, use
 Response (FastAPI → Spring): threat_score, ip_address, reason, log_id
 ```
 
+입력 처리 규칙:
+
+- 트랜스포머 입력 상한(`security_ai/serving/schemas.py`의 `PredictRequest`)을 넘는 필드는 상한까지 잘라 판정합니다.
+  예전에는 검증 오류로 판정 전체가 버려져 결과가 발행되지 않았습니다. 트리·스키마 모델과 규칙 게이트는 원본 값을 씁니다.
+- User-Agent가 상한(4,096자)을 넘으면 그 자체를 공격 사유(`비정상적으로 긴 User-Agent`)로 판정합니다.
+- 형식이 잘못된 `ip_address`는 트랜스포머에 빈 값으로 넘기고 판정을 계속합니다.
+- `ai-request-topic`에서 JSON이 아니거나 값이 비어 있는 메시지는 로그(`[Kafka AI Error] JSON이 아닌 메시지 건너뜀`)를 남기고 건너뜁니다.
+  예전에는 이런 메시지 한 건이 같은 메시지를 무한히 다시 읽게 만들어 소비 전체가 멈췄습니다.
+
 ## 6. 학습에 사용한 데이터셋
 
 `AI_v0/data/`, `AI/data/`에 여러 공개 데이터셋 원본이 있지만, 실제로 학습(train/validation/test)에
