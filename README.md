@@ -20,7 +20,7 @@
 
 ## 시스템 아키텍처
 
-<img src="docs/images/architecure_img.png" alt="시스템 아키텍처" width="800" height="400">
+<img src="docs/images/ArchitecureImg.png" alt="시스템 아키텍처" width="800" height="400">
 
 ## 기술 스택
 
