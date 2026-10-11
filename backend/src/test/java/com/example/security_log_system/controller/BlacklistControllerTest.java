@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -202,7 +203,7 @@ public class BlacklistControllerTest {
                 .ipAddress("192.168.0.10")
                 .reason("Repeated attack")
                 .dangerLevel(4)
-                .createdAt(LocalDateTime.now())
+                .createdAt(OffsetDateTime.parse("2026-10-07T02:57:52Z"))
                 .build();
 
         Page<BlacklistResponseDto> result =

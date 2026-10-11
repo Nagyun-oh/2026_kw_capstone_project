@@ -2,7 +2,6 @@ package com.example.security_log_system.controller;
 
 import com.example.security_log_system.exception.GlobalExceptionHandler;
 import com.example.security_log_system.service.AuthService;
-import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,10 +9,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import java.util.List;
 import java.util.Optional;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,38 +49,53 @@ public class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("로그인 성공 시 JWT 토큰과 200 OK를 반환한다")
+    @DisplayName("로그인 성공 시 사용자 정보와 200 OK를 반환한다")
     void login_whenSuccess_thenReturnToken() throws Exception{
-        when(authService.login(any())).thenReturn(Optional.of("jwt-token"));
+        var authentication =
+                UsernamePasswordAuthenticationToken.authenticated(
+                        "admin",
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                );
+
+        when(authService.loginWithSession(any(),any(),any()))
+                .thenReturn(authentication);
 
         mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {
-                        "username": "admin",
-                        "password": "1234"
-                        }
-                        """))
-        .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("jwt-token"));
+                            "username": "admin",
+                            "password": "1234"
+                        } 
+                        """)
+        ).andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("admin"))
+                .andExpect(jsonPath("$.role").value("ROLE_ADMIN"))
+                .andExpect(jsonPath("$.token").doesNotExist());
 
     }
 
     @Test
     @DisplayName("로그인 실패 시 오류 메시지와 401 Unauthorized를 반환한다")
     void login_whenFailed_thenReturnUnauthorized() throws Exception {
-        when(authService.login(any())).thenReturn(Optional.empty());
+
+        when(authService.loginWithSession(any(),any(),any()))
+                .thenThrow(new BadCredentialsException("Bad credentials"));
 
         mockMvc.perform(post("/api/v1/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "username": "admin",
-                                  "password": "wrong-password"
-                                }
-                                """))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                        """
+                        {
+                            "username": "admin",
+                            "password":"wrong-password"
+                        }
+                        """))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string(containsString("Invalid username or password.")));
+                .andExpect(content().string(
+                        "Invalid username or password."
+                ));
     }
 
     @Test

@@ -155,6 +155,7 @@ jobs:
           KAFKA_DATA_VOLUME: dummy
           ZOOKEEPER_DATA_VOLUME: dummy
           ZOOKEEPER_LOG_VOLUME: dummy
+          WAF_TRUSTED_PROXY: 172.18.0.1
         run: |
           docker compose -f backend/docker-compose.yml config --quiet
           docker compose -f waf/docker-compose.yml config --quiet

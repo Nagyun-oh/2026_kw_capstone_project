@@ -1,6 +1,13 @@
-import React, {useState} from 'react';
+import { useState } from 'react';
+import TablePagination from './TablePagination';
 
-function ThreatTable ( {
+const SEVERITY_TONES = {
+  MEDIUM: 'info',
+  HIGH: 'warning',
+  CRITICAL: 'danger',
+};
+
+function ThreatTable({
   threats,
   isNewThreat,
   pageInfo,
@@ -8,15 +15,14 @@ function ThreatTable ( {
   onSearch,
   onReset,
   onViewLog,
-})
-{
-  const [form,setForm] = useState({
-    threatType: "",
-    severity: "",
+}) {
+  const [form, setForm] = useState({
+    threatType: '',
+    severity: '',
   });
 
   const handleChange = event => {
-    const {name, value} = event.target;
+    const { name, value } = event.target;
 
     setForm(previous => ({
       ...previous,
@@ -29,128 +35,164 @@ function ThreatTable ( {
     onSearch(form);
   };
 
-  const handleReset = () =>{
-    const emptyForm = {threatType: "", severity: ""};
-    setForm(emptyForm);
+  const handleReset = () => {
+    setForm({ threatType: '', severity: '' });
     onReset();
   };
 
-return (
-        <section style={{ 
-          backgroundColor: 'white', padding: '15px', borderRadius: '10px',
-           boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-           border: isNewThreat ? '2px solid red' : '1px solid transparent', 
-           transition: 'all 0.3s ease' }}>
-        <form onSubmit={handleSubmit}>
+  return (
+    <section
+      className={`data-panel${isNewThreat ? ' data-panel--highlight' : ''}`}
+      aria-label="위협 탐지 목록"
+    >
+      <header className="data-panel__header">
+        <div>
+          <div className="data-panel__title">
+            <h2>위협 탐지</h2>
+
+            {isNewThreat && (
+              <span className="data-badge data-badge--danger" role="status">
+                새 알림
+              </span>
+            )}
+          </div>
+
+          <p>탐지된 위협과 위험도를 확인하고 원본 로그를 조회하세요.</p>
+        </div>
+
+        <span className="data-count">
+          목록 기준 {pageInfo.totalElements.toLocaleString('ko-KR')}건
+        </span>
+      </header>
+
+      <form className="data-filters" onSubmit={handleSubmit}>
+        <label className="data-field data-field--wide">
+          <span>탐지 유형</span>
           <input
             name="threatType"
             value={form.threatType}
             onChange={handleChange}
-            placeholder="Threat type"
+            placeholder="예: AI 탐지"
           />
+        </label>
 
+        <label className="data-field">
+          <span>위험도</span>
           <select
             name="severity"
             value={form.severity}
             onChange={handleChange}
           >
-            <option value="">All severity</option>
+            <option value="">전체 위험도</option>
             <option value="MEDIUM">MEDIUM</option>
             <option value="HIGH">HIGH</option>
             <option value="CRITICAL">CRITICAL</option>
           </select>
+        </label>
 
-          <button type="submit">검색</button>
-          <button type="button" onClick={handleReset}>초기화</button>
-        </form>
-
-          <h2 style={{ color: '#d9534f' }}>
-            🚨 위협 탐지 ({pageInfo.totalElements})
-            {isNewThreat && <span style={{ marginLeft: '10px', fontSize: '14px', animation: 'blink 0.5s infinite' }}>● NEW</span>}
-            </h2>
-          <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ backgroundColor: '#fff5f5' }}>
-              <tr>
-                <th>위협 번호</th>
-                <th>원본 로그</th>
-                <th>탐지 유형</th>
-                <th>위험도</th>
-                <th>설명</th>
-                </tr>
-            </thead>
-            <tbody>
-              {threats.map(t => (
-                <tr key={t.id} style={{ textAlign: 'center' }}>
-                   <td>#{t.id}</td>
-                  <td>
-                    {t.logId !=null ? (
-                      <button
-                        type="button"
-                        onClick={() => onViewLog(t.logId)}
-                        title ={`원본 로그 #${t.logId} 보기`}
-                        aria-label ={`원본 로그 #${t.logId} 보기`}
-                      >
-                        #{t.logId}
-                      </button>
-                    ) : (
-                      '-'
-                    )}
-                  </td>
-                  <td>{t.threatType}</td>
-                  <td style={{ color: t.severity === 'CRITICAL' ? 'red' : 'orange' }}>{t.severity}</td>
-                  <td>{t.description}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-      {/* 페이지 버튼 */}
-      <div style = {{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: "12px",
-        marginTop:"16px",
-      }}>
-        <button
-          type = "button"
-          title = "이전 페이지"
-          aria-label='이전 페이지'
-          disabled= {pageInfo.number === 0}
-          onClick={() =>
-            onPageChange(pageInfo.number-1)
-          }
-          style={{width: "36px",height:"36px"}}
-        >
-          {"<"}
-        </button>
-
-          <span>
-            {pageInfo.totalPages === 0
-              ? 0
-              : pageInfo.number +1}
-            {" / "}
-            {pageInfo.totalPages}
-          </span>
+        <div className="data-filters__actions">
+          <button
+            type="submit"
+            className="dashboard-button dashboard-button--primary"
+          >
+            검색
+          </button>
 
           <button
-            type = "button"
-            title='다음 페이지'
-            aria-label='다음 페이지'
-            disabled={
-              pageInfo.number+1 >= pageInfo.totalPages
-             }
-             onClick={ () =>
-                onPageChange(pageInfo.number+1)
-             }
-             style={{width: "36px",height:"36px"}}
+            type="button"
+            className="dashboard-button dashboard-button--secondary"
+            onClick={handleReset}
           >
-            {">"}
+            초기화
           </button>
-             
-          <span>전체 {pageInfo.totalElements}건</span>
+        </div>
+      </form>
+
+      <div
+        className="data-table-scroll"
+        role="region"
+        aria-label="위협 탐지 데이터 표"
+        tabIndex={0}
+      >
+        <table className="data-table data-table--threats">
+          <colgroup>
+            <col className="data-column-id" />
+            <col className="data-column-reference" />
+            <col className="data-column-type" />
+            <col className="data-column-severity" />
+            <col />
+          </colgroup>
+
+          <thead>
+            <tr>
+              <th scope="col">위협 번호</th>
+              <th scope="col">원본 로그</th>
+              <th scope="col">탐지 유형</th>
+              <th scope="col">위험도</th>
+              <th scope="col">탐지 설명</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {threats.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="data-empty">
+                  표시할 위협 기록이 없습니다.
+                  검색하거나 전체 데이터를 새로고침해주세요.
+                </td>
+              </tr>
+            ) : (
+              threats.map(threat => (
+                <tr key={threat.id}>
+                  <td className="data-muted">#{threat.id}</td>
+
+                  <td>
+                    {threat.logId != null ? (
+                      <button
+                        type="button"
+                        className="data-reference-button"
+                        onClick={() => onViewLog(threat.logId)}
+                        aria-label={`원본 로그 ${threat.logId} 상세 보기`}
+                      >
+                        #{threat.logId}
+                      </button>
+                    ) : (
+                      <span className="data-muted">연결 없음</span>
+                    )}
+                  </td>
+
+                  <td className="data-description">
+                    {threat.threatType || '—'}
+                  </td>
+
+                  <td>
+                    <span
+                      className={`data-badge data-badge--${
+                        SEVERITY_TONES[threat.severity] ?? 'neutral'
+                      }`}
+                    >
+                      {threat.severity || '미지정'}
+                    </span>
+                  </td>
+
+                  <td className="data-description">
+                    {threat.description || '—'}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
-        </section>
-)
+
+      <TablePagination
+        pageInfo={pageInfo}
+        itemCount={threats.length}
+        onPageChange={onPageChange}
+        label="위협 탐지"
+      />
+    </section>
+  );
 }
 
 export default ThreatTable;

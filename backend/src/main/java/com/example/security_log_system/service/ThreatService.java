@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.security_log_system.util.UtcDateTime;
 
 import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public class ThreatService {
                 .threatType(threatDto.getThreatType())
                 .severity(mapRiskLevelToSeverity(threatDto.getDangerLevel()))
                 .description(threatDto.getDescription())
+                .detectedAt(UtcDateTime.now())
                 .build();
 
         DetectedThreat savedThreat = threatRepository.save(threat);
@@ -90,7 +92,7 @@ public class ThreatService {
                 .threatType("AI Detection")
                 .severity(aiResponse.getThreatScore() >= 0.8 ? "CRITICAL" : "HIGH")
                 .description(aiResponse.getReason())
-                .detectedAt(LocalDateTime.now())
+                .detectedAt(UtcDateTime.now())
                 .build();
 
         DetectedThreat savedThreat = threatRepository.save(threat);

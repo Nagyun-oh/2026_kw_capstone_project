@@ -1,11 +1,11 @@
 package com.example.security_log_system.service;
 
+import com.example.security_log_system.util.UtcDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class NotificationService {
         payload.put("ip",ip);
         payload.put("type",type);
         payload.put("level",level);
-        payload.put("time", LocalDateTime.now());
+        payload.put("time", UtcDateTime.toOffset(UtcDateTime.now()));
 
         messagingTemplate.convertAndSend("/topic/threats",payload);
     }

@@ -1,9 +1,11 @@
 package com.example.security_log_system.dto;
 
 import com.example.security_log_system.entity.LogEntry;
+import com.example.security_log_system.util.UtcDateTime;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @Builder
@@ -15,7 +17,7 @@ public class LogResponseDto {
     private String requestUrl;
     private int statusCode;
     private String rawLog;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
     public static LogResponseDto from(LogEntry logEntry){
         return LogResponseDto.builder()
@@ -25,7 +27,7 @@ public class LogResponseDto {
                 .requestUrl(logEntry.getRequestUrl())
                 .statusCode(logEntry.getStatusCode())
                 .rawLog(logEntry.getRawLog())
-                .createdAt(logEntry.getCreatedAt())
+                .createdAt(UtcDateTime.toOffset(logEntry.getCreatedAt()))
                 .build();
     }
 }

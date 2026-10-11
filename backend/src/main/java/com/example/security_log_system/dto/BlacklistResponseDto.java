@@ -2,10 +2,12 @@ package com.example.security_log_system.dto;
 
 import com.example.security_log_system.entity.DetectedThreat;
 import com.example.security_log_system.entity.IpBlacklist;
+import com.example.security_log_system.util.UtcDateTime;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 
 @Getter
@@ -18,8 +20,8 @@ public class BlacklistResponseDto {
     private String ipAddress;
     private String reason;
     private int dangerLevel;
-    private LocalDateTime createdAt;
-    private LocalDateTime expiredAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime expiredAt;
 
     /*
      IpBlacklist Entity
@@ -41,8 +43,8 @@ public class BlacklistResponseDto {
                 .ipAddress(blacklist.getIpAddress())
                 .reason(blacklist.getReason())
                 .dangerLevel(blacklist.getDangerLevel())
-                .createdAt(blacklist.getCreatedAt())
-                .expiredAt(blacklist.getExpiredAt())
+                .createdAt(UtcDateTime.toOffset(blacklist.getCreatedAt()))
+                .expiredAt(UtcDateTime.toOffset(blacklist.getExpiredAt()))
                 .build();
     }
 

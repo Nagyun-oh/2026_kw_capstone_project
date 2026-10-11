@@ -34,14 +34,6 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
-  # 프로젝트에서 정의한 JWT 설정
-  # spring 하위가 아닌 최상위에 배치
-security:
-  jwt:
-    secret: ${JWT_SECRET}
-    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
-
-
 management:
   # 기본적으로 상태 확인 endpoint만 HTTP로 노출
   endpoints:
@@ -64,3 +56,13 @@ management:
 
 server:
   port: ${SERVER_PORT:8080}
+  servlet:
+    session:
+      timeout: 30m              # HTTP 세션의 비활성 만료 시간
+      tracking-modes: cookie    # 세션 ID를 URL에 붙이는 방식 사용 x
+      cookie:
+        name: JSESSIONID
+        path: /
+        http-only: true         # JavaScript가 세션 쿠키를 직접 읽지 못하도록 설정
+        same-site: lax          # 다른 사이트에서 보내는 요청의 쿠키 전송 제한
+        secure: ${SESSION_COOKIE_SECURE:true}            # HTTPS 연결에서만 쿠키 전송

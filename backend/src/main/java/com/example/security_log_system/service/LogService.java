@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
+import com.example.security_log_system.util.UtcDateTime;
 
 @Slf4j
 @Transactional
@@ -153,7 +154,7 @@ public class LogService {
                 .requestUrl(fullPath)
                 .statusCode(statusCode)
                 .rawLog(jsonNode.toString())
-                .createdAt(LocalDateTime.now())
+                .createdAt(UtcDateTime.now())
                 .build());
 
         // AI 요청 DTO 생성
