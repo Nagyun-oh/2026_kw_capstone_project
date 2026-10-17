@@ -35,6 +35,7 @@ services:
       - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template
       # 모든 요청 헤더를 JSON으로 직렬화하는 njs 스크립트
       - ./njs:/etc/nginx/njs
+      - ./modsecurity.conf.template:/etc/nginx/templates/conf.d/modsecurity.conf.template
     extra_hosts:
       # 컨테이너에서 Windows/호스트 머신의 localhost 서비스에 접근하기 위한 별칭
       - "host.docker.internal:host-gateway"

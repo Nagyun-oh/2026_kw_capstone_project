@@ -171,6 +171,7 @@ services:
         - ./waf/logs:/var/log/nginx
         - ./waf/nginx-logging.conf.template:/etc/nginx/templates/conf.d/logging.conf.template
         - ./waf/nginx.conf.template:/etc/nginx/templates/nginx.conf.template
+        - ./waf/modsecurity.conf.template:/etc/nginx/templates/conf.d/modsecurity.conf.template
         - ./waf/njs:/etc/nginx/njs
 
 
