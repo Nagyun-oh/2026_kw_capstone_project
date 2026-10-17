@@ -13,6 +13,7 @@ waf/
   logs/                           # Nginx access/error 및 ModSecurity 감사 로그
   fluent-bit.conf                 # access.log/감사 로그 -> Kafka 전송 설정
   waf-detection.lua               # 감사 JSON에서 탐지 필드만 추출
+  modsecurity.conf.template       # ModSecurity 거래 ID를 nginx $request_id로 지정
   parsers.conf                    # 로그 파서
   scripts/rotate-logs.sh           # 삭제/압축 없는 로그 교체, --dry-run 지원
   scripts/rotation.cron.example    # 12시간 간격 예약 예시 (기본 비활성)
@@ -47,6 +48,27 @@ Nginx는 `/var/log/nginx/access.log`에 완료된 요청을 기록합니다. Mod
 ```text
 WAF/Nginx access.log -> Fluent Bit -> Kafka topic(log-topic) -> AI 분석
 ModSecurity waf-audit.log -> Fluent Bit 탐지 필터 -> Kafka topic(waf-detection-topic)
+```
+
+### 요청 ID (`request_id`)
+
+같은 요청의 `access.log`와 탐지 이벤트를 연결하려고 두 곳에 같은 ID를 남깁니다.
+
+- `nginx-logging.conf.template`: access.log JSON에 `"request_id":"$request_id"`를 추가합니다. Fluent Bit 설정 변경 없이 `log-topic` 메시지에 포함됩니다.
+- `modsecurity.conf.template`: `modsecurity_transaction_id "$request_id";`로 ModSecurity의 `unique_id`를 nginx `$request_id`와 같게 만듭니다. 이 설정이 없으면 `unique_id`가 `179221680893.343331` 같은 별도 값이 되어 서로 연결할 수 없습니다. `waf-detection-topic`의 `request_id`는 이 `unique_id`입니다.
+
+이 이미지는 `conf.d/modsecurity.conf.template`을 기본 제공하므로, 같은 경로로 마운트해 덮어씁니다. 마운트를 추가했으므로 적용하려면 `restart`가 아니라 컨테이너 재생성이 필요합니다.
+
+```bash
+docker compose -f waf/docker-compose.yml -f targets/juiceshop/docker-compose.yml up -d --force-recreate waf
+```
+
+ID는 변경 적용 이후의 새 요청부터 붙고, 기존 로그에는 없습니다. 같은 값인지 확인하는 방법:
+
+```bash
+curl -H "X-Sample-Id: t1" "http://localhost/rest/products/search?q=%27%20OR%20%271%27%3D%271"
+grep t1 waf/logs/access.log      # request_id
+grep t1 waf/logs/waf-audit.log   # transaction.unique_id (같은 값이어야 함)
 ```
 
 확인 명령:
