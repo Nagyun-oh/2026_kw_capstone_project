@@ -21,6 +21,9 @@ public class LogEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "request_id",length = 255, unique=true)
+    private String requestId;
+
     private String ipAddress;       // 접속한 IP
     private String requestMethod;   // GET, POST 등
     private String requestUrl;      // 접속 경로

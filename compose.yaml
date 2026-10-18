@@ -92,6 +92,8 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
       SESSION_COOKIE_SECURE: "false"
+      WAF_CONSUMER_ENABLED: ${WAF_CONSUMER_ENABLED:-false}
+      WAF_EVENT_ZONE: ${WAF_EVENT_ZONE:-UTC}
   # ────────────────── React + Nginx ──────────────────────
   frontend:
     build:

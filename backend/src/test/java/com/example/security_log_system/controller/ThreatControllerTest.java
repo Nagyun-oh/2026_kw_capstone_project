@@ -202,11 +202,25 @@ public class ThreatControllerTest {
     void getThreats_whenSeverityIsInvalid_thenReturnBadRequest() throws Exception{
 
         mockMvc.perform(get("/api/v1/threats")
-                .param("severity","UNKNOWN"))
+                .param("severity","INVALID"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.severity")
                         .value("Invalid severity."));
 
+        verifyNoInteractions(threatService);
+    }
+
+    @Test
+    @DisplayName("지원하지 않는 탐지 출처로 검색하면 400을 반환한다")
+    void getThreats_whenSourceIsInvalid_thenReturnBadRequest() throws Exception {
+
+        mockMvc.perform(
+                get("/api/v1/threats")
+                        .param("source","INVALID")
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.source")
+                        .value("Source must be AI or WAF."));
         verifyNoInteractions(threatService);
     }
 
@@ -231,10 +245,6 @@ public class ThreatControllerTest {
 
         verifyNoInteractions(threatService);
     }
-
-
-
-
 }
 
  /*   정상 조회:

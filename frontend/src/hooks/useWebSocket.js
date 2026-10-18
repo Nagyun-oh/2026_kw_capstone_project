@@ -18,6 +18,10 @@ function useWebSocket(onThreatReceived) {
   // 강조 효과 해제를 위한 타이머 보관
   const highlightTimerRef = useRef(null);
 
+  // 현재 화면에서 처리한 알림별 최신 revision을 보관한다.
+  // 팝업이 닫혀도 기록을 지우지 않는다.
+  const alertRevisionsRef = useRef(new Map());
+
   // App이 다시 렌더링되면 최신 콜백으로 교체
   useEffect( ()=>{
     callbackRef.current = onThreatReceived;
@@ -60,18 +64,67 @@ function useWebSocket(onThreatReceived) {
 
               console.log("🚨 실시간 위협 알림 수신!",message);
 
-              // 동일한 알림이 중복 표시되지 않도록 ID 생성
-              const toastId = `threat-${message.ip}-${message.time}`;
+              if(message.alertId){
+                const revision = Number(message.revision);
 
-              if (!toast.isActive(toastId)) {
-                toast.error(`위협 감지! [${message.type}] IP: ${message.ip}`,
-                   {
-                    toastId: toastId,
-                    position: "top-right",
-                    autoClose: 5000,
-                  }
-              );
-            }
+                if (
+                  !Number.isSafeInteger(revision) ||
+                  revision < 1 ||
+                  !['CREATED', 'UPDATED'].includes(message.eventType)
+                ) {
+                  console.warn('잘못된 통합 알림입니다.', message);
+                  return;
+                }
+
+              const previousRevision =
+                alertRevisionsRef.current.get(message.alertId);
+
+              // 동일 메시지 재전송 또는 순서가 뒤집힌 오래된 메시지는 무시한다.
+              if (
+                previousRevision !== undefined &&
+                revision <= previousRevision
+              ) {
+                return;
+              }
+            
+              alertRevisionsRef.current.set(message.alertId, revision);
+
+              const toastId = `request-alert-${message.alertId}`;
+              const text =
+                `탐지 알림! [${message.type}] IP: ${message.ip ?? '미확인'}`;
+
+              if (toast.isActive(toastId)) {
+                // 현재 열려 있는 팝업만 갱신한다.
+                toast.update(toastId, {
+                  render: text,
+                });
+              } else if (
+                message.eventType === 'CREATED' &&
+                previousRevision === undefined
+              ) {
+                // 처음 받은 CREATED에 대해서만 새 팝업을 연다.
+                toast.error(text, {
+                  toastId,
+                  position: 'top-right',
+                  autoClose: 5000,
+                });
+              }
+              // UPDATED인데 팝업이 닫혀 있다면 다시 열지 않는다.
+              } else {
+                // 기존 HTTP 수동 테스트 알림과의 호환 처리
+                const toastId = `threat-${message.ip}-${message.time}`;
+
+                if (!toast.isActive(toastId)) {
+                  toast.error(
+                    `위협 감지! [${message.type}] IP: ${message.ip}`,
+                    {
+                      toastId,
+                      position: 'top-right',
+                      autoClose: 5000,
+                    }
+                  );
+                }
+              }
 
             // App에서 전달한 최신 콜백 실행
             callbackRef.current?.(message);

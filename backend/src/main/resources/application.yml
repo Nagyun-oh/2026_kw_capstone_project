@@ -34,6 +34,12 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
+app:
+  kafka:
+    waf:
+      enabled: ${WAF_CONSUMER_ENABLED:false}
+      event-zone: ${WAF_EVENT_ZONE:UTC}
+
 management:
   # 기본적으로 상태 확인 endpoint만 HTTP로 노출
   endpoints:

@@ -49,6 +49,9 @@ public class LogServiceTest {
     @InjectMocks
     private LogService logService;
 
+    @Mock
+    private RequestCorrelationService requestCorrelationService;
+
     @Test
     @DisplayName("유효한 Nginx 로그 수신 시 로그를 파싱하여 저장하고 AI 분석 요청을 전송한다")
     void validNginxLogMessage_thenParseAndSaveLogEntry(){
