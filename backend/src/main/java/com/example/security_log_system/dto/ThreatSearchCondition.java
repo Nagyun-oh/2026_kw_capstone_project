@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+// 위협 검색 조건
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,9 +15,16 @@ public class ThreatSearchCondition {
     private String threatType;
 
     @Pattern(
-            regexp = "(?i)MEDIUM|HIGH|CRITICAL",
+            regexp = "AI|WAF",
+            message = "Source must be AI or WAF."
+    )
+    private String source;
+
+    @Pattern(
+            regexp = "(?i)(LOW|MEDIUM|HIGH|CRITICAL|UNKNOWN)",
             message = "Invalid severity."
     )
-
     private String severity;
+
+
 }

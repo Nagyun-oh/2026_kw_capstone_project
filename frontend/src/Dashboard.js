@@ -11,6 +11,7 @@ import LogDetailModal from './components/LogDetailModal';
 import DashboardLayout from './components/DashboardLayout';
 import DashboardSummary from './components/DashboardSummary';
 import useDashboardSummary from './hooks/useDashboardSummary';
+import WafDetailModal from './components/WafDetailModal';
 
 function Dashboard({
   user,
@@ -36,7 +37,9 @@ function Dashboard({
       searchThreats,
       resetThreatSearch,
       searchBlacklists,
-      resetBlacklistSearch
+      resetBlacklistSearch,
+      isThreatLoading,
+      threatError,
   } = useSecurityData();
 
   const {
@@ -57,11 +60,14 @@ function Dashboard({
   const [selectedLog,setSelectedLog] = useState(null);
   const [isLogLoading,setIsLogLoading] = useState(false);
   const [logDetailError,setLogDetailError] = useState('');
+  const [selectedWafThreatId, setSelectedWafThreatId] = useState(null);
 
   // 가장 최근 상세 조회 요청을 구분하는 번호
   const logRequestIdRef = useRef(0);
 
   const handleViewLog = async logId => {
+    setSelectedWafThreatId(null);
+
     // 새 요청마다 번호 증가
     const requestId = ++logRequestIdRef.current;
 
@@ -105,6 +111,11 @@ const handleCloseLogModal = () => {
   setLogDetailError('');
 };
 
+const handleViewWaf = threatId => {
+  handleCloseLogModal();
+  setSelectedWafThreatId(threatId);
+}
+
 function handleRefreshAll(){
   fetchAllData();
   refreshSummary();
@@ -128,6 +139,13 @@ function handleRefreshAll(){
         error={logDetailError}
         onClose={handleCloseLogModal}
       />
+
+      <WafDetailModal
+        threatId={selectedWafThreatId}
+        onClose={() => setSelectedWafThreatId(null)}
+        onViewLog={handleViewLog}
+      />
+
 
       <div className="dashboard-toolbar">
         <button
@@ -165,10 +183,13 @@ function handleRefreshAll(){
         threats={threats}
         isNewThreat={isNewThreat}
         pageInfo={threatPage}
+        loading = {isThreatLoading}
+        error = {threatError}
         onPageChange={fetchThreats}
         onSearch={searchThreats}
         onReset={resetThreatSearch}
         onViewLog={handleViewLog}
+        onViewWaf={handleViewWaf}
       />
     </div>
 

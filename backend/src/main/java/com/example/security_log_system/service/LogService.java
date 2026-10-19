@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,8 @@ public class LogService {
     private final LogRepository logRepository;
     private final BlacklistService blacklistService;
     private final AiRequestProducer aiRequestProducer;
+    private  final RequestCorrelationService requestCorrelationService;
+    private final ObjectMapper objectMapper;
 
     // GET
     @Transactional(readOnly = true)
@@ -47,9 +50,7 @@ public class LogService {
                 .map(LogResponseDto::from);
     }
 
-    // JSON 파싱을 위한 객체 추가
-    private final ObjectMapper objectMapper;
-
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void processRawLog(String kafkaMessage) {
         try{
             JsonNode jsonNode = objectMapper.readTree(kafkaMessage);
@@ -131,6 +132,21 @@ public class LogService {
 
 
     private void processWafAccessJson(JsonNode jsonNode){
+        String requestId = readRequestId(jsonNode);
+
+        if(requestId !=null){
+            Optional<LogEntry> existing =
+                    requestCorrelationService.lockAndFindLog(requestId);
+
+            if(existing.isPresent()){
+                // 같은 요청의 로그를 다시 받으면 연결만 확인하고 종료한다.
+                requestCorrelationService.linkExistingWafDetection(
+                        existing.get()
+                );
+                return;
+            }
+        }
+
         String ipAddress = jsonNode.path("remote_addr").asText("0.0.0.0");
         String method = jsonNode.path("method").asText("");
         String fullPath = jsonNode.path("path").asText("/");
@@ -149,6 +165,7 @@ public class LogService {
 
         // 입력된 로그 DB에 저장
         LogEntry entry = logRepository.save(LogEntry.builder()
+                .requestId(requestId)
                 .ipAddress(ipAddress)
                 .requestMethod(method)
                 .requestUrl(fullPath)
@@ -156,6 +173,9 @@ public class LogService {
                 .rawLog(jsonNode.toString())
                 .createdAt(UtcDateTime.now())
                 .build());
+
+        // WAF가 먼저 저장되어 있었다면 여기서 원본 로그를 연결한다.
+        requestCorrelationService.linkExistingWafDetection(entry);
 
         // AI 요청 DTO 생성
         AiRequestDto aiRequest = AiRequestDto.builder()
@@ -207,4 +227,28 @@ public class LogService {
 
         aiRequestProducer.sendAnalysisRequest(aiRequest);
     }
+
+    private String readRequestId(JsonNode jsonNode){
+        JsonNode value = jsonNode.get("request_id");
+
+        if(value==null || value.isNull()){
+            return null;
+        }
+
+        if(!value.isTextual()){
+            throw new IllegalArgumentException(
+                    "request_id must be a string."
+            );
+        }
+
+        String requestId = value.textValue();
+
+        if(requestId.isBlank() || requestId.length() > 255){
+            throw new IllegalArgumentException(
+                    "Invalid request_id length."
+            );
+        }
+        return requestId;
+    }
+
 }

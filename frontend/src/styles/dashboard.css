@@ -994,3 +994,54 @@
     padding: 14px 20px;
   }
 }
+
+/* 위협 목록의 상세 버튼 */
+.threat-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* WAF 상세 */
+.waf-detail-description {
+  margin: 14px 0 0;
+  color: var(--dashboard-muted);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.waf-detail-rules {
+  display: grid;
+  gap: 14px;
+}
+
+.waf-detail-rule {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 10px;
+  background: var(--dashboard-surface);
+}
+
+.waf-detail-rule__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.waf-detail-rule__header h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.waf-detail-rule__message {
+  margin: 14px 0;
+  color: var(--dashboard-text);
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

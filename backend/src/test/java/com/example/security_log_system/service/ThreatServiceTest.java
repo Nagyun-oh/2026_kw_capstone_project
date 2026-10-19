@@ -55,6 +55,12 @@ public class ThreatServiceTest {
 
     private ThreatService threatService;
 
+    @Mock
+    private RequestCorrelationService requestCorrelationService;
+
+    @Mock
+    private RequestAlertService requestAlertService;
+
     @BeforeEach
     void setUp(){
         meterRegistry = new SimpleMeterRegistry();
@@ -64,7 +70,9 @@ public class ThreatServiceTest {
                 threatRepository,
                 blacklistService,
                 notificationService,
-                meterRegistry
+                meterRegistry,
+                requestCorrelationService,
+                requestAlertService
         );
     }
 
@@ -279,11 +287,16 @@ public class ThreatServiceTest {
                 same(savedThreat)
         );
 
-        verify(notificationService).sendUrgentAlert(
+        verify(requestCorrelationService).lockForAiResult(logEntry);
+
+        verify(requestAlertService).recordAi(
+                null,
+                1L,
                 "192.168.0.10",
-                "AI Detection",
-                4
+                "CRITICAL"
         );
+
+        verifyNoInteractions(notificationService);
     }
 
     @Test
@@ -318,6 +331,13 @@ public class ThreatServiceTest {
 
         verifyNoInteractions(blacklistService);
         verifyNoInteractions(notificationService);
+
+        verify(requestAlertService).recordAi(
+                null,
+                1L,
+                "192.168.0.10",
+                "HIGH"
+        );
     }
 
     @Test
@@ -369,6 +389,40 @@ public class ThreatServiceTest {
         return dto;
 
     }
+
+    @Test
+    @DisplayName("같은 로그의 AI 위협이 이미 있으면 저장과 알림 기록을 반복하지 않는다")
+    void duplicateAiResult_isIgnored() {
+        LogEntry entry = LogEntry.builder()
+                .id(1L)
+                .requestId("request-test-001")
+                .ipAddress("192.168.0.10")
+                .build();
+
+        when(logRepository.findById(1L))
+                .thenReturn(Optional.of(entry));
+
+        when(threatRepository.existsByLogEntry_IdAndThreatType(
+                1L,
+                "AI Detection"
+        )).thenReturn(true);
+
+        threatService.saveAiDetectedThreat(
+                aiResponseDto(
+                        1L,
+                        0.9f,
+                        "192.168.0.10",
+                        "AI detected"
+                )
+        );
+
+        verify(requestCorrelationService).lockForAiResult(entry);
+        verify(threatRepository, never()).save(any(DetectedThreat.class));
+        verifyNoInteractions(requestAlertService);
+        verifyNoInteractions(notificationService);
+        verifyNoInteractions(blacklistService);
+    }
+
 }
 
 

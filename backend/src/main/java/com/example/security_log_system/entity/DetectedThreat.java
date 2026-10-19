@@ -40,13 +40,19 @@ public class DetectedThreat {
 
     @Column(name = "detected_at")
     private LocalDateTime detectedAt;
+
+
+    public void linkLogEntry(LogEntry entry){
+        if(entry == null || entry.getId() == null ){
+            throw new IllegalArgumentException(
+                    "Saved LogEntry is required."
+            );
+        }
+        if(this.logEntry !=null
+              && !this.logEntry.getId().equals(entry.getId())){
+            throw new IllegalStateException("Threat is already linked to another log.");
+        }
+        this.logEntry = entry;
+    }
 }
 
-/*
-TODO
-    - detectedAt이 null로 저장될 수 있는 경로 확인
-    - severity를 String 대신 Enum으로 관리 검토
-    - isChecked 기본값 false 명확화
-    - Entity 직접 반환 대신 ThreatResponseDto에서 logId만 노출
-    - threatScore 컬럼이 필요한지 검토, 현재 AI 점수는 저장되지 않음
-*/

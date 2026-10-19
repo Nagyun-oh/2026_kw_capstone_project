@@ -12,4 +12,7 @@ import java.util.List;
 @Repository
 public interface ThreatRepository
         extends JpaRepository<DetectedThreat,Long>,
-        JpaSpecificationExecutor<DetectedThreat> { }
+        JpaSpecificationExecutor<DetectedThreat> {
+    boolean existsByLogEntry_IdAndThreatType(Long logId, String threatType);
+
+}

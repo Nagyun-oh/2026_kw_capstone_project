@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef,useState } from 'react';
 import apiClient from '../api/apiClient';
 
 function useSecurityData() {
@@ -11,7 +11,7 @@ function useSecurityData() {
   };
 
   const EMPTY_THREAT_SEARCH = {
-    threatType: "",
+    source: "",
     severity: "",
   };
 
@@ -23,6 +23,10 @@ function useSecurityData() {
   const [logSearch,setLogSearch] = useState(EMPTY_LOG_SEARCH);
   const [threatSearch,setThreatSearch] = useState(EMPTY_THREAT_SEARCH);
   const [blacklistSearch,setBlacklistSearch] = useState(EMPTY_BLACKLIST_SEARCH);
+
+  const [isThreatLoading, setIsThreatLoading] = useState(false);
+  const [threatError,setThreatError] = useState('');
+  const threatRequestIdRef = useRef(0);
 
 
   /* == 정보 및 페이지 상태 ( 전체 로그, 위협, 블랙리스트) == */
@@ -98,36 +102,62 @@ function useSecurityData() {
     return response.data;
   };
 
-  const fetchThreats = (page =0, search = threatSearch) => {
+  const fetchThreats = async (page =0, search = threatSearch) => {
+    const requestId = ++threatRequestIdRef.current;
     const params = {page, size:10};
 
-    if(search.threatType.trim()){
-      params.threatType = search.threatType.trim();
+    if(search.source){
+      params.source = search.source;
     }
 
     if(search.severity){
       params.severity = search.severity;
     }
 
-    apiClient.get(
-      '/api/v1/threats',
-      {params}
-    )
-    .then(response => {
-      // 현재 페이지의 로그 목록 저장
-      setThreats(response.data.content ?? []);
+    setIsThreatLoading(true);
+    setThreatError('');
 
-      // 백엔드 Page 응답의 페이지 정보 저장
+    try{
+      const response = await apiClient.get("api/v1/threats",{
+        params,
+      });
+
+      // 이전 검색 응답이 현재 결과를 덮어 쓰지 않도록 한다.
+      if(requestId !== threatRequestIdRef.current) return;
+
+      setThreats(response.data.content??[]);
+
       setThreatPage({
         number: response.data.number,
         totalPages: response.data.totalPages,
         totalElements: response.data.totalElements,
         size: response.data.size,
       });
-    })
-    .catch(error =>{
-      console.error("위협 조회 실패",error);
-    });
+    
+    } catch (error){
+      if(requestId !== threatRequestIdRef.current) return;
+
+      setThreats([]);
+      setThreatPage({
+        number: 0,
+        totalPages: 0,
+        totalElements: 0,
+        size: 10,
+      });
+
+      if(error.response?.status === 401){
+        setThreatError("로그인이 만료되었습니다. 다시 로그인해주세요.");
+      }else if(error.response?.status === 400){
+          setThreatError("검색 조건을 확인해주세요.");
+      } else {
+        setThreatError("위협 목록을 불러오지 못했습니다.")
+      }
+
+    } finally {
+      if(requestId === threatRequestIdRef.current){
+        setIsThreatLoading(false);
+      }
+    }
   };
 
   const fetchBlacklists = (page =0, search = blacklistSearch) => {
@@ -223,6 +253,8 @@ function useSecurityData() {
       resetThreatSearch,
       searchBlacklists,
       resetBlacklistSearch,
+      isThreatLoading,
+      threatError,
   };
 }
 

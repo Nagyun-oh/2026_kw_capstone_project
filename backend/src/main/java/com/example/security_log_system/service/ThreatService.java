@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.security_log_system.util.UtcDateTime;
 
@@ -32,6 +33,8 @@ public class ThreatService {
     private final BlacklistService blacklistService;
     private final NotificationService notificationService;
     private final MeterRegistry meterRegistry;
+    private final RequestCorrelationService requestCorrelationService;
+    private final RequestAlertService requestAlertService;
 
     @Transactional(readOnly = true)
     public Page<ThreatResponseDto> getThreats(ThreatSearchCondition condition, Pageable pageable){
@@ -73,6 +76,7 @@ public class ThreatService {
     }
 
     // Kafka AI 분석 결과를 기반으로 위협 저장
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void saveAiDetectedThreat(AiResponseDto aiResponse) {
         if (aiResponse.getLogId() ==null){
             throw new IllegalArgumentException("AI response logId is null");
@@ -87,10 +91,21 @@ public class ThreatService {
             return;
         }
 
+        requestCorrelationService.lockForAiResult(entry);
+
+        // 같은 로그의 AI 위협이 이미 저장되었다면 재처리하지 않는다.
+        if(threatRepository.existsByLogEntry_IdAndThreatType(entry.getId(),"AI Detection")){
+            return;
+        }
+
+        String severity =
+                aiResponse.getThreatScore() >= 0.8
+                    ? "CRITICAL" : "HIGH";
+
         DetectedThreat threat = DetectedThreat.builder()
                 .logEntry(entry)
                 .threatType("AI Detection")
-                .severity(aiResponse.getThreatScore() >= 0.8 ? "CRITICAL" : "HIGH")
+                .severity(severity)
                 .description(aiResponse.getReason())
                 .detectedAt(UtcDateTime.now())
                 .build();
@@ -100,9 +115,15 @@ public class ThreatService {
         incrementThreatDetectedMetric(threat.getSeverity());
 
         if(aiResponse.getThreatScore() >= 0.8){
-            blacklistService.addToBlacklist(aiResponse.getIpAddress(), aiResponse.getReason(), 4,savedThreat);
-            notificationService.sendUrgentAlert(aiResponse.getIpAddress(), "AI Detection",4);
+            blacklistService.addToBlacklist(entry.getIpAddress(), aiResponse.getReason(), 4,savedThreat);
         }
+
+        requestAlertService.recordAi(
+                entry.getRequestId(),
+                entry.getId(),
+                entry.getIpAddress(),
+                severity
+        );
     }
 
     private void incrementThreatDetectedMetric(String severity){

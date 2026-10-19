@@ -55,6 +55,9 @@ jobs:
             sleep 2
           done
           docker exec -i ${{ job.services.mysql.id }} mysql -h127.0.0.1 -uroot -pci-root security_db < docs/db/security-db-schema.sql
+          docker exec -i ${{ job.services.mysql.id }} mysql -h127.0.0.1 -uroot -pci-root security_db < docs/db/add-waf-detections.sql
+          docker exec -i ${{ job.services.mysql.id }} mysql -h127.0.0.1 -uroot -pci-root security_db < docs/db/add-request-correlation.sql
+          docker exec -i ${{ job.services.mysql.id }} mysql -h127.0.0.1 -uroot -pci-root security_db < docs/db/add-request-alerts.sql
       - name: Run tests and build executable JAR
         working-directory: backend
         env:
