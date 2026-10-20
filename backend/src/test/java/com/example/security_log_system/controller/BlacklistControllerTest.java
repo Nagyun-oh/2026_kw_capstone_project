@@ -27,8 +27,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -245,6 +244,35 @@ public class BlacklistControllerTest {
 
         verifyNoInteractions(blacklistService);
     }
+
+    @Test
+    @DisplayName("블랙리스트 삭제에 성공하면 204 No Content를 반환한다.")
+    void deleteBlacklist_whenExists_thenReturnNoContent() throws Exception{
+        // given
+        when(blacklistService.deleteBlacklist(10L))
+                .thenReturn(true);
+
+        // when & then
+        mockMvc.perform(delete("/api/v1/blacklist/{id}",10L))
+                .andExpect(status().isNoContent());
+        verify(blacklistService).deleteBlacklist(10L);
+    }
+
+    @Test
+    @DisplayName("삭제할 블랙리스트가 없으면 404 Not Found를 반환한다")
+    void deleteBlacklist_whenNotExists_thenReturnNotFound() throws Exception{
+        // given
+        when(blacklistService.deleteBlacklist(10L))
+                .thenReturn(false);
+
+        // when && then
+        mockMvc.perform(delete("/api/v1/blacklist/{id}",10L))
+                .andExpect(status().isNotFound());
+
+        verify(blacklistService).deleteBlacklist(10L);
+
+    }
+
 
 }
 

@@ -1,5 +1,5 @@
 import React, {useRef,useState} from 'react';
-import {ToastContainer} from 'react-toastify';  
+import {ToastContainer,toast} from 'react-toastify';  
 import 'react-toastify/dist/ReactToastify.css';
 
 import ThreatTable from './components/ThreatTable';
@@ -12,6 +12,7 @@ import DashboardLayout from './components/DashboardLayout';
 import DashboardSummary from './components/DashboardSummary';
 import useDashboardSummary from './hooks/useDashboardSummary';
 import WafDetailModal from './components/WafDetailModal';
+import BlacklistDeleteModal from './components/BlacklistDeleteModal';
 
 function Dashboard({
   user,
@@ -40,6 +41,8 @@ function Dashboard({
       resetBlacklistSearch,
       isThreatLoading,
       threatError,
+      deleteBlacklist,
+      refreshBlacklists,
   } = useSecurityData();
 
   const {
@@ -61,6 +64,14 @@ function Dashboard({
   const [isLogLoading,setIsLogLoading] = useState(false);
   const [logDetailError,setLogDetailError] = useState('');
   const [selectedWafThreatId, setSelectedWafThreatId] = useState(null);
+  
+  const [deletingBlacklistId, setDeletingBlacklistId] = useState(null);
+
+  const [blacklistToDelete, setBlacklistToDelete] = useState(null);
+  const [blacklistDeleteError, setBlacklistDeleteError] = useState(''); 
+
+  // 연속 클릭으로 삭제 요청이 중복 실행되지 않도록 한다.
+  const blacklistDeleteInFlightRef = useRef(false);
 
   // 가장 최근 상세 조회 요청을 구분하는 번호
   const logRequestIdRef = useRef(0);
@@ -121,6 +132,85 @@ function handleRefreshAll(){
   refreshSummary();
 }
 
+// 목록의 삭제 버튼: 확인 모달을 연다.
+const handleDeleteBlacklist = entry => {
+  if (blacklistDeleteInFlightRef.current) return;
+
+  setBlacklistDeleteError('');
+  setBlacklistToDelete(entry);
+};
+
+// 취소 버튼 또는 Escape: 확인 모달을 닫는다.
+const handleCloseBlacklistDelete = () => {
+  if (blacklistDeleteInFlightRef.current) return;
+
+  setBlacklistToDelete(null);
+  setBlacklistDeleteError('');
+};
+
+// 모달의 삭제하기 버튼: 실제 삭제 요청을 보낸다.
+const handleConfirmBlacklistDelete = async () => {
+  if (!blacklistToDelete || blacklistDeleteInFlightRef.current) {
+    return;
+  }
+
+  const entry = blacklistToDelete;
+
+  blacklistDeleteInFlightRef.current = true;
+  setDeletingBlacklistId(entry.id);
+  setBlacklistDeleteError('');
+
+  try {
+    try {
+      await deleteBlacklist(entry.id);
+
+      setBlacklistToDelete(null);
+      toast.success(
+        `${entry.ipAddress}를 블랙리스트에서 삭제했습니다.`
+      );
+    } catch (error) {
+      const status = error.response?.status;
+
+      if (status === 404) {
+        setBlacklistToDelete(null);
+        toast.info(
+          '이미 삭제되었거나 존재하지 않는 항목입니다. 목록을 갱신합니다.'
+        );
+      } else {
+        if (status === 401) {
+          setBlacklistDeleteError(
+            '로그인이 만료되었습니다. 창을 닫고 다시 로그인해주세요.'
+          );
+        } else if (status === 403) {
+          setBlacklistDeleteError(
+            '삭제 권한 또는 CSRF 인증을 확인하지 못했습니다. 다시 로그인한 뒤 시도해주세요.'
+          );
+        } else {
+          setBlacklistDeleteError(
+            '삭제 요청을 완료하지 못했습니다. 창을 닫고 목록을 새로고침해 확인해주세요.'
+          );
+        }
+
+        return;
+      }
+    }
+
+    const [listUpdated] = await Promise.all([
+      refreshBlacklists(),
+      refreshSummary(),
+    ]);
+
+    if (listUpdated === false) {
+      toast.warning(
+        '삭제 대상은 목록에서 제거되었지만 화면 목록을 갱신하지 못했습니다. 전체 데이터 새로고침을 눌러주세요.'
+      );
+    }
+  } finally {
+    blacklistDeleteInFlightRef.current = false;
+    setDeletingBlacklistId(null);
+  }
+};
+
  return (
      <DashboardLayout
       user = {user}
@@ -131,6 +221,14 @@ function handleRefreshAll(){
      >
 
       <ToastContainer />
+
+      <BlacklistDeleteModal
+      entry={blacklistToDelete}
+      busy={deletingBlacklistId != null}
+      error={blacklistDeleteError}
+      onClose={handleCloseBlacklistDelete}
+      onConfirm={handleConfirmBlacklistDelete}
+      />
 
       <LogDetailModal 
         isOpen={isLogModalOpen}
@@ -201,6 +299,8 @@ function handleRefreshAll(){
         onSearch={searchBlacklists}
         onReset={resetBlacklistSearch}
         onViewLog={handleViewLog}
+        onDelete={handleDeleteBlacklist}
+        deletingId={deletingBlacklistId}
       />
     </div>
      </DashboardLayout>

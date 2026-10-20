@@ -23,6 +23,10 @@ function useSecurityData() {
   const [logSearch,setLogSearch] = useState(EMPTY_LOG_SEARCH);
   const [threatSearch,setThreatSearch] = useState(EMPTY_THREAT_SEARCH);
   const [blacklistSearch,setBlacklistSearch] = useState(EMPTY_BLACKLIST_SEARCH);
+  
+  // 가장 최근 목록 조회와 적용된 검색 조건을 기억한다.
+  const blacklistRequestIdRef = useRef(0);
+  const blacklistSearchRef = useRef(EMPTY_BLACKLIST_SEARCH);
 
   const [isThreatLoading, setIsThreatLoading] = useState(false);
   const [threatError,setThreatError] = useState('');
@@ -160,7 +164,13 @@ function useSecurityData() {
     }
   };
 
-  const fetchBlacklists = (page =0, search = blacklistSearch) => {
+  const fetchBlacklists = async (
+    page =0, 
+    search = blacklistSearch
+  ) => {
+    const requestId = ++blacklistRequestIdRef.current;
+    blacklistSearchRef.current = {...search};
+
     const params = {page,size:10};
 
     if(search.ip.trim()){
@@ -170,26 +180,47 @@ function useSecurityData() {
       params.severity = search.severity;
     }
 
-    apiClient.get(
-      '/api/v1/blacklist',
-      {params}
-    )
-    .then(response => {
-      // 현재 페이지의 로그 목록 저장
-      setBlacklists(response.data.content ?? []);
+    try {
+      const response = await apiClient.get('/api/v1/blacklist',{
+        params,
+      });
 
-      // 백엔드 Page 응답의 페이지 정보 저장
-      setBlackListPage({
+      // 오래된 조회 결과가 최신 목록을 덮어쓰지 않도록 한다.
+      if(requestId !== blacklistRequestIdRef.current){
+        return null;
+      }
+
+      // 현재 페이지의 로그 목록 저장
+       setBlacklists(response.data.content ?? []);
+
+        // 백엔드 Page 응답의 페이지 정보 저장
+        setBlackListPage({
         number: response.data.number,
         totalPages: response.data.totalPages,
         totalElements: response.data.totalElements,
         size: response.data.size,
       });
-    })
-    .catch(error =>{
-      console.error("블랙리스트 조회 실패",error);
-    });
+
+      return true;
+    } catch (error){
+      if(requestId !== blacklistRequestIdRef.current){
+        return null;
+      }
+
+      console.error('블랙리스트 조회 실패',error);
+      return false;
+    }
   };
+
+  // 삭제 실패는 호출한 Dashbaord에서 처리한다
+  const deleteBlacklist = async id => {
+    await apiClient.delete(`/api/v1/blacklist/${id}`);
+  };
+
+  // 현재 적용된 검색 조건으로 첫 페이지를 다시 조회한다.
+  const refreshBlacklists = () => {
+    return fetchBlacklists(0,blacklistSearchRef.current);
+  }
   
   /* 전체 새로고침 */
   const fetchAllData = () => {
@@ -255,6 +286,8 @@ function useSecurityData() {
       resetBlacklistSearch,
       isThreatLoading,
       threatError,
+      deleteBlacklist,
+      refreshBlacklists,
   };
 }
 
