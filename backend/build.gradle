@@ -47,6 +47,7 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
     // @Valid, @NotBlank, @Min, @Max
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+	testImplementation 'org.springframework.security:spring-security-test'
 }
 
 tasks.named('test') {

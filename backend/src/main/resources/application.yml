@@ -39,6 +39,9 @@ app:
     waf:
       enabled: ${WAF_CONSUMER_ENABLED:false}
       event-zone: ${WAF_EVENT_ZONE:UTC}
+  waf-sync:
+    token: ${WAF_SYNC_TOKEN:}
+
 
 management:
   # 기본적으로 상태 확인 endpoint만 HTTP로 노출

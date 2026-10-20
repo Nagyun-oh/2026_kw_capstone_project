@@ -94,6 +94,7 @@ services:
       SESSION_COOKIE_SECURE: "false"
       WAF_CONSUMER_ENABLED: ${WAF_CONSUMER_ENABLED:-false}
       WAF_EVENT_ZONE: ${WAF_EVENT_ZONE:-UTC}
+      WAF_SYNC_TOKEN: ${WAF_SYNC_TOKEN:-}
   # ────────────────── React + Nginx ──────────────────────
   frontend:
     build:
