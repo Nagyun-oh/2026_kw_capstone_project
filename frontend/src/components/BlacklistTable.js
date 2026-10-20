@@ -16,6 +16,8 @@ function BlacklistTable({
   onSearch,
   onReset,
   onViewLog,
+  onDelete,
+  deletingId,
 }) {
   const [form, setForm] = useState({
     ip: '',
@@ -112,6 +114,7 @@ function BlacklistTable({
             <col className="data-column-reference" />
             <col />
             <col className="data-column-severity" />
+            <col className='blacklist-column-actions'/>
           </colgroup>
 
           <thead>
@@ -121,13 +124,14 @@ function BlacklistTable({
               <th scope="col">원본 로그</th>
               <th scope="col">등록 사유</th>
               <th scope="col">위험도</th>
+              <th scope="col">관리</th>
             </tr>
           </thead>
 
           <tbody>
             {blacklists.length === 0 ? (
               <tr>
-                <td colSpan={5} className="data-empty">
+                <td colSpan={6} className="data-empty">
                   표시할 차단 목록이 없습니다.
                   검색하거나 전체 데이터를 새로고침해주세요.
                 </td>
@@ -180,6 +184,21 @@ function BlacklistTable({
                         {danger?.label ?? '미지정'}
                       </span>
                     </td>
+
+                    <td>
+                      <button
+                        type="button"
+                        className="dashboard-button dashboard-button--danger"
+                        onClick={() => onDelete(entry)}
+                        disabled={deletingId !=null}
+                        aria-label={`블랙리스트 ${entry.ipAddress} 삭제`}
+                      >
+                        {deletingId === entry.id ? '삭제 중…' : '삭제'}
+                      </button>
+                    </td>
+
+
+
                   </tr>
                 );
               })
