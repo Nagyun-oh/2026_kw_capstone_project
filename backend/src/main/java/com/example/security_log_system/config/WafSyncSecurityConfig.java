@@ -40,9 +40,6 @@ public class WafSyncSecurityConfig {
                         .httpBasic(basic -> basic.disable())
                         .logout(logout->logout.disable())
 
-                        // 이 경로는 브라우저 세션 대신 전용 헤더로 인증한다.
-                        .csrf(csrf -> csrf.disable())
-
                         .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(
                                         HttpMethod.GET,

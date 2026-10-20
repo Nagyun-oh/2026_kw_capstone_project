@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @WebMvcTest
 @ContextConfiguration(classes = {
@@ -104,7 +105,8 @@ public class WafSyncControllerTest {
     @DisplayName("올바른 토큰이 있어도 동기화 경로의 POST는 거부한다")
     void writeRequestIsRejected() throws Exception {
         mockMvc.perform(post(URL)
-                        .header("X-WAF-Sync-Token", TOKEN))
+                        .header("X-WAF-Sync-Token", TOKEN)
+                        .with(csrf()))
                 .andExpect(status().isForbidden());
 
         verifyNoInteractions(blacklistSnapshotService);
