@@ -100,6 +100,7 @@ services:
       APP_BOOTSTRAP_ADMIN_PASSWORD: ${APP_BOOTSTRAP_ADMIN_PASSWORD:-}
       WAF_CONSUMER_ENABLED: ${WAF_CONSUMER_ENABLED:-false}
       WAF_EVENT_ZONE: ${WAF_EVENT_ZONE:-UTC}
+      WAF_SYNC_TOKEN: ${WAF_SYNC_TOKEN:-}
       SESSION_COOKIE_SECURE: "true"
       SERVER_FORWARD_HEADERS_STRATEGY: native
   # ────────────────── React + Nginx ──────────────────────
