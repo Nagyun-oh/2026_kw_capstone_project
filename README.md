@@ -72,7 +72,7 @@ docker compose --env-file .env -f compose.yaml ps -a
 | 백엔드 Swagger | http://localhost:8080/swagger-ui/index.html |
 | AI 상태 / Swagger | http://localhost:8000/health / http://localhost:8000/docs |
 
-기존 하위 Compose와 루트 Compose를 동시에 실행하지 마세요. 컨테이너 이름·포트가 겹치며, 동일한 DB·Kafka 저장 공간을 두 서버에서 동시에 사용하면 안 됩니다. 현재 WAF는 `DetectionOnly`이며 대시보드의 블랙리스트 등록이 WAF 자동 차단을 의미하지 않습니다.
+기존 하위 Compose와 루트 Compose를 동시에 실행하지 마세요. 컨테이너 이름·포트가 겹치며, 동일한 DB·Kafka 저장 공간을 두 서버에서 동시에 사용하면 안 됩니다. WAF는 `DetectionOnly`로 공격 패턴을 탐지·기록만 하고, 블랙리스트에 등록된 IP의 요청만 403으로 차단합니다([블랙리스트 자동 동기화](waf/README.md#블랙리스트-자동-동기화)).
 
 ## AWS 배포
 

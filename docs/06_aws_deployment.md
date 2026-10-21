@@ -22,7 +22,7 @@
 | EC2 중지·시작 | 사용자가 기존 데이터 보존 및 새 요청 처리 확인 |
 | 자동 기동·백업 복구·부하 테스트 | 별도 검증 필요 |
 
-당시 배포 버전은 관리 API 접근을 보안 그룹으로 제한했다. 새 버전은 HTTP 세션·CSRF·관리자 권한 검사를 적용하며, AWS 통합 검증은 새 이미지 배포 후 수행한다. WAF는 `DetectionOnly`이며 블랙리스트 표시가 실제 WAF 차단을 의미하지 않는다.
+당시 배포 버전은 관리 API 접근을 보안 그룹으로 제한했다. 새 버전은 HTTP 세션·CSRF·관리자 권한 검사를 적용하며, AWS 통합 검증은 새 이미지 배포 후 수행한다. 당시 WAF는 `DetectionOnly`였고 블랙리스트 표시가 실제 WAF 차단을 의미하지 않았다. 이후 블랙리스트 자동 동기화([waf/README.md](../waf/README.md#블랙리스트-자동-동기화))를 추가해 블랙리스트 IP의 요청만 WAF에서 403으로 차단한다. 로컬에서 검증했으며 AWS 검증은 배포 후 수행한다.
 
 ### 1-2. HTTPS 전환 진행 상태 (2026-10-08 기준)
 
@@ -292,6 +292,8 @@ nano .env.aws
 | APP_BOOTSTRAP_ADMIN_ENABLED | 기본 `false`, 최초 관리자 발급 시에만 `true` |
 | APP_BOOTSTRAP_ADMIN_USERNAME | 최초 발급할 관리자 ID. 발급하지 않을 때는 비움 |
 | APP_BOOTSTRAP_ADMIN_PASSWORD | 최초 발급할 관리자 비밀번호. 발급 완료 후 제거 |
+| WAF_SYNC_TOKEN | backend와 waf가 함께 쓰는 블랙리스트 동기화 토큰(32자 이상, `openssl rand -hex 32`). 비어 있으면 WAF 차단 동기화가 동작하지 않는다 |
+| WAF_SYNC_EXCLUDE_IPS | 선택. 절대 차단하지 않을 추가 IP(쉼표 구분). `WAF_TRUSTED_PROXY`와 Docker 게이트웨이는 자동 제외 |
 
 CD가 사용하는 `IMAGE_REGISTRY_PREFIX`와 `IMAGE_TAG`가 이미 있으면 유지한다. JWT 키는 새 인증 구성에서 사용하지 않는다. 환경변수 파일에 비밀번호를 넣을 때는 따옴표로 감싸 Compose의 값 해석을 확인하고, 실제 값을 명령 인자·로그·Git에 남기지 않는다.
 
