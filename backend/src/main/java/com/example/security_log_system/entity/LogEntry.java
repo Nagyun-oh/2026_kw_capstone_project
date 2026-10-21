@@ -26,7 +26,10 @@ public class LogEntry {
 
     private String ipAddress;       // 접속한 IP
     private String requestMethod;   // GET, POST 등
-    private String requestUrl;      // 접속 경로
+
+    @Column(name="request_url",columnDefinition = "TEXT")
+    private String requestUrl;      // 긴 요청 경로와 쿼리 문자열 저장
+
     private int statusCode;         // 200,403 등
 
     @Column(columnDefinition = "TEXT")
