@@ -1,0 +1,3 @@
+# WAF 컨테이너(Linux)에서 실행하는 셸 스크립트는 Windows에서 받아도 LF를 유지한다.
+# CRLF가 섞이면 entrypoint 훅이 실행되지 않거나 WAF 시작이 실패한다.
+*.sh text eol=lf
