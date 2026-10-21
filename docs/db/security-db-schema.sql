@@ -84,7 +84,7 @@ CREATE TABLE `network_logs` (
   `ip_address` varchar(255) DEFAULT NULL,
   `raw_log` text,
   `request_method` varchar(255) DEFAULT NULL,
-  `request_url` varchar(255) DEFAULT NULL,
+  `request_url` text,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
