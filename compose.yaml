@@ -39,6 +39,13 @@ services:
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-log:/var/lib/zookeeper/log
+    healthcheck:
+      test: ["CMD", "cub", "zk-ready", "localhost:2181", "5"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    stop_grace_period: 30s
   # ────────────────── Kafka ──────────────────────
   kafka:
     image: confluentinc/cp-kafka:7.3.0
@@ -46,7 +53,7 @@ services:
     restart: unless-stopped
     depends_on:
       zookeeper:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "127.0.0.1:9092:9092"
     environment:
@@ -70,6 +77,7 @@ services:
       timeout: 10s
       retries: 12
       start_period: 40s
+    stop_grace_period: 60s
   # ────────────────── Spring Boot ──────────────────────
   backend:
     build:
