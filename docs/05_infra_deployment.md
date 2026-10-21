@@ -378,7 +378,7 @@ docker exec security-ai-local python -c "import joblib; b=joblib.load('/app/mode
   ```
 
   `waf-audit.log`는 교체 대상이 아니므로 처음부터 다시 읽는다. 이 경로의 이벤트(`waf-detection-topic`)는 아직 저장하는 컨슈머가 없어 DB 중복은 생기지 않는다.
-- WAF는 `DetectionOnly`다. 대시보드 블랙리스트 등록과 WAF의 실제 차단은 별개이며 자동 연계는 아직 없다.
+- WAF는 `DetectionOnly`다. 공격 패턴은 탐지·기록만 하고, 블랙리스트 IP의 요청만 자동 동기화로 403 차단한다([waf/README.md](../waf/README.md#블랙리스트-자동-동기화)).
 - AI 수정 사항이 로컬에만 남아 있으면 GitHub 코드로 같은 결과를 재현할 수 없다. 배포 전 팀원과 확인해 필요한 환경 변수 연결·피처 수정 사항을 반영한다.
 - Kafka는 단일 브로커·ZooKeeper 기반이다. KRaft 전환은 데이터 보존 여부와 업그레이드 경로를 정해 별도로 수행한다.
 

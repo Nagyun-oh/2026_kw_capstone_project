@@ -9,7 +9,12 @@ waf/
   docker-compose.yml              # WAF 컨테이너 및 CRS 환경변수 설정
   rules/
     CUSTOM-001-ai-align.conf      # AI 모델 특성과 맞춘 커스텀 룰
-    CUSTOM-002-blacklist.conf     # IP 블랙리스트 룰
+    CUSTOM-002-blacklist.conf     # 수동 IP 블랙리스트 룰
+    CUSTOM-003-blacklist-sync.conf # 백엔드 블랙리스트 자동 동기화 룰(Include)
+  sync/
+    blacklist-sync.sh             # 백엔드 블랙리스트 -> ModSecurity 차단 룰 동기화
+    99-blacklist-sync.sh          # WAF 시작 훅(/docker-entrypoint.d), 동기화 루프 실행
+  tests/                          # 로그 교체·블랙리스트 동기화 단위 테스트
   logs/                           # Nginx access/error 및 ModSecurity 감사 로그
   fluent-bit.conf                 # access.log/감사 로그 -> Kafka 전송 설정
   waf-detection.lua               # 감사 JSON에서 탐지 필드만 추출
@@ -147,7 +152,7 @@ ANOMALY_INBOUND: 5
 ANOMALY_OUTBOUND: 4
 ```
 
-- `MODSEC_RULE_ENGINE=DetectionOnly`: ModSecurity 탐지 및 차단 활성화
+- `MODSEC_RULE_ENGINE=DetectionOnly`: ModSecurity는 탐지·기록만 하고 차단하지 않는다(WAF·AI 비교 실험용). 블랙리스트 룰(20100)만 `ctl:ruleEngine=On`으로 예외적으로 차단한다.
 - `PARANOIA=2`: CRS 탐지 범위를 PL2까지 확장
 - `BLOCKING_PARANOIA=1`: 실제 차단 판단은 PL1 기준으로 적용
 - `ANOMALY_INBOUND=5`: 요청 이상 점수가 5 이상이면 차단
@@ -171,14 +176,115 @@ SQL Injection, XSS, Path Traversal 같은 일반 웹 공격 패턴은 기본 CRS
 
 ### CUSTOM-002-blacklist.conf
 
-차단할 IP를 수동 또는 백엔드 연동으로 추가할 수 있는 블랙리스트 룰 파일입니다.
+백엔드와 별개로 직접 차단할 IP를 넣는 수동 블랙리스트 룰 파일입니다(id 20001~20099). `DetectionOnly`에서도 차단하려면 `ctl:ruleEngine=On`을 함께 넣습니다.
 
 ```apache
 SecRule REMOTE_ADDR "@ipMatch 1.2.3.4" \
-    "id:20001,phase:1,deny,status:403,log,msg:'Blacklisted IP'"
+    "id:20001,phase:1,deny,status:403,log,msg:'Blacklisted IP',ctl:ruleEngine=On"
 ```
+
+### CUSTOM-003-blacklist-sync.conf
+
+백엔드 블랙리스트를 자동으로 반영하는 룰입니다(id 20100). 아래 [블랙리스트 자동 동기화](#블랙리스트-자동-동기화)를 참고합니다.
+
+## 블랙리스트 자동 동기화
+
+관리자 대시보드의 블랙리스트(백엔드 `ip_blacklist`)를 WAF가 주기적으로 받아 실제 차단 룰로 적용합니다. 백엔드·프론트 코드는 바꾸지 않고, 백엔드의 조회 전용 API(`GET /internal/waf/blacklist`, PR #88)만 사용합니다.
+
+```text
+관리자 등록·삭제 / AI 자동 등록 -> MySQL ip_blacklist
+WAF 컨테이너 안 blacklist-sync.sh (10초 간격)
+  -> GET http://backend:8080/internal/waf/blacklist  (X-WAF-Sync-Token)
+  -> version이 바뀌었을 때만: IP 검증·제외 -> 룰 생성 -> nginx -t -> 교체 -> reload -> 새 worker 확인
+  -> /var/lib/waf-blacklist/blacklist.conf  (CUSTOM-003이 Include, waf-blacklist-state 볼륨)
+차단된 요청 -> 403, 감사 로그의 rule 20100 -> 대시보드 WAF Detection
+```
+
+### 구성 요소
+
+| 구성 | 역할 |
+| --- | --- |
+| `waf-blacklist-init` | WAF보다 먼저 한 번 실행되고 종료한다. 상태 볼륨 소유자를 WAF 실행 계정(101)으로 바꾸고 빈 룰 파일을 만든다. ModSecurity v3는 `IncludeOptional`이 없어 Include 대상이 없으면 WAF가 시작되지 않기 때문이다. |
+| `99-blacklist-sync.sh` | 이미지의 `/docker-entrypoint.d` 훅. 저장된 룰 형식을 확인(`prepare`)하고 동기화 루프(`run`)를 백그라운드로 띄운다. 실행 권한(755)이 있어야 실행된다. |
+| `blacklist-sync.sh` | 조회·검증·적용 본체. 로그는 `docker logs waf`에 `[blacklist-sync]`로 남는다. |
+| `waf-blacklist-state` 볼륨 | 마지막으로 적용에 성공한 룰. 재시작·재생성 직후 백엔드 연결 전에도 이전 차단을 유지한다. |
+
+`MODSEC_RULE_ENGINE=DetectionOnly`에서는 `deny`가 실행되지 않는다. 생성 룰에 `ctl:ruleEngine=On`을 넣어 **블랙리스트에 걸린 요청만** 차단하고, 나머지 CRS 판정은 계속 탐지만 한다.
+
+### 설정
+
+| 변수 | 기본값 | 설명 |
+| --- | --- | --- |
+| `WAF_SYNC_TOKEN` | 없음 | 백엔드와 같은 값(32자 이상). 비어 있으면 동기화하지 않고 저장된 룰만 쓴다. 생성: `openssl rand -hex 32` |
+| `WAF_SYNC_INTERVAL` | `10` | 조회 간격(초) |
+| `WAF_SYNC_EXCLUDE_IPS` | 없음 | 절대 차단하지 않을 추가 IP(쉼표 구분, 단일 IP만) |
+
+다음 IP는 백엔드 목록에 있어도 차단하지 않고 로그에 남긴다.
+
+- `0.0.0.0`, `::`, `127.0.0.0/8`, `::1`
+- 컨테이너 기본 게이트웨이(자동 감지): 로컬에서는 호스트에서 보낸 모든 요청, AWS에서는 호스트 Nginx의 출발지다(로컬 `172.20.0.1`, AWS 예시 `172.18.0.1`).
+- `SET_REAL_IP_FROM`이 단일 IP일 때 그 값(AWS의 `WAF_TRUSTED_PROXY`)
+- 형식이 틀린 값(CIDR, `::ffff:1.2.3.4` 같은 IPv4 포함 IPv6 표기 등)
+
+### 실패 시 동작
+
+| 상황 | 동작 |
+| --- | --- |
+| 백엔드 중지·연결 실패·401·500·응답 형식 오류 | 기존 룰 유지. 같은 오류는 처음 한 번만 기록하고 복구되면 `동기화 복구`를 남긴다. |
+| 정상 응답(200)의 빈 목록 | 차단할 IP가 없는 것으로 보고 기존 차단 해제 |
+| `nginx -t` 실패, reload 실패 | 이전 룰 파일로 되돌리고 다음 주기에 다시 시도 |
+| WAF 재시작·재생성 | 볼륨의 마지막 정상 룰로 시작한 뒤 최신 목록으로 재동기화 |
+| 저장된 룰 형식이 깨짐 | `blacklist.conf.invalid`로 옮기고 빈 룰로 시작 |
+
+### 확인 명령
+
+```bash
+docker logs waf 2>&1 | grep blacklist-sync                         # 동기화 기록
+docker exec waf cat /var/lib/waf-blacklist/blacklist.conf          # 현재 적용 룰
+docker exec waf bash /opt/waf-blacklist/blacklist-sync.sh once     # 즉시 한 번 동기화
+python3 -m unittest discover -s waf/tests -v                       # 단위 테스트(Docker 불필요)
+```
+
+로컬에서 호스트가 보낸 요청은 게이트웨이 IP라 차단 대상에서 빠진다. 403을 직접 확인하려면 같은 네트워크의 다른 컨테이너에서 요청하고, 그 컨테이너 IP(`172.x`)를 관리자 API `POST /api/v1/blacklist`로 등록한다. `127.x`로 잘못 입력하면 제외 대상이라 403이 나오지 않는다.
+
+```bash
+docker inspect security-ai-local -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
+docker exec security-ai-local python -c "import urllib.request; print(urllib.request.urlopen('http://waf:8080/').status)"
+```
+
+### 검증 결과 (로컬)
+
+**2026-10-20**
+
+- 등록 후 약 4초 안에 해당 IP 403, 삭제 후 다음 주기에 200 복구
+- 같은 시점 호스트(게이트웨이) 요청과 관리자 대시보드(WAF를 거치지 않음)는 200 유지
+- 목록 밖 IP의 SQLi는 차단되지 않고 CRS 탐지만 기록(`DetectionOnly` 유지)
+- WAF 재시작, 백엔드가 꺼진 상태의 WAF 재생성 직후에도 차단 유지. 백엔드 복구 후 자동 재동기화
+
+**2026-10-21** (관리자 API 등록, 대시보드 삭제로 재검증)
+
+| 시각(UTC) | 동작 | 결과 |
+| --- | --- | --- |
+| 04:12:46 | 관리자 API로 `172.20.0.7` 등록 | 04:12:49 `적용 완료: 추가 [172.20.0.7]` (3초) |
+| 04:12:56 | 해당 컨테이너에서 WAF 요청 | 403 |
+| 04:13:36 | 대시보드에서 삭제 | 04:13:43 `적용 완료: 해제 [172.20.0.7]` (7초) |
+| 04:13:50 | 같은 요청 | 200 |
+
+- 차단 중 호스트(게이트웨이) 요청과 대시보드는 200 유지
+- `127.0.0.7`, `127.20.0.7` 등록 시 백엔드에는 저장되지만 WAF는 `차단하면 안 되는 IP라서 제외`로 기록하고 차단하지 않음
+- 백엔드가 약 1시간 50분 동안 기동하지 못한 상태(DB 미기동)에서 기존 룰 유지. 백엔드 복구 후 `동기화 복구: 실패 635회 뒤 정상 조회`로 자동 재동기화
+- 삭제 후 같은 IP가 다시 등록되지 않음. 단, 시험 요청이 공격이 아닌 `GET /`라 아래 재등록 한계는 검증하지 않음
+
+### 한계
+
+- **만료 없음**: 스냅샷 API가 IP만 주므로 WAF는 `expiredAt`을 알 수 없다. 관리자가 삭제해야만 해제된다. (백엔드 정책 필요)
+- **차단된 요청의 재수집과 삭제 직후 재등록**: 차단된 요청(403)도 access 로그로 저장·AI 분석된다(`processWafAccessJson`에는 블랙리스트 확인이 없음). 차단 중에는 백엔드의 중복 확인으로 블랙리스트 행은 늘지 않지만, 요청마다 로그·AI 탐지·알림은 쌓인다. 분석은 비동기라 삭제 전에 들어온 공격 요청의 AI 결과가 삭제 후 도착해도 다시 등록되며, 삭제 후 다음 동기화 전(최대 `WAF_SYNC_INTERVAL`초)의 공격 요청도 같다. (백엔드 정책 필요)
+- **제외 IP만 바뀌어도 reload**: 룰 파일에 백엔드 version을 주석으로 남기므로, 실제 차단 IP가 같아도 목록이 바뀌면 파일을 다시 쓰고 reload한다. 동작에는 영향이 없다.
+- **반복 실패 로그**: 백엔드가 재시작을 반복하면 연결 오류 종류(이름 조회 실패·연결 거부)가 번갈아 바뀌어 같은 실패가 주기적으로 다시 기록된다.
+- **IPv6 표기**: 소문자 변환만 하고 축약 형태를 정규화하지 않는다. 같은 주소를 다른 표기로 등록하면 서로 다른 값으로 본다.
 
 ## 미구현 또는 TODO
 
-- [ ] 백엔드 블랙리스트 자동 동기화 (`BlacklistService` -> `CUSTOM-002`)
+- [x] 백엔드 블랙리스트 자동 동기화 (`/internal/waf/blacklist` -> `CUSTOM-003`)
+- [ ] 차단 만료(`expiredAt`) 반영과 삭제 직후 재등록 방지 (백엔드 정책)
 - [ ] AI 모델 분석 결과와 WAF 정책 자동 연계
