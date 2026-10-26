@@ -6,8 +6,11 @@
 #   run          주기 동기화 루프 (99-blacklist-sync.sh가 백그라운드로 실행)
 #   once         한 번만 동기화한다 (수동 점검용)
 #
-# 동기화 흐름: 스냅샷 조회 -> version 비교 -> IP 검증·제외 -> 룰 생성 -> nginx -t -> 교체 -> reload 확인
+# 동기화 흐름: 스냅샷 조회 -> JSON 검증 -> version 비교 -> IP 검증·제외 -> 룰 생성
+#              -> 백업 -> 교체 -> nginx -t -> reload 확인 -> 백업 삭제
 # 조회·검증·적용 중 하나라도 실패하면 기존 룰을 그대로 둔다(마지막 정상 설정 유지).
+# 적용 중에는 백업(blacklist.conf.prev)이 마지막 정상 룰이다. 백업이 남아 있으면 적용이 끝나지 않은
+# 것이므로 다음 동기화나 재시작 때 백업으로 되돌린다. 적용에 실패하면 다음 주기에 반드시 다시 적용한다.
 # 정상 응답의 빈 목록은 "차단할 IP 없음"으로 보고 기존 차단을 해제한다.
 set -uo pipefail
 shopt -s nullglob
@@ -15,12 +18,16 @@ export LC_ALL=C
 
 STATE_DIR=${WAF_BLACKLIST_STATE_DIR:-/var/lib/waf-blacklist}
 RULES_FILE=$STATE_DIR/blacklist.conf   # CUSTOM-003-blacklist-sync.conf가 Include하는 파일
+CANDIDATE_FILE=$RULES_FILE.new         # 검증 전 새 룰
+BACKUP_FILE=$RULES_FILE.prev           # 적용 중에만 존재하는 마지막 정상 룰
 SYNC_URL=${WAF_SYNC_URL:-http://backend:8080/internal/waf/blacklist}
 SYNC_TOKEN=${WAF_SYNC_TOKEN:-}
 SYNC_INTERVAL=${WAF_SYNC_INTERVAL:-10}
 EXCLUDE_IPS=${WAF_SYNC_EXCLUDE_IPS:-}
 NGINX_PID_FILE=${WAF_NGINX_PID_FILE:-/tmp/nginx.pid}
 PROC_DIR=${WAF_PROC_DIR:-/proc}
+RELOAD_TIMEOUT=${WAF_RELOAD_TIMEOUT:-10}   # reload 후 새 worker를 기다리는 시간(초)
+[[ $RELOAD_TIMEOUT =~ ^[1-9][0-9]*$ ]] || RELOAD_TIMEOUT=10
 LOCK_DIR=${TMPDIR:-/tmp}
 NGINX_UID=101
 
@@ -31,6 +38,7 @@ RULE_SUFFIX="\" \"id:20100,phase:1,deny,status:403,log,msg:'Blacklisted IP (back
 EMPTY_RULES='# 차단할 IP가 없다(동기화 전이거나 블랙리스트가 비어 있음).'
 
 LAST_VERSION=''
+FORCE_APPLY=0   # 1이면 version·파일이 같아도 다시 적용한다(이전 적용 실패·중단 뒤 실제 설정과 맞추기)
 UNCHANGED=0
 SYNC_ERROR='' FETCH_ERROR='' APPLY_ERROR='' RELOAD_ERROR=''
 declare -A PROTECTED=()
@@ -133,25 +141,34 @@ fetch_snapshot() {
     if [[ $code != 200 ]]; then FETCH_ERROR="HTTP $code"; return 1; fi
 }
 
-# {"version":"<sha256>","ipAddresses":["..."]} 형식만 받아 VERSION, RAW_IPS를 채운다.
+# 응답 본문 전체를 JSON으로 해석해 {"version":"<sha256>","ipAddresses":["..."]} 형식인지 확인하고
+# VERSION, RAW_IPS를 채운다. 문법 오류, 필드 누락, 타입 불일치(문자열이 아닌 version·IP)는 모두 실패다.
+# 정규식으로는 깨진 JSON을 걸러낼 수 없어 WAF 이미지에 포함된 perl JSON::PP로 해석한다.
+# 다른 필드가 더 있어도 무시한다(백엔드 응답에 필드가 추가돼도 동기화가 멈추지 않게).
 parse_snapshot() {
-    local body list item
-    local -a items=()
-    local re_version='"version":"([0-9a-f]{64})"'
-    local re_ips='"ipAddresses":\[([^]]*)\]'
-    local re_item='^"([^"\\]*)"$'
-    body=$(tr -d ' \t\r\n' < "$1")
-    [[ $body == \{*\} && $body =~ $re_version ]] || return 1
-    VERSION=${BASH_REMATCH[1]}
-    [[ $body =~ $re_ips ]] || return 1
-    list=${BASH_REMATCH[1]}
+    local parsed
+    parsed=$(perl -MJSON::PP -MB -e '
+        # JSON 문자열만 참. 숫자는 IOK/NOK 플래그를 가지므로 문자열과 구분된다.
+        sub is_string {
+            my $flags = B::svref_2object(\$_[0])->FLAGS;
+            return defined $_[0] && !ref $_[0]
+                && ($flags & B::SVp_POK) && !($flags & (B::SVp_IOK | B::SVp_NOK));
+        }
+        local $/;
+        my $data = eval { JSON::PP->new->utf8->decode(<STDIN>) };
+        exit 1 unless ref $data eq "HASH";
+        my ($version, $ips) = @$data{qw(version ipAddresses)};
+        exit 1 unless is_string($version) && $version =~ /\A[0-9a-f]{64}\z/;
+        exit 1 unless ref $ips eq "ARRAY";
+        for my $ip (@$ips) {
+            exit 1 unless is_string($ip) && $ip !~ /[\x00-\x1f]/;   # 줄 단위 출력을 깨는 제어 문자 거부
+        }
+        binmode STDOUT, ":utf8";
+        print join("\n", $version, @$ips);
+    ' < "$1" 2>/dev/null) || return 1
+    VERSION=${parsed%%$'\n'*}
     RAW_IPS=()
-    [[ -z $list ]] && return 0
-    IFS=, read -ra items <<< "$list"
-    for item in "${items[@]}"; do
-        [[ $item =~ $re_item ]] || return 1
-        RAW_IPS+=("${BASH_REMATCH[1]}")
-    done
+    if [[ $parsed == *$'\n'* ]]; then mapfile -t RAW_IPS <<< "${parsed#*$'\n'}"; fi
 }
 
 # RAW_IPS에서 형식이 틀리거나 차단하면 안 되는 IP, 중복을 빼고 BLOCK_IPS를 만든다.
@@ -237,8 +254,9 @@ worker_pids() {
 }
 
 # reload 신호를 보내고, 기존 worker가 모두 새 worker로 바뀌었는지 확인한다.
+# 0: 확인 완료, 1: 신호 전송 실패(기존 설정 유지), 2: 신호는 보냈지만 시간 안에 확인 못 함(적용 여부 모름)
 reload_nginx() {
-    local before after output
+    local before after output i
     before=$(worker_pids | sort)
     if ! output=$(nginx -s reload 2>&1); then
         RELOAD_ERROR=$(grep -m1 -oE '\[(emerg|alert|error)\].*' <<< "$output" | cut -c1-200)
@@ -246,34 +264,77 @@ reload_nginx() {
     fi
     # worker를 볼 수 없는 환경(테스트 등)에서는 신호 전송 성공까지만 확인한다.
     [[ -n $before ]] || return 0
-    for _ in {1..20}; do
+    for (( i = 0; i < RELOAD_TIMEOUT * 2; i++ )); do
         sleep 0.5
         after=$(worker_pids | sort)
         if [[ -n $after && -z $(comm -12 <(printf '%s\n' "$before") <(printf '%s\n' "$after")) ]]; then
             return 0
         fi
     done
-    RELOAD_ERROR='10초 안에 새 worker가 확인되지 않음'
-    return 1
+    RELOAD_ERROR="${RELOAD_TIMEOUT}초 안에 새 worker가 확인되지 않음"
+    return 2
 }
 
-# $1(RULES_FILE과 같은 디렉터리의 새 룰)을 검증 후 교체한다. 실패하면 이전 파일로 되돌린다.
+# 교체 전 룰을 BACKUP_FILE로 보관한다. 임시 이름에 쓴 뒤 옮겨, 중간에 끊겨도 반쯤 쓰인 백업이 남지 않게 한다.
+save_backup() {
+    local tmp=$BACKUP_FILE.tmp
+    if [[ -e $RULES_FILE ]]; then
+        cp -p "$RULES_FILE" "$tmp"
+    else
+        printf '%s\n' "$EMPTY_RULES" > "$tmp"
+    fi || { rm -f "$tmp"; return 1; }
+    mv -f "$tmp" "$BACKUP_FILE" || { rm -f "$tmp"; return 1; }
+}
+
+# 백업이 있으면 RULES_FILE로 되돌린다. 0: 되돌림 또는 백업 없음, 1: 되돌리지 못함(백업은 그대로 남는다)
+restore_backup() {
+    [[ -e $BACKUP_FILE ]] || return 0
+    mv -f "$BACKUP_FILE" "$RULES_FILE"
+}
+
+# reload 실패 뒤 이전 룰로 되돌린다. $1: reload_nginx 결과
+# 신호를 보낸 뒤 확인만 시간 초과됐다면(2) 새 룰이 이미 적용됐거나 적용 중일 수 있으므로,
+# 파일만 되돌리지 않고 이전 룰로 다시 검증·reload·확인해 실제 nginx 설정을 파일과 맞춘다.
+rollback_reload() {
+    local output
+    if ! restore_backup; then APPLY_ERROR+=', 이전 룰 복구 실패'; return 1; fi
+    (( $1 == 2 )) || return 0
+    if ! output=$(nginx -t 2>&1) || ! reload_nginx; then
+        APPLY_ERROR+=', 이전 룰 재적용도 실패(실제 적용 상태 확인 필요)'
+        return 1
+    fi
+    APPLY_ERROR+=', 이전 룰로 다시 reload함'
+}
+
+# $1(RULES_FILE과 같은 디렉터리의 새 룰)을 검증 후 교체한다. 실패하면 이전 룰로 되돌린다.
+# 교체부터 완료까지는 BACKUP_FILE이 마지막 정상 룰이며, 적용이 끝나거나 되돌린 뒤에만 사라진다.
+# 0: 적용 완료, 1: 실패(APPLY_ERROR)
 apply_rules() {
-    local candidate=$1 backup=$RULES_FILE.prev output
-    cp -p "$RULES_FILE" "$backup" 2>/dev/null || printf '%s\n' "$EMPTY_RULES" > "$backup"
-    mv -f "$candidate" "$RULES_FILE"
+    local candidate=$1 output rc
+    if ! save_backup; then APPLY_ERROR='이전 룰 백업 실패'; return 1; fi
+    if ! mv -f "$candidate" "$RULES_FILE"; then
+        # rename은 원자적이라 실패하면 RULES_FILE은 그대로다. 백업만 지운다.
+        rm -f "$BACKUP_FILE"
+        APPLY_ERROR='룰 파일 교체 실패'
+        return 1
+    fi
     if ! output=$(nginx -t 2>&1); then
-        mv -f "$backup" "$RULES_FILE"
         APPLY_ERROR="nginx -t 실패: $(grep -m1 -oE '\[emerg\].*' <<< "$output" | cut -c1-200)"
+        restore_backup || APPLY_ERROR+=', 이전 룰 복구 실패'
         return 1
     fi
     # nginx가 아직 뜨지 않았으면 파일만 바꿔 두고, nginx가 시작할 때 읽게 한다.
-    if nginx_running && ! reload_nginx; then
-        mv -f "$backup" "$RULES_FILE"
-        APPLY_ERROR="reload 실패: $RELOAD_ERROR"
-        return 1
+    if nginx_running; then
+        reload_nginx
+        rc=$?
+        if (( rc != 0 )); then
+            APPLY_ERROR="reload 실패: $RELOAD_ERROR"
+            rollback_reload "$rc"
+            return 1
+        fi
     fi
-    rm -f "$backup"
+    # 백업이 남으면 재시작 때 이전 룰로 되돌아가므로 지우지 못하면 실패로 본다.
+    if ! rm -f "$BACKUP_FILE"; then APPLY_ERROR='적용 후 백업 삭제 실패'; return 1; fi
 }
 
 # 추가·해제된 IP를 로그 한 줄로 요약한다(많으면 앞의 10개만). $1, $2: 정렬된 IP 목록
@@ -287,6 +348,12 @@ summarize_change() {
 # 0: 적용 완료 또는 변경 없음, 1: 실패(SYNC_ERROR, 기존 룰 유지)
 sync_once() {
     local response candidate old_ips new_ips
+    # 이전 적용이 끝나지 않았다면(복구 실패 등) 백업이 마지막 정상 룰이다. 덮어쓰기 전에 먼저 되돌린다.
+    if [[ -e $BACKUP_FILE ]]; then
+        if ! restore_backup; then SYNC_ERROR='끝나지 않은 이전 적용을 되돌리지 못함'; return 1; fi
+        log "끝나지 않은 이전 적용을 마지막 정상 룰로 되돌렸다. 최신 목록으로 다시 적용한다"
+        FORCE_APPLY=1
+    fi
     response=$(mktemp) || { SYNC_ERROR='임시 파일 생성 실패'; return 1; }
     if ! fetch_snapshot "$response"; then
         rm -f "$response"; SYNC_ERROR="목록 조회 실패: $FETCH_ERROR"; return 1
@@ -297,24 +364,27 @@ sync_once() {
     rm -f "$response"
 
     # version이 같으면 목록이 바뀌지 않았으므로 룰을 다시 만들지 않는다.
-    if [[ $VERSION == "$LAST_VERSION" ]]; then UNCHANGED=1; return 0; fi
+    if (( ! FORCE_APPLY )) && [[ $VERSION == "$LAST_VERSION" ]]; then UNCHANGED=1; return 0; fi
 
     select_ips
-    candidate=$RULES_FILE.new
+    candidate=$CANDIDATE_FILE
     if ! render_rules "$candidate" 2>/dev/null; then
         rm -f "$candidate"; SYNC_ERROR="룰 파일을 쓸 수 없음($STATE_DIR)"; return 1
     fi
     # 재시작 직후처럼 이미 같은 룰이 적용돼 있으면 reload하지 않는다.
-    if cmp -s "$candidate" "$RULES_FILE"; then
+    if (( ! FORCE_APPLY )) && cmp -s "$candidate" "$RULES_FILE"; then
         rm -f "$candidate"; LAST_VERSION=$VERSION; UNCHANGED=1; return 0
     fi
 
     old_ips=$(rule_ips "$RULES_FILE" | sort)
     new_ips=$(rule_ips "$candidate" | sort)
     if ! apply_rules "$candidate"; then
-        rm -f "$candidate"; SYNC_ERROR=$APPLY_ERROR; return 1
+        # 실패 지점에 따라 nginx가 새 룰을 읽었을 수도 있으므로, 다음 주기에는 같은 목록이어도 다시 적용한다.
+        rm -f "$candidate"; FORCE_APPLY=1; SYNC_ERROR=$APPLY_ERROR; return 1
     fi
+    # version은 적용이 끝난 뒤에만 기억한다.
     LAST_VERSION=$VERSION
+    FORCE_APPLY=0
     UNCHANGED=0
     log "적용 완료: 차단 IP ${#BLOCK_IPS[@]}개, $(summarize_change "$old_ips" "$new_ips")"
 }
@@ -343,7 +413,15 @@ prepare() {
         log "경고: $STATE_DIR에 쓸 수 없다. waf-blacklist-init 실행 여부와 볼륨 권한을 확인한다"
         return 0
     fi
-    rm -f "$RULES_FILE.new" "$RULES_FILE.prev"
+    rm -f "$CANDIDATE_FILE" "$BACKUP_FILE.tmp"
+    # 적용 도중 종료됐다면 교체된 룰은 검증·reload 전일 수 있다. 백업(마지막 정상 룰)으로 되돌린다.
+    if [[ -e $BACKUP_FILE ]]; then
+        if restore_backup; then
+            log "적용이 끝나지 않은 룰이 있어 마지막 정상 룰로 되돌렸다"
+        else
+            log "경고: 마지막 정상 룰($BACKUP_FILE)로 되돌리지 못했다. 볼륨 권한을 확인한다"
+        fi
+    fi
     if [[ ! -s $RULES_FILE ]]; then
         printf '%s\n' "$EMPTY_RULES" > "$RULES_FILE"
         log "저장된 룰이 없어 차단 없이 시작한다"
