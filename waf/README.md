@@ -198,6 +198,7 @@ WAF 컨테이너 안 blacklist-sync.sh (10초 간격)
   -> 응답 전체 JSON 검증 -> version이 바뀌었을 때만: IP 검증·제외 -> 룰 생성
   -> 이전 룰 백업 -> 교체 -> nginx -t -> reload -> 새 worker 확인 -> 백업 삭제
   -> /var/lib/waf-blacklist/blacklist.conf  (CUSTOM-003이 Include, waf-blacklist-state 볼륨)
+  -> POST http://backend:8080/internal/waf/sync-status  (동기화마다 적용 결과 보고, 같은 토큰)
 차단된 요청 -> 403, 감사 로그의 rule 20100 -> 대시보드 WAF Detection
 ```
 
@@ -207,8 +208,8 @@ WAF 컨테이너 안 blacklist-sync.sh (10초 간격)
 | --- | --- |
 | `waf-blacklist-init` | WAF보다 먼저 한 번 실행되고 종료한다. 상태 볼륨 소유자를 WAF 실행 계정(101)으로 바꾸고 빈 룰 파일을 만든다. ModSecurity v3는 `IncludeOptional`이 없어 Include 대상이 없으면 WAF가 시작되지 않기 때문이다. |
 | `99-blacklist-sync.sh` | 이미지의 `/docker-entrypoint.d` 훅. 저장된 룰 형식을 확인(`prepare`)하고 동기화 루프(`run`)를 백그라운드로 띄운다. 실행 권한(755)이 있어야 실행된다. |
-| `blacklist-sync.sh` | 조회·검증·적용 본체. 응답은 WAF 이미지에 포함된 perl `JSON::PP`로 해석한다. 로그는 `docker logs waf`에 `[blacklist-sync]`로 남는다. |
-| `waf-blacklist-state` 볼륨 | 마지막으로 적용에 성공한 룰. 재시작·재생성 직후 백엔드 연결 전에도 이전 차단을 유지한다. 적용 중에만 `blacklist.conf.prev`(교체 전 마지막 정상 룰)가 함께 있다. |
+| `blacklist-sync.sh` | 조회·검증·적용·상태 보고 본체. 응답 해석과 보고 본문 생성은 WAF 이미지에 포함된 perl `JSON::PP`를 쓴다. 로그는 `docker logs waf`에 `[blacklist-sync]`로 남는다. |
+| `waf-blacklist-state` 볼륨 | 마지막으로 적용에 성공한 룰. 재시작·재생성 직후 백엔드 연결 전에도 이전 차단을 유지한다. 머리 주석에 백엔드 version과 차단 제외 IP·사유를 남겨 상태 보고에 쓴다. 적용 중에만 `blacklist.conf.prev`(교체 전 마지막 정상 룰)가 함께 있다. |
 
 `MODSEC_RULE_ENGINE=DetectionOnly`에서는 `deny`가 실행되지 않는다. 생성 룰에 `ctl:ruleEngine=On`을 넣어 **블랙리스트에 걸린 요청만** 차단하고, 나머지 CRS 판정은 계속 탐지만 한다.
 
@@ -220,13 +221,24 @@ WAF 컨테이너 안 blacklist-sync.sh (10초 간격)
 | `WAF_SYNC_INTERVAL` | `10` | 조회 간격(초) |
 | `WAF_SYNC_EXCLUDE_IPS` | 없음 | 절대 차단하지 않을 추가 IP(쉼표 구분, 단일 IP만) |
 | `WAF_RELOAD_TIMEOUT` | `10` | reload 뒤 새 worker로 바뀌었는지 기다리는 시간(초). 느린 서버에서만 늘린다 |
+| `WAF_ID` | `local-waf-1` | 상태 보고에 쓰는 고정 이름. `compose.aws.yaml`은 `aws-waf-1`. 소문자·숫자·`.`·`_`·`-` 64자 이하가 아니면 보고만 끈다 |
+| `WAF_SYNC_STATUS_URL` | `WAF_SYNC_URL`의 `/blacklist`를 `/sync-status`로 바꾼 값 | 상태 보고 주소 |
 
-다음 IP는 백엔드 목록에 있어도 차단하지 않고 로그에 남긴다.
+다음 IP는 백엔드 목록에 있어도 차단하지 않고 로그에 남긴다. 괄호는 상태 보고의 제외 사유 코드다.
 
-- `0.0.0.0`, `::`, `127.0.0.0/8`, `::1`
-- 컨테이너 기본 게이트웨이(자동 감지): 로컬에서는 호스트에서 보낸 모든 요청, AWS에서는 호스트 Nginx의 출발지다(로컬 `172.20.0.1`, AWS 예시 `172.18.0.1`).
-- `SET_REAL_IP_FROM`이 단일 IP일 때 그 값(AWS의 `WAF_TRUSTED_PROXY`)
-- 형식이 틀린 값(CIDR, `::ffff:1.2.3.4` 같은 IPv4 포함 IPv6 표기 등)
+- `0.0.0.0`, `::` (`UNSPECIFIED_ADDRESS`), `127.0.0.0/8`, `::1` (`LOOPBACK`)
+- 컨테이너 기본 게이트웨이(`GATEWAY`, 자동 감지): 로컬에서는 호스트에서 보낸 모든 요청, AWS에서는 호스트 Nginx의 출발지다(로컬 `172.20.0.1`, AWS 예시 `172.18.0.1`).
+- `SET_REAL_IP_FROM`이 단일 IP일 때 그 값(`TRUSTED_PROXY`, AWS의 `WAF_TRUSTED_PROXY`)
+- `WAF_SYNC_EXCLUDE_IPS`에 지정한 IP(`CONFIGURED_EXCLUSION`)
+- 형식이 틀린 값(CIDR, `::ffff:1.2.3.4` 같은 IPv4 포함 IPv6 표기 등). 계약 초안의 사유 목록에 없어 보고에는 넣지 않는다.
+
+### 상태 보고
+
+동기화 루프(`run`)는 동기화가 끝날 때마다 `POST /internal/waf/sync-status`로 결과를 한 번 보고한다. 형식과 상태 의미는 [docs/waf-sync-status-api.md](../docs/waf-sync-status-api.md)의 합의 초안을 따른다. 백엔드 수신 API는 아직 없으므로, 그 전까지는 `상태 보고 실패: HTTP 403`(또는 404) 같은 로그가 한 번 남고 차단 동작에는 영향이 없다.
+
+- `appliedVersion`은 실행 중인 nginx에 **적용을 확인한** version이다. 적용 중(`.prev` 있음)이거나 reload 결과를 확인하지 못했으면(`/tmp/waf-blacklist-sync.unverified` 있음) `null`로 보낸다.
+- 보고는 연결 3초·전체 5초 제한이 있고, 실패해도 쌓아 두지 않고 다음 주기에 최신 상태를 보낸다.
+- 수동 `once`는 보고하지 않는다.
 
 ### 실패 시 동작
 
@@ -237,10 +249,12 @@ WAF 컨테이너 안 blacklist-sync.sh (10초 간격)
 | 정상 응답(200)의 빈 목록 | 차단할 IP가 없는 것으로 보고 기존 차단 해제 |
 | 이전 룰 백업·파일 교체 실패 | 기존 룰 유지. 실패한 목록의 version을 기억하지 않으므로 다음 주기에 다시 적용한다. |
 | `nginx -t` 실패, reload 신호 전송 실패 | 이전 룰로 되돌리고 다음 주기에 다시 적용 |
-| reload 신호 후 새 worker 확인 시간 초과 | 새 룰이 이미 적용됐을 수 있으므로 이전 룰로 되돌린 뒤 **다시 검증·reload**해 실제 nginx 설정을 파일과 맞춘다. 다음 주기에 같은 목록이어도 다시 적용한다. |
+| nginx worker를 볼 수 없음 | reload 결과를 확인할 수 없으므로 신호를 보내지 않고 이전 룰 유지(reload 신호 전송 실패와 같게 처리) |
+| reload 신호 후 새 worker 확인 시간 초과 | 새 룰이 이미 적용됐을 수 있으므로 이전 룰로 되돌린 뒤 **다시 검증·reload**해 실제 nginx 설정을 파일과 맞춘다. 이것도 확인하지 못하면 `/tmp/waf-blacklist-sync.unverified`를 남겨 적용 상태를 `null`로 보고하고, 다음 주기에 같은 목록이어도 다시 적용한다. |
 | 적용 도중 종료(`blacklist.conf.prev`가 남음) | 교체된 룰은 검증·reload 전일 수 있으므로, 재시작(`prepare`)이나 다음 동기화 때 `.prev`(마지막 정상 룰)로 되돌린 뒤 다시 적용한다. |
 | WAF 재시작·재생성 | 볼륨의 마지막 정상 룰로 시작한 뒤 최신 목록으로 재동기화 |
 | 저장된 룰 형식이 깨짐 | `blacklist.conf.invalid`로 옮기고 빈 룰로 시작 |
+| 상태 보고 실패(연결 실패, 5초 초과, 204가 아닌 응답) | 차단 설정은 그대로 둔다. 같은 실패는 한 번만 기록하고 다음 주기에 최신 상태를 보고한다. 복구되면 `상태 보고 복구`를 남긴다. |
 
 ### 확인 명령
 
@@ -291,6 +305,21 @@ docker exec security-ai-local python -c "import urllib.request; print(urllib.req
 | 보완 후 | 클라이언트 IP 없음 | 통과(이전 룰로 다시 reload) | 일치 |
 
 파일 교체 실패, 적용 중 종료 후 재시작, 깨진 JSON 수신은 `waf/tests/test_blacklist_sync.py`의 회귀 테스트로 재현한다. 보완 전 스크립트에서는 추가한 테스트 7개가 모두 실패한다.
+
+**2026-10-26** (상태 보고, 일회용 WAF 컨테이너 + 가짜 백엔드)
+
+실제 nginx(`owasp/modsecurity-crs:nginx`)에 스크립트를 마운트하고, 스냅샷을 주고 보고를 기록하는 가짜 백엔드를 같은 Docker 네트워크에 두었다. 백엔드 보고 API가 아직 없어 본문은 [합의 초안](../docs/waf-sync-status-api.md) 기준으로 확인했다.
+
+| 상황 | 보고 | 실제 응답 |
+| --- | --- | --- |
+| 첫 기동(빈 룰) | reload 확인 뒤 `SUCCESS`, 이후 2초 주기마다 같은 보고, 토큰 일치 | - |
+| 클라이언트·게이트웨이·`127.0.0.5` 등록 | `SUCCESS`, `excludedIps` = 게이트웨이 `GATEWAY`, `127.0.0.5` `LOOPBACK` | 클라이언트 403 |
+| worker를 `SIGSTOP`으로 멈춘 채 새 목록 등록 | `FAILURE`, `RELOAD_TIMEOUT`, `appliedVersion`·`excludedIps` = `null` | - |
+| worker 재개 | 다음 주기에 다시 적용, `SUCCESS`(새 version) | 403 |
+| 컨테이너 재시작 + 보고 API가 404 | reload 없이 첫 주기에 적용 확인, `상태 보고 실패: HTTP 404` 1회 | 403 유지 |
+| 보고 API 복구(204) | `상태 보고 복구` | - |
+
+적용 결과별 보고 본문, 보고 실패·시간 초과(5초)·잘못된 `WAF_ID`는 가짜 백엔드 단위 테스트로 확인한다. 실제 백엔드와의 연결은 백엔드 API 구현 후 확인한다.
 
 ### 한계
 
