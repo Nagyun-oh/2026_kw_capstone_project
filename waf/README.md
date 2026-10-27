@@ -195,7 +195,8 @@ SecRule REMOTE_ADDR "@ipMatch 1.2.3.4" \
 관리자 등록·삭제 / AI 자동 등록 -> MySQL ip_blacklist
 WAF 컨테이너 안 blacklist-sync.sh (10초 간격)
   -> GET http://backend:8080/internal/waf/blacklist  (X-WAF-Sync-Token)
-  -> version이 바뀌었을 때만: IP 검증·제외 -> 룰 생성 -> nginx -t -> 교체 -> reload -> 새 worker 확인
+  -> 응답 전체 JSON 검증 -> version이 바뀌었을 때만: IP 검증·제외 -> 룰 생성
+  -> 이전 룰 백업 -> 교체 -> nginx -t -> reload -> 새 worker 확인 -> 백업 삭제
   -> /var/lib/waf-blacklist/blacklist.conf  (CUSTOM-003이 Include, waf-blacklist-state 볼륨)
 차단된 요청 -> 403, 감사 로그의 rule 20100 -> 대시보드 WAF Detection
 ```
@@ -205,9 +206,9 @@ WAF 컨테이너 안 blacklist-sync.sh (10초 간격)
 | 구성 | 역할 |
 | --- | --- |
 | `waf-blacklist-init` | WAF보다 먼저 한 번 실행되고 종료한다. 상태 볼륨 소유자를 WAF 실행 계정(101)으로 바꾸고 빈 룰 파일을 만든다. ModSecurity v3는 `IncludeOptional`이 없어 Include 대상이 없으면 WAF가 시작되지 않기 때문이다. |
-| `99-blacklist-sync.sh` | 이미지의 `/docker-entrypoint.d` 훅. 저장된 룰 형식을 확인(`prepare`)하고 동기화 루프(`run`)를 백그라운드로 띄운다. 실행 권한(755)이 있어야 실행된다. |
-| `blacklist-sync.sh` | 조회·검증·적용 본체. 로그는 `docker logs waf`에 `[blacklist-sync]`로 남는다. |
-| `waf-blacklist-state` 볼륨 | 마지막으로 적용에 성공한 룰. 재시작·재생성 직후 백엔드 연결 전에도 이전 차단을 유지한다. |
+| `99-blacklist-sync.sh` | 이미지의 `/docker-entrypoint.d` 훅. 저장된 룰 형식을 확인(`prepare`)하고 동기화 루프(`run`)를 백그라운드로 띄운다. 준비 실패 시 오류를 반환해 미완료 후보 설정으로 WAF가 시작되지 않게 한다. 실행 권한(755)이 있어야 실행된다. |
+| `blacklist-sync.sh` | 조회·검증·적용 본체. 응답은 WAF 이미지에 포함된 perl `JSON::PP`로 해석한다. 로그는 `docker logs waf`에 `[blacklist-sync]`로 남는다. |
+| `waf-blacklist-state` 볼륨 | 마지막으로 적용에 성공한 룰. 적용 또는 복구가 진행 중이면 `blacklist.conf.prev`(교체 전 마지막 정상 룰)를 보존한다. 파일 복원만으로 백업을 지우지 않고 실행 설정의 복구까지 확인한다. |
 
 `MODSEC_RULE_ENGINE=DetectionOnly`에서는 `deny`가 실행되지 않는다. 생성 룰에 `ctl:ruleEngine=On`을 넣어 **블랙리스트에 걸린 요청만** 차단하고, 나머지 CRS 판정은 계속 탐지만 한다.
 
@@ -218,6 +219,7 @@ WAF 컨테이너 안 blacklist-sync.sh (10초 간격)
 | `WAF_SYNC_TOKEN` | 없음 | 백엔드와 같은 값(32자 이상). 비어 있으면 동기화하지 않고 저장된 룰만 쓴다. 생성: `openssl rand -hex 32` |
 | `WAF_SYNC_INTERVAL` | `10` | 조회 간격(초) |
 | `WAF_SYNC_EXCLUDE_IPS` | 없음 | 절대 차단하지 않을 추가 IP(쉼표 구분, 단일 IP만) |
+| `WAF_RELOAD_TIMEOUT` | `10` | reload 뒤 새 worker로 바뀌었는지 기다리는 시간(초). 느린 서버에서만 늘린다 |
 
 다음 IP는 백엔드 목록에 있어도 차단하지 않고 로그에 남긴다.
 
@@ -230,11 +232,21 @@ WAF 컨테이너 안 blacklist-sync.sh (10초 간격)
 
 | 상황 | 동작 |
 | --- | --- |
-| 백엔드 중지·연결 실패·401·500·응답 형식 오류 | 기존 룰 유지. 같은 오류는 처음 한 번만 기록하고 복구되면 `동기화 복구`를 남긴다. |
+| 백엔드 중지·연결 실패·401·500 | 기존 룰 유지. 같은 오류는 처음 한 번만 기록하고 복구되면 `동기화 복구`를 남긴다. |
+| JSON 문법 오류, 필드 누락, 타입 불일치(문자열이 아닌 IP·version 등) | 응답 전체를 JSON으로 해석해 확인한다. 깨진 응답 안에 빈 배열이 있어도 기존 룰을 유지한다(차단 해제 안 함). 다른 필드가 더 있는 것은 허용한다. |
 | 정상 응답(200)의 빈 목록 | 차단할 IP가 없는 것으로 보고 기존 차단 해제 |
-| `nginx -t` 실패, reload 실패 | 이전 룰 파일로 되돌리고 다음 주기에 다시 시도 |
+| 이전 룰 백업·파일 교체 실패 | 기존 룰 유지. 실패한 목록의 version을 기억하지 않으므로 다음 주기에 다시 적용한다. |
+| `nginx -t` 실패, reload 신호 전송 실패 | 이전 룰로 되돌리고 다음 주기에 다시 적용 |
+| reload 신호 후 새 worker 확인 시간 초과 | 새 룰이 이미 적용됐을 수 있으므로 이전 룰로 되돌린 뒤 **다시 검증·reload**해 실제 nginx 설정을 파일과 맞춘다. 다음 주기에 같은 목록이어도 다시 적용한다. |
+| 적용 도중 종료(`blacklist.conf.prev`가 남음) | 다음 동기화에서 **백엔드 조회 전에** 이전 파일 복원·`nginx -t`·실행 중인 Nginx의 reload 확인을 먼저 수행한다. 백엔드가 중단돼도 이 복구는 수행된다. |
+| 복구 검증·reload·적용 확인 실패 | `.prev`를 유지하고 새 스냅샷 조회·적용을 중단한다. 다음 주기나 새 동기화 프로세스에서 복구를 재시도한다. 파일이 복원됐어도 실행 설정은 미확인일 수 있다. |
+| 시작 시 백업 복원·룰 준비 실패 | `prepare`와 시작 훅이 오류를 반환해 WAF 시작을 중단한다. 백업을 삭제하지 말고 볼륨 권한·공간·백업 내용을 확인한 뒤 재시작한다. |
 | WAF 재시작·재생성 | 볼륨의 마지막 정상 룰로 시작한 뒤 최신 목록으로 재동기화 |
 | 저장된 룰 형식이 깨짐 | `blacklist.conf.invalid`로 옮기고 빈 룰로 시작 |
+
+`prepare`는 Nginx 시작 전에 파일을 복원하며, `.prev`는 남겨 둔다. 시작 후 `run`이 복구 검증·reload 확인을 마친 다음 백업을 삭제한다. 복원된 백업의 형식이 잘못된 경우에는 빈 룰로 대체하지 않고 시작을 중단한다. 위 표의 빈 룰 대체는 미완료 적용 백업이 없는 기존 손상 파일에만 해당한다.
+
+회귀 테스트는 백엔드 503과 미완료 적용이 겹치는 경우, 복구 검증·reload 실패 후 프로세스 재시작, 시작 시 복원 파일 교체 실패·손상된 백업, 시작 훅의 오류 전파를 포함한다. 가짜 Nginx의 실행 설정을 파일로 추적하므로 실제 HTTP 403 동작 검증과는 구분한다.
 
 ### 확인 명령
 
@@ -242,7 +254,7 @@ WAF 컨테이너 안 blacklist-sync.sh (10초 간격)
 docker logs waf 2>&1 | grep blacklist-sync                         # 동기화 기록
 docker exec waf cat /var/lib/waf-blacklist/blacklist.conf          # 현재 적용 룰
 docker exec waf bash /opt/waf-blacklist/blacklist-sync.sh once     # 즉시 한 번 동기화
-python3 -m unittest discover -s waf/tests -v                       # 단위 테스트(Docker 불필요)
+python3 -m unittest discover -s waf/tests -v                       # 단위 테스트(Docker 불필요, CI에서도 실행)
 ```
 
 로컬에서 호스트가 보낸 요청은 게이트웨이 IP라 차단 대상에서 빠진다. 403을 직접 확인하려면 같은 네트워크의 다른 컨테이너에서 요청하고, 그 컨테이너 IP(`172.x`)를 관리자 API `POST /api/v1/blacklist`로 등록한다. `127.x`로 잘못 입력하면 제외 대상이라 403이 나오지 않는다.
@@ -274,6 +286,24 @@ docker exec security-ai-local python -c "import urllib.request; print(urllib.req
 - `127.0.0.7`, `127.20.0.7` 등록 시 백엔드에는 저장되지만 WAF는 `차단하면 안 되는 IP라서 제외`로 기록하고 차단하지 않음
 - 백엔드가 약 1시간 50분 동안 기동하지 못한 상태(DB 미기동)에서 기존 룰 유지. 백엔드 복구 후 `동기화 복구: 실패 635회 뒤 정상 조회`로 자동 재동기화
 - 삭제 후 같은 IP가 다시 등록되지 않음. 단, 시험 요청이 공격이 아닌 `GET /`라 아래 재등록 한계는 검증하지 않음
+
+**2026-10-21** (실패 처리 보완, 실제 nginx로 reload 확인 시간 초과 재현)
+
+일회용 WAF 컨테이너에서 기존 worker를 `SIGSTOP`으로 멈춰, nginx master는 새 룰을 읽었지만 스크립트의 worker 교체 확인은 시간 초과되는 상황을 만들었다. 차단 대상 클라이언트를 등록한 뒤 worker를 다시 실행하고 결과를 비교했다.
+
+| 스크립트 | 룰 파일 | 실제 응답 | 판단 |
+| --- | --- | --- | --- |
+| 보완 전 | 클라이언트 IP 없음(파일만 되돌림) | 403(새 룰이 적용돼 있음) | 불일치 |
+| 보완 후 | 클라이언트 IP 없음 | 통과(이전 룰로 다시 reload) | 일치 |
+
+파일 교체 실패, 적용 중 종료 후 재시작, 깨진 JSON 수신은 `waf/tests/test_blacklist_sync.py`의 회귀 테스트로 재현한다. 보완 전 스크립트에서는 추가한 테스트 7개가 모두 실패한다.
+
+**2026-10-27** (미완료 적용 복구와 백엔드 장애가 겹치는 경우)
+
+- 기존 서비스와 네트워크·상태 볼륨을 공유하지 않는 일회용 `owasp/modsecurity-crs:nginx` 컨테이너로 확인했다.
+- 이전 설정 A는 테스트 요청을 허용하고, 후보 B는 `127.0.0.1`을 차단하도록 구성했다. B를 실제 reload해 403을 확인하고 `.prev`에는 A를 남겼다. 이는 reload 후 백업 삭제 전에 동기화가 종료된 상태를 재현한다.
+- 스냅샷 API를 연결 불가능한 주소로 지정하고 `once`를 실행했다. 목록 조회는 실패했지만, 먼저 A의 복원·검증·reload가 완료되어 같은 요청이 200으로 돌아왔고 파일도 A와 일치했다.
+- 시작 훅은 이미지의 `/docker-entrypoint.sh`가 `set -e`로 훅 오류를 전파하는 것을 확인했다. 복원 파일 교체 실패·복구 reload 실패·프로세스 재시도는 가짜 명령을 사용한 회귀 테스트로 검증했으며, 이 실패들을 실제 Nginx에서 모두 재현한 것은 아니다.
 
 ### 한계
 

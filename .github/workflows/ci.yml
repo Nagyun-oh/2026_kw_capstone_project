@@ -14,7 +14,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# 백엔드 테스트, 프론트엔드 빌드, AI 이미지 기동 확인, Compose 설정 검증을 수행한다.
+# 백엔드 테스트, 프론트엔드 빌드, AI 이미지 기동 확인, WAF 스크립트 테스트, Compose 설정 검증을 수행한다.
 # 배포는 별도 workflow에서 수행한다. 모델 평가(정확도 측정)는 포함하지 않는다.
 jobs:
   backend:
@@ -140,6 +140,17 @@ jobs:
       - name: Show AI logs
         if: always()
         run: docker logs ai 2>&1 | tail -50 || true
+
+  waf:
+    name: WAF script tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run blacklist sync and log rotation tests
+        # Docker·실제 nginx 없이 가짜 백엔드·nginx로 waf/sync, waf/scripts의 셸 스크립트를 검증한다.
+        # 동기화 스크립트가 쓰는 perl JSON::PP는 러너 기본 perl에 포함돼 있다(WAF 이미지와 같다).
+        run: python3 -m unittest discover -s waf/tests -v
 
   compose:
     name: Compose configuration

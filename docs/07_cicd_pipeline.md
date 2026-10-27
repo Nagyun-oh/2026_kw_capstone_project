@@ -20,7 +20,7 @@ develop에 merge
    │
    ▼
 GitHub Actions
- ├─ CI : 백엔드 테스트(MySQL) · 프론트 빌드 · AI 이미지 빌드 + /health · Compose 검증
+ ├─ CI : 백엔드 테스트(MySQL) · 프론트 빌드 · AI 이미지 빌드 + /health · WAF 스크립트 테스트 · Compose 검증
  └─ CD : 모델 다운로드·SHA-256 검증 → 이미지 3개 빌드 → ECR push (태그 = git SHA)
    │     AWS 인증은 OIDC 임시 자격 증명 (GitHub에 AWS 키 저장 안 함)
    ▼
@@ -44,6 +44,7 @@ SSM Run Command → EC2
 | Backend test & build | MySQL 8.0 서비스 컨테이너에 `docs/db/security-db-schema.sql` 적용 후 `./gradlew test bootJar`. 실패 시 테스트 리포트를 artifact로 업로드 |
 | Frontend build | `npm ci` → `npm run build` |
 | AI image build & health | 모델 다운로드·검증 → `AI_new` 이미지 빌드 → 컨테이너 기동 후 `/health`의 `model_loaded=true` 확인 |
+| WAF script tests | `python3 -m unittest discover -s waf/tests`. Docker·실제 nginx 없이 가짜 백엔드·nginx로 블랙리스트 동기화와 로그 순환 스크립트 검증 |
 | Compose configuration | 로컬·AWS·WAF Compose 파일 문법 검증 (더미 환경변수 사용) |
 
 - 백엔드 `contextLoads`는 실제 DB 연결과 JPA `validate`를 수행하므로 MySQL이 필요하다. Kafka는 필요 없다.
