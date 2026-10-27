@@ -106,7 +106,11 @@ function useWebSocket(onThreatReceived) {
                 toast.error(text, {
                   toastId,
                   position: 'top-right',
-                  autoClose: 5000,
+                  autoClose: false,
+                  closeButton: true,
+                  closeOnClick: false,
+                  draggable: false,
+                  hideProgressBar: true,
                 });
               }
               // UPDATED인데 팝업이 닫혀 있다면 다시 열지 않는다.
@@ -120,9 +124,12 @@ function useWebSocket(onThreatReceived) {
                     {
                       toastId,
                       position: 'top-right',
-                      autoClose: 5000,
-                    }
-                  );
+                      autoClose: false,
+                      closeButton: true,
+                      closeOnClick: false,
+                      draggable: false,
+                      hideProgressBar: true,
+                    });
                 }
               }
 
@@ -139,7 +146,7 @@ function useWebSocket(onThreatReceived) {
             // 2초 후 강조 효과 해제
             highlightTimerRef.current = setTimeout( () =>{
               setIsNewThreat(false);
-            }, 2000);
+            }, 10000);
           }
         );
       },

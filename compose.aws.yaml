@@ -103,6 +103,8 @@ services:
       WAF_SYNC_TOKEN: ${WAF_SYNC_TOKEN:-}
       SESSION_COOKIE_SECURE: "true"
       SERVER_FORWARD_HEADERS_STRATEGY: native
+      WAF_ID: ${WAF_ID:-aws-waf-1}
+      WAF_SYNC_STALE_AFTER_SECONDS: ${WAF_SYNC_STALE_AFTER_SECONDS:-60}
   # ────────────────── React + Nginx ──────────────────────
   frontend:
     build:

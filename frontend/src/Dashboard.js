@@ -13,6 +13,8 @@ import DashboardSummary from './components/DashboardSummary';
 import useDashboardSummary from './hooks/useDashboardSummary';
 import WafDetailModal from './components/WafDetailModal';
 import BlacklistDeleteModal from './components/BlacklistDeleteModal';
+import useWafSyncStatus from './hooks/useWafSyncStatus';
+import WafSyncStatusPanel from './components/WafSyncStatusPanel';
 
 function Dashboard({
   user,
@@ -52,6 +54,13 @@ function Dashboard({
     updatedAt: summaryUpdatedAt,
     refreshSummary,
   } = useDashboardSummary();
+
+  const {
+    data: wafSyncStatus,
+    isLoading: isWafSyncLoading,
+    errorMessage: wafSyncError,
+    refreshWafStatus,
+  } = useWafSyncStatus();
 
   const {isNewThreat, connectionStatus} 
     = useWebSocket (() => {
@@ -130,6 +139,7 @@ const handleViewWaf = threatId => {
 function handleRefreshAll(){
   fetchAllData();
   refreshSummary();
+  refreshWafStatus();
 }
 
 // 목록의 삭제 버튼: 확인 모달을 연다.
@@ -198,6 +208,7 @@ const handleConfirmBlacklistDelete = async () => {
     const [listUpdated] = await Promise.all([
       refreshBlacklists(),
       refreshSummary(),
+      refreshWafStatus(),
     ]);
 
     if (listUpdated === false) {
@@ -292,6 +303,12 @@ const handleConfirmBlacklistDelete = async () => {
     </div>
 
     <div id="security-blacklist" className="dashboard-section">
+      <WafSyncStatusPanel
+        data={wafSyncStatus}
+        isLoading={isWafSyncLoading}
+        errorMessage={wafSyncError}
+        onRefresh={refreshWafStatus}
+      />
       <BlacklistTable
         blacklists={blacklists}
         pageInfo={blacklistPage}

@@ -56,9 +56,8 @@ public class WafSyncTokenFilter extends OncePerRequestFilter {
                         "waf-sync",
                         null,
                         List.of(
-                                new SimpleGrantedAuthority(
-                                        "WAF_BLACKLIST_READ"
-                                )
+                                new SimpleGrantedAuthority("WAF_BLACKLIST_READ"),
+                                new SimpleGrantedAuthority("WAF_SYNC_STATUS_WRITE")
                         )
                 );
 
@@ -73,9 +72,6 @@ public class WafSyncTokenFilter extends OncePerRequestFilter {
         } finally {
             SecurityContextHolder.clearContext();
         }
-
-
-
     }
 
     private boolean isValidToken(String suppliedToken){
