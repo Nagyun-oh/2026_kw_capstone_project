@@ -1,7 +1,7 @@
 # WAF 동기화 상태 보고 API (합의 초안)
 
 > **상태**: 보안(WAF)·백엔드 합의용 초안. WAF 쪽 보고 전송은 이 문서대로 구현했다([waf/sync/blacklist-sync.sh](../waf/sync/blacklist-sync.sh)).
-> 백엔드 수신 API·저장·조회와 대시보드 표시는 아직 없다. [11. 변경 제안](#11-변경-제안-합의-필요)은 합의 전까지 구현에 반영하지 않았다.
+> 백엔드 수신 API·저장·조회와 대시보드 표시는 아직 없다. 이번 보완에서 `INVALID_FORMAT` 보고와 #92의 안전한 복구를 WAF에 반영했다. [11. 변경 제안](#11-변경-제안-합의-필요)의 백엔드 항목은 후속 작업이다.
 
 ## 1. 목적과 범위
 
@@ -84,6 +84,9 @@ version 형식은 백엔드 `BlacklistSnapshotService`와 같은 **소문자 SHA
 | `GATEWAY` | WAF 컨테이너 기본 게이트웨이(로컬은 호스트에서 온 모든 요청, AWS는 호스트 Nginx의 출발지) |
 | `TRUSTED_PROXY` | `SET_REAL_IP_FROM`이 단일 IP일 때 그 값(AWS `WAF_TRUSTED_PROXY`) |
 | `CONFIGURED_EXCLUSION` | `WAF_SYNC_EXCLUDE_IPS`로 지정한 IP |
+| `INVALID_FORMAT` | WAF가 지원하지 않는 문자열(앞자리 0, CIDR, IPv4 포함 IPv6 등). 원래 문자열을 그대로 보고 |
+
+형식 오류로 제외된 값도 누락 없이 보고한다. `excludedIps[].ip`는 올바른 IP라는 보장이 없는 원본 문자열이므로, 백엔드가 일반 IP 검증으로 이 보고를 거부하면 안 된다. 빈 문자열도 `INVALID_FORMAT`으로 전달될 수 있다. 화면에서는 문자열로 안전하게 렌더링한다.
 
 한 IP가 여러 사유에 해당하면 `LOOPBACK`·`UNSPECIFIED_ADDRESS` > `TRUSTED_PROXY` > `GATEWAY` > `CONFIGURED_EXCLUSION` 순으로 하나만 보낸다(AWS에서 게이트웨이와 신뢰 프록시가 같은 IP면 `TRUSTED_PROXY`).
 
@@ -135,17 +138,18 @@ version 형식은 백엔드 `BlacklistSnapshotService`와 같은 **소문자 SHA
 | 룰 파일 백업·교체 실패 | 건드리지 않음 | `appliedVersion = A` |
 | `nginx -t` 실패, reload 신호 전송 실패 | 신호를 받지 않음, 파일은 A로 되돌림 | `appliedVersion = A` |
 | reload 후 새 worker 확인 시간 초과 → A로 다시 검증·reload·확인 성공 | A | `appliedVersion = A` |
-| 위에서 A 재적용도 확인 못 함 | A인지 B인지 모름 | `appliedVersion = null`, 다음 주기에 같은 목록이어도 다시 적용 |
-| 적용 도중 프로세스 종료 뒤 같은 컨테이너에서 재실행 | 모름 | 다시 적용해 확인할 때까지 `null` |
-| WAF 컨테이너 재시작 | nginx가 볼륨의 마지막 정상 룰을 새로 읽음 | 첫 동기화에서 확인, reload 없이 `SUCCESS` 가능 |
+| 위에서 A 재적용도 확인 못 함 | A인지 B인지 모름 | `.prev` 보존, `appliedVersion = null`, 다음 주기에는 새 목록 조회 전 A 복구부터 재시도 |
+| 적용 도중 프로세스 종료 뒤 같은 컨테이너에서 재실행 | 모름 | A 복원·검증·reload 확인까지 `null`. 이후 조회가 실패해도 확인된 A를 보고 |
+| WAF 컨테이너 재시작 | nginx가 볼륨의 마지막 정상 룰을 새로 읽음 | `.prev`가 있으면 복구 검증·reload 후 보고. 미완료 표시가 없고 메타데이터가 완전하면 reload 없이 `SUCCESS` 가능 |
 
 ### WAF가 '적용 확인'을 판단하는 방법
 
 - reload 확인은 **reload 전의 worker가 모두 새 worker로 바뀐 것**을 `/proc`에서 확인하는 것이다. worker를 볼 수 없으면 확인할 수 없으므로 reload를 보내지 않고 실패로 처리한다.
 - 룰 파일은 nginx 시작 전(`prepare`)이나 확인된 reload로만 바뀐다. 따라서 아래 두 표시가 없고 nginx가 실행 중이면 nginx는 룰 파일대로 동작한다.
-  - `blacklist.conf.prev`: 적용 중(교체했지만 아직 확인 전)
-  - `/tmp/waf-blacklist-sync.unverified`: reload 결과를 확인하지 못함(재시작 때 지움)
-- 이때 룰 파일 머리 주석의 version과 `# 차단 제외:` 주석을 `appliedVersion`, `excludedIps`로 보낸다. 그래서 `excludedIps`는 마지막 실패 후보가 아니라 현재 적용된 목록 기준이다.
+  - `blacklist.conf.prev`: 적용 또는 복구 중(실행 설정을 확인하기 전에는 보존)
+  - `/tmp/waf-blacklist-sync.unverified`: 이전 버전이 남긴 미확인 표시. 준비 단계만으로 지우지 않고 확인된 적용·복구 후 제거
+- 이때 룰 파일 머리 주석의 version과 `# 차단 제외:` 주석을 `appliedVersion`, `excludedIps`로 보낸다. `# 차단 제외 메타데이터: 1`이 있어야 완전한 제외 목록으로 판단한다. 구버전 파일처럼 메타데이터가 없으면 둘 다 `null`로 보내며, 다음 정상 조회·적용으로 갱신한다.
+- 복구 파일 교체·검증·reload 실패도 `STATE_WRITE_FAILED` / `NGINX_TEST_FAILED` / `RELOAD_FAILED` / `RELOAD_TIMEOUT`으로 보고한다. 복구가 완료되지 않은 상태에서는 실제 적용 version과 제외 목록을 `null`로 유지한다.
 
 ## 7. 보고 시점과 연결 끊김 기준
 
@@ -244,11 +248,11 @@ nginx가 실행 중이 아니어서 적용을 확인하지 못함:
 
 ## 11. 변경 제안 (합의 필요)
 
-WAF 구현 중 확인한 사항이다. 초안을 임의로 바꾸지 않고, 아래 항목은 합의 전까지 구현에 반영하지 않았다(1·2번은 백엔드 작업).
+WAF 구현 중 확인한 사항이다. 3번은 이번 보완에서 WAF에 반영했고, 나머지는 백엔드 구현 전에 확인할 계약 사항이다(1·2번은 백엔드 작업).
 
 1. **보고 경로 CSRF 예외**: `csrf.ignoringRequestMatchers("/internal/waf/sync-status")`처럼 이 경로만 예외로 둔다. 이 체인은 세션·쿠키를 쓰지 않고(STATELESS, `NullSecurityContextRepository`) 커스텀 헤더 토큰으로 인증하므로, 브라우저가 자동으로 붙이는 자격 증명이 없어 CSRF 공격 대상이 아니다. 다른 경로의 CSRF 보호는 그대로 둔다.
 2. **쓰기 권한 분리**: 토큰 필터가 `WAF_SYNC_STATUS_WRITE` 같은 권한을 함께 부여하고 보고 경로는 그 권한만 허용한다. 조회 권한과 구분해 두면 이후 권한 정리가 쉽다.
-3. **제외 사유 `INVALID_FORMAT` 추가**: 백엔드 검증은 `01.2.3.4`(앞자리 0), `::1.2.3.4`(IPv4 포함 IPv6)를 허용하지만 WAF는 형식 오류로 보고 차단하지 않는다. AI 자동 등록 경로는 이 검증을 거치지 않는다. 지금은 사유 목록에 없어 `excludedIps`에 넣지 않고 WAF 로그에만 남긴다. 추가하면 "등록됐지만 형식 때문에 차단되지 않는 IP"를 화면에 보여줄 수 있다.
+3. **제외 사유 `INVALID_FORMAT` 반영 완료(WAF)**: 백엔드와 WAF의 허용 형식 차이로 차단되지 않는 값도 `excludedIps`에 담는다. 백엔드 수신 DTO·사유 검증·프론트 표시에 이 코드를 포함해야 한다. 기존 IP 등록 검증 자체는 이번에 변경하지 않았다.
 4. **오류 코드 목록 확정**: 4절의 7개 코드를 기준으로 하고, 백엔드는 모르는 코드도 문자열로 저장한다(WAF가 코드를 추가해도 400이 되지 않게).
 5. **`message` 길이**: 최대 300자. DB 컬럼은 300자 이상(예: `VARCHAR(500)`)으로 둔다.
 6. **`wafId` 형식**: 소문자·숫자·`.`·`_`·`-`, 64자 이하. WAF는 형식이 틀리면 보고를 끄고 경고만 남긴다(동기화는 계속).
