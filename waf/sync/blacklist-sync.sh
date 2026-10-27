@@ -19,7 +19,8 @@ export LC_ALL=C
 STATE_DIR=${WAF_BLACKLIST_STATE_DIR:-/var/lib/waf-blacklist}
 RULES_FILE=$STATE_DIR/blacklist.conf   # CUSTOM-003-blacklist-sync.conf가 Include하는 파일
 CANDIDATE_FILE=$RULES_FILE.new         # 검증 전 새 룰
-BACKUP_FILE=$RULES_FILE.prev           # 적용 중에만 존재하는 마지막 정상 룰
+BACKUP_FILE=$RULES_FILE.prev           # 적용·복구가 끝날 때까지 보존하는 마지막 정상 룰
+RESTORE_FILE=$RULES_FILE.restore       # 백업을 보존하며 원자적으로 복원할 임시 파일
 SYNC_URL=${WAF_SYNC_URL:-http://backend:8080/internal/waf/blacklist}
 SYNC_TOKEN=${WAF_SYNC_TOKEN:-}
 SYNC_INTERVAL=${WAF_SYNC_INTERVAL:-10}
@@ -286,10 +287,28 @@ save_backup() {
     mv -f "$tmp" "$BACKUP_FILE" || { rm -f "$tmp"; return 1; }
 }
 
-# 백업이 있으면 RULES_FILE로 되돌린다. 0: 되돌림 또는 백업 없음, 1: 되돌리지 못함(백업은 그대로 남는다)
+# 백업을 복사한 뒤 원자적으로 교체한다. 실행 설정 복구까지 확인하기 전에는 백업을 지우지 않는다.
+# 복구 도중 종료돼도 다음 프로세스가 .prev를 보고 다시 복구할 수 있어야 한다.
 restore_backup() {
     [[ -e $BACKUP_FILE ]] || return 0
-    mv -f "$BACKUP_FILE" "$RULES_FILE"
+    if ! cp -p "$BACKUP_FILE" "$RESTORE_FILE" || ! mv -f "$RESTORE_FILE" "$RULES_FILE"; then
+        rm -f "$RESTORE_FILE"
+        return 1
+    fi
+}
+
+# 미완료 적용은 백엔드 조회와 무관하게 먼저 복구한다. 실패하면 .prev를 남기고 다음 주기에 재시도한다.
+recover_pending() {
+    local output
+    if ! restore_backup; then SYNC_ERROR='끝나지 않은 이전 적용의 파일 복구 실패'; return 1; fi
+    if ! output=$(nginx -t 2>&1); then SYNC_ERROR='이전 룰 복구 검증 실패'; return 1; fi
+    if nginx_running && ! reload_nginx; then
+        SYNC_ERROR="이전 룰 복구 reload 실패(실제 적용 상태 확인 필요): $RELOAD_ERROR"
+        return 1
+    fi
+    if ! rm -f "$BACKUP_FILE"; then SYNC_ERROR='복구 후 백업 삭제 실패'; return 1; fi
+    LAST_VERSION=''
+    FORCE_APPLY=1
 }
 
 # reload 실패 뒤 이전 룰로 되돌린다. $1: reload_nginx 결과
@@ -298,12 +317,15 @@ restore_backup() {
 rollback_reload() {
     local output
     if ! restore_backup; then APPLY_ERROR+=', 이전 룰 복구 실패'; return 1; fi
-    (( $1 == 2 )) || return 0
-    if ! output=$(nginx -t 2>&1) || ! reload_nginx; then
-        APPLY_ERROR+=', 이전 룰 재적용도 실패(실제 적용 상태 확인 필요)'
-        return 1
+    if (( $1 == 2 )); then
+        if ! output=$(nginx -t 2>&1) || ! reload_nginx; then
+            APPLY_ERROR+=', 이전 룰 재적용도 실패(실제 적용 상태 확인 필요)'
+            return 1
+        fi
+        APPLY_ERROR+=', 이전 룰로 다시 reload함'
     fi
-    APPLY_ERROR+=', 이전 룰로 다시 reload함'
+    # 신호 전송 자체가 실패했다면 실행 설정은 이전 룰이므로 파일 복원만으로 완료된다.
+    if ! rm -f "$BACKUP_FILE"; then APPLY_ERROR+=', 복구 후 백업 삭제 실패'; return 1; fi
 }
 
 # $1(RULES_FILE과 같은 디렉터리의 새 룰)을 검증 후 교체한다. 실패하면 이전 룰로 되돌린다.
@@ -320,7 +342,8 @@ apply_rules() {
     fi
     if ! output=$(nginx -t 2>&1); then
         APPLY_ERROR="nginx -t 실패: $(grep -m1 -oE '\[emerg\].*' <<< "$output" | cut -c1-200)"
-        restore_backup || APPLY_ERROR+=', 이전 룰 복구 실패'
+        # reload 전 검증 실패이므로 실행 설정은 바뀌지 않았다.
+        if ! restore_backup || ! rm -f "$BACKUP_FILE"; then APPLY_ERROR+=', 이전 룰 복구 실패'; fi
         return 1
     fi
     # nginx가 아직 뜨지 않았으면 파일만 바꿔 두고, nginx가 시작할 때 읽게 한다.
@@ -350,9 +373,8 @@ sync_once() {
     local response candidate old_ips new_ips
     # 이전 적용이 끝나지 않았다면(복구 실패 등) 백업이 마지막 정상 룰이다. 덮어쓰기 전에 먼저 되돌린다.
     if [[ -e $BACKUP_FILE ]]; then
-        if ! restore_backup; then SYNC_ERROR='끝나지 않은 이전 적용을 되돌리지 못함'; return 1; fi
-        log "끝나지 않은 이전 적용을 마지막 정상 룰로 되돌렸다. 최신 목록으로 다시 적용한다"
-        FORCE_APPLY=1
+        recover_pending || return 1
+        log "끝나지 않은 이전 적용을 마지막 정상 룰로 복구했다. 최신 목록을 조회한다"
     fi
     response=$(mktemp) || { SYNC_ERROR='임시 파일 생성 실패'; return 1; }
     if ! fetch_snapshot "$response"; then
@@ -411,25 +433,35 @@ init_volume() {
 prepare() {
     if [[ ! -w $STATE_DIR ]]; then
         log "경고: $STATE_DIR에 쓸 수 없다. waf-blacklist-init 실행 여부와 볼륨 권한을 확인한다"
-        return 0
+        return 1
     fi
-    rm -f "$CANDIDATE_FILE" "$BACKUP_FILE.tmp"
+    if ! rm -f "$CANDIDATE_FILE" "$BACKUP_FILE.tmp" "$RESTORE_FILE"; then
+        log '오류: 복구용 임시 파일을 정리하지 못했다'
+        return 1
+    fi
     # 적용 도중 종료됐다면 교체된 룰은 검증·reload 전일 수 있다. 백업(마지막 정상 룰)으로 되돌린다.
     if [[ -e $BACKUP_FILE ]]; then
         if restore_backup; then
             log "적용이 끝나지 않은 룰이 있어 마지막 정상 룰로 되돌렸다"
         else
             log "경고: 마지막 정상 룰($BACKUP_FILE)로 되돌리지 못했다. 볼륨 권한을 확인한다"
+            return 1
         fi
+        # 미완료 후보를 빈 룰로 대체하지 않는다. 복원된 백업도 유효하지 않으면 시작을 중단한다.
+        if [[ ! -s $RULES_FILE ]] || ! rules_file_valid; then
+            log '오류: 복원된 마지막 정상 룰의 형식이 올바르지 않다'
+            return 1
+        fi
+        # 여기서는 nginx가 아직 시작되지 않았다. .prev는 run의 검증·reload 확인 후 제거한다.
     fi
     if [[ ! -s $RULES_FILE ]]; then
-        printf '%s\n' "$EMPTY_RULES" > "$RULES_FILE"
+        printf '%s\n' "$EMPTY_RULES" > "$RULES_FILE" || return 1
         log "저장된 룰이 없어 차단 없이 시작한다"
     elif rules_file_valid; then
         log "마지막 정상 룰로 시작한다: 차단 IP $(rule_ips "$RULES_FILE" | grep -c .)개"
     else
-        mv -f "$RULES_FILE" "$RULES_FILE.invalid"
-        printf '%s\n' "$EMPTY_RULES" > "$RULES_FILE"
+        mv -f "$RULES_FILE" "$RULES_FILE.invalid" || return 1
+        printf '%s\n' "$EMPTY_RULES" > "$RULES_FILE" || return 1
         log "경고: 저장된 룰 형식이 올바르지 않아 $RULES_FILE.invalid로 옮기고 차단 없이 시작한다"
     fi
 }

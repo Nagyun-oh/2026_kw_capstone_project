@@ -20,6 +20,7 @@ import unittest
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "sync" / "blacklist-sync.sh"
+HOOK = SCRIPT.with_name("99-blacklist-sync.sh")
 TOKEN = "test-only-sync-token-0123456789abcdef"
 RULE_ACTIONS = ("id:20100,phase:1,deny,status:403,log,msg:'Blacklisted IP (backend sync)',"
                 "tag:'custom/blacklist',ctl:ruleEngine=On")
@@ -70,6 +71,7 @@ class BlacklistSyncTest(unittest.TestCase):
         self.pid_file = root / "nginx.pid"
         self.pid_file.write_text(str(os.getpid()))
         self.calls = root / "nginx-calls.log"
+        self.runtime_rules = root / "runtime.conf"
         self.proc = root / "proc"
         real_mv = shutil.which("mv")
         nginx = root / "bin" / "nginx"
@@ -83,6 +85,7 @@ class BlacklistSyncTest(unittest.TestCase):
             '  -t) [ "${TEST_NGINX_T_FAIL:-0}" = 0 ] || { echo "nginx: [emerg] test rule error" >&2; exit 1; } ;;\n'
             '  "-s reload")\n'
             '    [ "${TEST_NGINX_RELOAD_FAIL:-0}" = 0 ] || { echo "nginx: [alert] reload failed" >&2; exit 1; }\n'
+            '    cp "$WAF_BLACKLIST_STATE_DIR/blacklist.conf" "$TEST_RUNTIME_RULES" || exit 1\n'
             '    if [ "$(grep -c \'^-s reload$\' "$TEST_NGINX_CALLS")" -gt "${TEST_NGINX_RELOAD_STALL:-0}" ]; then\n'
             '      for dir in "$WAF_PROC_DIR"/[0-9]*; do\n'
             f'        if [ -d "$dir" ]; then {real_mv} "$dir" "${{dir}}0"; fi\n'
@@ -97,10 +100,13 @@ class BlacklistSyncTest(unittest.TestCase):
         fake_mv = nginx.parent / "mv"
         fake_mv.write_text(
             '#!/bin/sh\n'
-            'if [ -n "${TEST_MV_FAIL_FROM:-}" ] && [ "$2" = "$TEST_MV_FAIL_FROM" ] && [ -e "$TEST_MV_FAIL_FLAG" ]; then\n'
+            'if { [ -n "${TEST_MV_FAIL_FROM:-}" ] && [ "$2" = "$TEST_MV_FAIL_FROM" ]; } ||\n'
+            '   { [ -n "${TEST_MV_FAIL_TO:-}" ] && [ "$3" = "$TEST_MV_FAIL_TO" ]; }; then\n'
+            '  if [ -e "$TEST_MV_FAIL_FLAG" ]; then\n'
             '  rm -f "$TEST_MV_FAIL_FLAG"\n'
             '  echo "mv: cannot move \'$2\': Permission denied" >&2\n'
             '  exit 1\n'
+            '  fi\n'
             'fi\n'
             f'exec {real_mv} "$@"\n'
         )
@@ -120,6 +126,7 @@ class BlacklistSyncTest(unittest.TestCase):
             PATH=f"{nginx.parent}:{os.environ['PATH']}",
             TMPDIR=str(root / "tmp"),
             TEST_NGINX_CALLS=str(self.calls),
+            TEST_RUNTIME_RULES=str(self.runtime_rules),
             WAF_BLACKLIST_STATE_DIR=str(self.state),
             WAF_SYNC_URL=f"http://127.0.0.1:{self.server.server_port}/internal/waf/blacklist",
             WAF_SYNC_TOKEN=TOKEN,
@@ -315,7 +322,27 @@ class BlacklistSyncTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("마지막 정상 룰로 되돌렸다", result.stdout)
         self.assertEqual(self.rules.read_bytes(), last_good)
+        self.assertEqual(self.state_files(), ["blacklist.conf", "blacklist.conf.prev"])
+        self.assertEqual(self.nginx_calls(), [])
+        self.serve(status=503, body="{}")
+        result = self.run_sync()
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("HTTP 503", result.stdout)
+        self.assertEqual(self.runtime_rules.read_bytes(), last_good)
+        self.assertEqual(self.nginx_calls(), ["-t", "-s reload"])
         self.assertEqual(self.state_files(), ["blacklist.conf"])
+
+    def test_prepare_rejects_invalid_backup_without_clearing_rules(self):
+        """복원된 백업이 손상됐으면 빈 목록으로 조용히 시작하지 않는다."""
+        self.interrupted_apply(["203.0.113.10"], ["198.51.100.7"])
+        backup = self.state / "blacklist.conf.prev"
+        backup.write_text("invalid rule\n")
+        result = self.run_sync("prepare")
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("복원된 마지막 정상 룰의 형식이 올바르지 않다", result.stdout)
+        self.assertEqual(backup.read_text(), "invalid rule\n")
+        self.assertEqual(self.rules.read_bytes(), backup.read_bytes())
+        self.assertNotIn("차단 없이 시작", result.stdout)
         self.assertEqual(self.nginx_calls(), [])
 
     def test_sync_reapplies_after_interrupted_apply(self):
@@ -326,8 +353,81 @@ class BlacklistSyncTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertIn("끝나지 않은 이전 적용", result.stdout)
         self.assertEqual(self.blocked_ips(), ["198.51.100.7"])
+        # 백엔드 조회 전에 이전 룰을 복구하고, 조회에 성공하면 새 룰을 적용한다.
+        self.assertEqual(self.nginx_calls(), ["-t", "-s reload", "-t", "-s reload"])
+        self.assertEqual(self.state_files(), ["blacklist.conf"])
+
+    def test_interrupted_apply_recovers_runtime_before_failed_fetch(self):
+        """새 룰 reload 후 중단되고 백엔드까지 503이어도 이전 실행 설정을 복구한다."""
+        last_good = self.interrupted_apply(["203.0.113.10"], ["198.51.100.7"])
+        self.runtime_rules.write_bytes(self.rules.read_bytes())
+        self.add_worker(100)
+        self.serve(status=503, body="{}")
+        result = self.run_sync()
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("HTTP 503", result.stdout)
+        self.assertEqual(self.rules.read_bytes(), last_good)
+        self.assertEqual(self.runtime_rules.read_bytes(), last_good)
         self.assertEqual(self.nginx_calls(), ["-t", "-s reload"])
         self.assertEqual(self.state_files(), ["blacklist.conf"])
+
+    def test_recovery_failure_keeps_backup_and_retries_after_process_restart(self):
+        """복구 검증·reload 실패 시 백업을 보존하고 새 프로세스에서도 복구를 재시도한다."""
+        cases = {
+            "검증 실패": dict(TEST_NGINX_T_FAIL="1"),
+            "신호 실패": dict(TEST_NGINX_RELOAD_FAIL="1"),
+            "확인 시간 초과": dict(TEST_NGINX_RELOAD_STALL="100", WAF_RELOAD_TIMEOUT="1"),
+        }
+        self.add_worker(100)
+        for name, env in cases.items():
+            with self.subTest(name):
+                last_good = self.interrupted_apply(["203.0.113.10"], ["198.51.100.7"])
+                self.runtime_rules.write_bytes(self.rules.read_bytes())
+                FakeBackend.tokens.clear()
+                self.serve(status=503, body="{}")
+                result = self.run_sync(**env)
+                self.assertEqual(result.returncode, 1, result.stdout)
+                self.assertEqual((self.state / "blacklist.conf.prev").read_bytes(), last_good)
+                self.assertEqual(FakeBackend.tokens, [], "복구 실패 중에는 새 목록을 조회하지 않는다")
+                self.calls.unlink()
+                # run_sync는 매번 새 프로세스다. 메모리의 FORCE_APPLY 없이도 재시도해야 한다.
+                retry = self.run_sync()
+                self.assertEqual(retry.returncode, 1, retry.stdout)
+                self.assertIn("HTTP 503", retry.stdout)
+                self.assertEqual(self.runtime_rules.read_bytes(), last_good)
+                self.assertEqual(self.nginx_calls(), ["-t", "-s reload"])
+                self.assertEqual(self.state_files(), ["blacklist.conf"])
+
+    def test_prepare_restore_failure_returns_error_without_accepting_candidate(self):
+        """백업 복원 실패는 정상 준비 완료로 처리하지 않으며 백업을 보존한다."""
+        last_good = self.interrupted_apply(["203.0.113.10"], ["198.51.100.7"])
+        self.mv_fail_flag.touch()
+        result = self.run_sync("prepare",
+                               TEST_MV_FAIL_TO=str(self.rules),
+                               TEST_MV_FAIL_FLAG=str(self.mv_fail_flag))
+        self.assertFalse(self.mv_fail_flag.exists(), "복원 파일 교체 실패가 재현되어야 한다")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn("마지막 정상 룰로 시작한다", result.stdout)
+        self.assertEqual((self.state / "blacklist.conf.prev").read_bytes(), last_good)
+        self.assertEqual(self.nginx_calls(), [])
+        retry = self.run_sync("prepare")
+        self.assertEqual(retry.returncode, 0, retry.stdout)
+        self.assertEqual(self.rules.read_bytes(), last_good)
+
+    def test_startup_hook_stops_when_prepare_fails(self):
+        """prepare 실패를 시작 훅이 전파하고 동기화 루프를 시작하지 않는다."""
+        bin_dir = self.state.parent / "bin"
+        hook_calls = self.state.parent / "hook-calls.log"
+        fake_bash = bin_dir / "bash"
+        fake_bash.write_text('#!/bin/sh\nprintf "%s\\n" "$2" >> "$TEST_HOOK_CALLS"\nexit 17\n')
+        fake_bash.chmod(0o700)
+        fake_setsid = bin_dir / "setsid"
+        fake_setsid.write_text('#!/bin/sh\necho run >> "$TEST_HOOK_CALLS"\n')
+        fake_setsid.chmod(0o700)
+        result = subprocess.run(["sh", str(HOOK)], env=dict(self.env, TEST_HOOK_CALLS=str(hook_calls)),
+                                text=True, capture_output=True, timeout=5)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(hook_calls.read_text().splitlines(), ["prepare"])
 
     def test_reload_timeout_reapplies_previous_rules(self):
         self.serve(["203.0.113.10"])
@@ -349,7 +449,8 @@ class BlacklistSyncTest(unittest.TestCase):
                 self.assertEqual(self.rules.read_bytes(), applied)
                 # 파일만 되돌리지 않고 이전 룰로 다시 검증·reload한다.
                 self.assertEqual(self.nginx_calls(), ["-t", "-s reload", "-t", "-s reload"])
-                self.assertEqual(self.state_files(), ["blacklist.conf"])
+                expected = ["blacklist.conf"] if stalled_reloads == "1" else ["blacklist.conf", "blacklist.conf.prev"]
+                self.assertEqual(self.state_files(), expected)
 
     def test_nginx_test_failure_restores_previous_rules(self):
         self.serve(["203.0.113.10"])
