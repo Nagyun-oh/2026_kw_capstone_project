@@ -1147,3 +1147,133 @@
   cursor: not-allowed;
   opacity: 0.55;
 }
+
+/* WAF 블랙리스트 동기화 상태 */
+.waf-sync-panel {
+  margin-bottom: 20px;
+}
+
+.waf-sync-panel__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.waf-sync-panel__body {
+  padding: 0 24px 24px;
+}
+
+.waf-sync-panel__description {
+  margin: 0 0 18px;
+  color: var(--dashboard-text);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.waf-sync-panel__notice {
+  margin: 12px 0;
+  color: var(--dashboard-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.waf-sync-panel__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 20px;
+}
+
+.waf-sync-panel__facts > div {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 10px;
+  background: #f8f9fc;
+}
+
+.waf-sync-panel dt {
+  color: var(--dashboard-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.waf-sync-panel dd {
+  margin: 8px 0 0;
+  color: var(--dashboard-text);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.waf-sync-panel__failure {
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fff5f5;
+  color: #991b1b;
+  overflow-wrap: anywhere;
+}
+
+.waf-sync-panel__failure > code {
+  display: block;
+  margin-top: 8px;
+}
+
+.waf-sync-panel__failure p {
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+  line-height: 1.7;
+}
+
+.waf-sync-panel__exclusions h3 {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.waf-sync-panel__table {
+  width: 100%;
+  min-width: 420px;
+}
+
+.waf-sync-panel__table code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.waf-sync-panel__versions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--dashboard-border);
+}
+
+.waf-sync-panel__versions summary {
+  color: var(--dashboard-muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.waf-sync-panel__versions dl {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0 0;
+}
+
+.waf-sync-panel__footnote {
+  margin: 20px 0 0;
+  color: var(--dashboard-muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+@media (max-width: 768px) {
+  .waf-sync-panel__body {
+    padding: 0 16px 20px;
+  }
+
+  .waf-sync-panel__facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -39,6 +39,11 @@ public class WafSyncSecurityConfig {
                         .formLogin(form -> form.disable())
                         .httpBasic(basic -> basic.disable())
                         .logout(logout->logout.disable())
+                        .csrf(csrf -> csrf
+                                .ignoringRequestMatchers(
+                                        "/internal/waf/sync-status"
+                                )
+                        )
 
                         .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(
@@ -46,7 +51,13 @@ public class WafSyncSecurityConfig {
                                         "/internal/waf/blacklist"
                                 )
                                         .hasAuthority("WAF_BLACKLIST_READ")
-                                        .anyRequest().denyAll()
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/internal/waf/sync-status"
+                                )
+                                .hasAuthority("WAF_SYNC_STATUS_WRITE")
+
+                                .anyRequest().denyAll()
                         )
                         .exceptionHandling(exception -> exception
                                 .authenticationEntryPoint(

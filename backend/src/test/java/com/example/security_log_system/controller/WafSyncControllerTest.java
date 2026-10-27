@@ -4,6 +4,7 @@ import com.example.security_log_system.config.SecurityConfig;
 import com.example.security_log_system.config.WafSyncSecurityConfig;
 import com.example.security_log_system.dto.BlacklistSnapshotDto;
 import com.example.security_log_system.service.BlacklistSnapshotService;
+import com.example.security_log_system.service.WafSyncStatusService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import com.example.security_log_system.dto.WafSyncReportDto;
+import org.springframework.http.MediaType;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
@@ -44,6 +50,9 @@ public class WafSyncControllerTest {
 
     @MockitoBean
     private BlacklistSnapshotService blacklistSnapshotService;
+
+    @MockitoBean
+    private WafSyncStatusService wafSyncStatusService;
 
     @Test
     @DisplayName("올바른 동기화 토큰으로 전체 차단 목록을 조회한다")
@@ -102,7 +111,7 @@ public class WafSyncControllerTest {
     }
 
     @Test
-    @DisplayName("올바른 토큰이 있어도 동기화 경로의 POST는 거부한다")
+    @DisplayName("스냅샷 조회 경로의 POST는 계속 거부한다")
     void writeRequestIsRejected() throws Exception {
         mockMvc.perform(post(URL)
                         .header("X-WAF-Sync-Token", TOKEN)
@@ -118,6 +127,83 @@ public class WafSyncControllerTest {
         mockMvc.perform(delete("/api/v1/blacklist/1")
                         .with(user("admin").roles("ADMIN")))
                 .andExpect(status().isForbidden());
+    }
+
+
+    private static final String REPORT_URL =
+            "/internal/waf/sync-status";
+
+    private static final String VALID_REPORT = """
+        {
+          "wafId": "local-waf-1",
+          "attemptedVersion": "%s",
+          "appliedVersion": "%s",
+          "lastSyncResult": "SUCCESS",
+          "excludedIps": [],
+          "error": null
+        }
+        """.formatted("a".repeat(64), "a".repeat(64));
+
+    @Test
+    @DisplayName("올바른 토큰의 보고는 CSRF 토큰 없이 저장하고 204를 반환한다")
+    void validReportReturnsNoContent() throws Exception {
+        mockMvc.perform(post(REPORT_URL)
+                        .header("X-WAF-Sync-Token", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_REPORT))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(wafSyncStatusService)
+                .saveReport(any(WafSyncReportDto.class));
+    }
+
+    @Test
+    @DisplayName("관리자 인증만으로 WAF 보고를 저장할 수 없다")
+    void adminCannotSubmitReportWithoutToken() throws Exception {
+        mockMvc.perform(post(REPORT_URL)
+                        .with(user("admin").roles("ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_REPORT))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(wafSyncStatusService);
+    }
+
+    @Test
+    @DisplayName("성공 보고의 시도 version과 적용 version이 다르면 400을 반환한다")
+    void inconsistentSuccessIsRejected() throws Exception {
+        String invalidReport = VALID_REPORT.replace(
+                "\"appliedVersion\": \"" + "a".repeat(64) + "\"",
+                "\"appliedVersion\": \"" + "b".repeat(64) + "\""
+        );
+
+        mockMvc.perform(post(REPORT_URL)
+                        .header("X-WAF-Sync-Token", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidReport))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(wafSyncStatusService);
+    }
+
+    @Test
+    @DisplayName("형식 오류로 제외된 빈 IP 문자열도 정상 보고로 수신한다")
+    void invalidFormatExclusionIsAccepted() throws Exception {
+        String report = VALID_REPORT.replace(
+                "\"excludedIps\": []",
+                """
+                "excludedIps": [
+                  {"ip": "", "reason": "INVALID_FORMAT"}
+                ]
+                """
+        );
+
+        mockMvc.perform(post(REPORT_URL)
+                        .header("X-WAF-Sync-Token", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(report))
+                .andExpect(status().isNoContent());
     }
 
 

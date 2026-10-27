@@ -41,6 +41,8 @@ app:
       event-zone: ${WAF_EVENT_ZONE:UTC}
   waf-sync:
     token: ${WAF_SYNC_TOKEN:}
+    expected-waf-id: ${WAF_ID:local-waf-1}
+    stale-after-seconds: ${WAF_SYNC_STALE_AFTER_SECONDS:60}
 
 
 management:
