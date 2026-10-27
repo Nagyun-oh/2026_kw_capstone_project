@@ -185,6 +185,8 @@ services:
         WAF_SYNC_TOKEN: ${WAF_SYNC_TOKEN:-}
         WAF_SYNC_INTERVAL: ${WAF_SYNC_INTERVAL:-10}
         WAF_SYNC_EXCLUDE_IPS: ${WAF_SYNC_EXCLUDE_IPS:-}
+        # 상태 보고(POST /internal/waf/sync-status)에 쓰는 고정 WAF 이름
+        WAF_ID: ${WAF_ID:-aws-waf-1}
       volumes:
         - ./waf/rules/CUSTOM-001-ai-align.conf:/etc/modsecurity.d/owasp-crs/rules/CUSTOM-001-ai-align.conf
         - ./waf/rules/CUSTOM-002-blacklist.conf:/etc/modsecurity.d/owasp-crs/rules/CUSTOM-002-blacklist.conf
