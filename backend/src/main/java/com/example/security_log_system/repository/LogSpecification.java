@@ -19,6 +19,13 @@ public final class LogSpecification {
         return (root,query,builder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            if(condition.getLogId() !=null){
+                predicates.add(builder.equal(
+                        root.get("id"),
+                        condition.getLogId()
+                ));
+            }
+
             if (StringUtils.hasText(condition.getIp())) {
                 predicates.add(builder.equal(
                         root.get("ipAddress"),

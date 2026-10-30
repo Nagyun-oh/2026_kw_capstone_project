@@ -35,13 +35,15 @@ function DashboardLayout({
         <div className="dashboard-layout" id="dashboard-overview">
             <aside className="dashboard-sidebar">
                 <a className="dashboard-brand" href="#dashboard-overview">
-                    <span className="dashboard-brand__mark" aria-hidden="true">
-                        S
-                    </span>
+                    <img
+                        className="dashboard-brand__logo"
+                        src= '/dualguard-icon.svg'
+                        alt = ''
+                    />
 
                     <span>
-                        <strong>Security Monitor</strong>
-                        <small>보안 위협 분석 시스템</small>
+                        <strong>DualGuard</strong>
+                        <small>Light SOAR</small>
                     </span>
                 </a>
 

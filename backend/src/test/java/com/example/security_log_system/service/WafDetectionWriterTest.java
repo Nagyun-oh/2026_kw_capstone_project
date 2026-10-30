@@ -57,6 +57,9 @@ class WafDetectionWriterTest {
     @Mock
     private RequestAlertService requestAlertService;
 
+    @Mock
+    private AutoBlacklistPolicyService autoBlacklistPolicyService;
+
     private ObjectMapper objectMapper;
     private WafDetectionWriter writer;
 
@@ -70,6 +73,7 @@ class WafDetectionWriterTest {
                 objectMapper,
                 requestCorrelationService,
                 requestAlertService,
+                autoBlacklistPolicyService,
                 "UTC"
         );
 
@@ -143,6 +147,7 @@ class WafDetectionWriterTest {
                 objectMapper,
                 requestCorrelationService,
                 requestAlertService,
+                autoBlacklistPolicyService,
                 "Asia/Seoul"
         );
 

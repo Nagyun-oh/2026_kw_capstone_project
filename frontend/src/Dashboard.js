@@ -15,6 +15,8 @@ import WafDetailModal from './components/WafDetailModal';
 import BlacklistDeleteModal from './components/BlacklistDeleteModal';
 import useWafSyncStatus from './hooks/useWafSyncStatus';
 import WafSyncStatusPanel from './components/WafSyncStatusPanel';
+import BlacklistRegisterModal from './components/BlacklistRegisterModal';
+import useDashboardAutoRefresh from './hooks/useDashboardAutoRefresh';
 
 function Dashboard({
   user,
@@ -45,6 +47,9 @@ function Dashboard({
       threatError,
       deleteBlacklist,
       refreshBlacklists,
+      addBlacklist,
+      logError,
+      blacklistError,
   } = useSecurityData();
 
   const {
@@ -62,10 +67,18 @@ function Dashboard({
     refreshWafStatus,
   } = useWafSyncStatus();
 
-  const {isNewThreat, connectionStatus} 
-    = useWebSocket (() => {
-    fetchThreats(0);
-    fetchBlacklists(0);
+  useDashboardAutoRefresh(
+    () => Promise.allSettled([
+      fetchAllData({background: true}),
+      refreshSummary({background: true}),
+      refreshWafStatus({background:true}),
+    ]),
+    10_000
+  )
+
+  const {isNewThreat, connectionStatus} = useWebSocket (() => {
+    fetchAllData({background: true});
+    refreshSummary({background: true});
   });
 
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
@@ -75,9 +88,13 @@ function Dashboard({
   const [selectedWafThreatId, setSelectedWafThreatId] = useState(null);
   
   const [deletingBlacklistId, setDeletingBlacklistId] = useState(null);
-
   const [blacklistToDelete, setBlacklistToDelete] = useState(null);
   const [blacklistDeleteError, setBlacklistDeleteError] = useState(''); 
+
+  const [isBlacklistRegisterOpen, setIsBlacklistRegisterOpen] = useState(false);
+  const [isBlacklistRegistering, setIsBlacklistRegistering] = useState(false);
+  const [blacklistRegisterError, setBlacklistRegisterError] = useState('');
+  const blacklistRegisterInFlightRef = useRef(false);
 
   // 연속 클릭으로 삭제 요청이 중복 실행되지 않도록 한다.
   const blacklistDeleteInFlightRef = useRef(false);
@@ -222,6 +239,89 @@ const handleConfirmBlacklistDelete = async () => {
   }
 };
 
+function handleOpenBlacklistRegister() {
+  if (blacklistRegisterInFlightRef.current) return;
+
+  setBlacklistRegisterError('');
+  setIsBlacklistRegisterOpen(true);
+}
+
+function handleCloseBlacklistRegister() {
+  if (blacklistRegisterInFlightRef.current) return;
+
+  setIsBlacklistRegisterOpen(false);
+  setBlacklistRegisterError('');
+}
+
+async function handleConfirmBlacklistRegister(request) {
+  if (blacklistRegisterInFlightRef.current) return;
+
+  blacklistRegisterInFlightRef.current = true;
+  setIsBlacklistRegistering(true);
+  setBlacklistRegisterError('');
+
+  try {
+    try {
+      await addBlacklist(request);
+    } catch (error) {
+      const status = error.response?.status;
+      const responseBody = error.response?.data;
+
+      if (status === 401) {
+        setBlacklistRegisterError(
+          '로그인이 만료되었습니다. 다시 로그인해주세요.'
+        );
+      } else if (status === 403) {
+        setBlacklistRegisterError(
+          '등록 권한 또는 CSRF 인증을 확인하지 못했습니다.'
+        );
+      } else if (
+        status === 400 &&
+        responseBody === 'IP is already blacklisted.'
+      ) {
+        setBlacklistRegisterError(
+          '이미 블랙리스트에 등록된 IP입니다.'
+        );
+      } else if (status === 400) {
+        const errors = responseBody?.errors;
+
+        setBlacklistRegisterError(
+          errors && typeof errors === 'object'
+            ? Object.values(errors).join(' ')
+            : 'IP 주소와 등록 사유를 확인해주세요.'
+        );
+      } else {
+        setBlacklistRegisterError(
+          '등록 결과를 확인하지 못했습니다. 창을 닫고 목록을 새로고침해 확인해주세요.'
+        );
+      }
+
+      return;
+    }
+
+    setIsBlacklistRegisterOpen(false);
+
+    toast.success(
+      `${request.ipAddress}를 블랙리스트에 등록했습니다. 실제 차단은 WAF 반영 상태를 확인해주세요.`
+    );
+
+    const [listUpdated] = await Promise.all([
+      refreshBlacklists(),
+      refreshSummary(),
+      refreshWafStatus(),
+    ]);
+
+    if (listUpdated === false) {
+      toast.warning(
+        '등록은 완료됐지만 목록을 갱신하지 못했습니다. 전체 데이터를 새로고침해주세요.'
+      );
+    }
+  } finally {
+    blacklistRegisterInFlightRef.current = false;
+    setIsBlacklistRegistering(false);
+  }
+}
+
  return (
      <DashboardLayout
       user = {user}
@@ -241,6 +341,15 @@ const handleConfirmBlacklistDelete = async () => {
       onConfirm={handleConfirmBlacklistDelete}
       />
 
+      {isBlacklistRegisterOpen && (
+      <BlacklistRegisterModal
+        busy={isBlacklistRegistering}
+        error={blacklistRegisterError}
+        onClose={handleCloseBlacklistRegister}
+        onConfirm={handleConfirmBlacklistRegister}
+      />
+    )}
+
       <LogDetailModal 
         isOpen={isLogModalOpen}
         log={selectedLog}
@@ -255,11 +364,14 @@ const handleConfirmBlacklistDelete = async () => {
         onViewLog={handleViewLog}
       />
 
+      <div className="dashboard-toolbar dashboard-toolbar--refresh">
+        <p className='data-muted'>
+          약 10초마다 자동 갱신됩니다. 검색 조건과 현재 페이지는 유지됩니다.
+        </p>
 
-      <div className="dashboard-toolbar">
         <button
           type="button"
-          className='dashboard-button dashboard-button--primary'
+          className="dashboard-button dashboard-button--primary"
           onClick={handleRefreshAll}
         >
           전체 데이터 새로고침
@@ -283,6 +395,7 @@ const handleConfirmBlacklistDelete = async () => {
         onSearch={searchLogs}
         onReset={resetLogSearch}
         onViewLog = {handleViewLog}
+        error = {logError}
       >
       </LogTable>
       </div>
@@ -318,6 +431,8 @@ const handleConfirmBlacklistDelete = async () => {
         onViewLog={handleViewLog}
         onDelete={handleDeleteBlacklist}
         deletingId={deletingBlacklistId}
+        onRegister={handleOpenBlacklistRegister}
+        error = {blacklistError}
       />
     </div>
      </DashboardLayout>

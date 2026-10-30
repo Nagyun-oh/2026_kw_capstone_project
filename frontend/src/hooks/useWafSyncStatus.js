@@ -7,8 +7,6 @@ import {
 
 import { getWafSyncStatus } from '../api/wafSyncAPI';
 
-const POLL_INTERVAL_MS = 10_000;
-
 function useWafSyncStatus() {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,14 +14,23 @@ function useWafSyncStatus() {
 
   const controllerRef = useRef(null);
 
-  const refreshWafStatus = useCallback(async () => {
+  const refreshWafStatus = useCallback(async (
+    {background = false} = {}
+  ) => {
+
+    if(background && controllerRef.current){
+      return;
+    }
+
     // 수동 새로고침 등으로 새 요청이 시작되면 이전 요청 취소
     controllerRef.current?.abort();
 
     const controller = new AbortController();
     controllerRef.current = controller;
 
-    setIsLoading(true);
+    if(!background){
+      setIsLoading(true);
+    }
     setErrorMessage('');
 
     try {
@@ -71,27 +78,9 @@ function useWafSyncStatus() {
   useEffect(() => {
     refreshWafStatus();
 
-    const refreshIfIdle = () => {
-      // 자동 조회가 진행 중인 요청을 반복 취소하지 않도록 한다.
-      if (controllerRef.current) {
-        return;
-      }
-
-      refreshWafStatus();
-    };
-
-    const intervalId = window.setInterval(
-      refreshIfIdle,
-      POLL_INTERVAL_MS
-    );
-
-    // 다른 탭에서 돌아오면 상태를 다시 확인한다.
-    window.addEventListener('focus', refreshIfIdle);
-
     return () => {
-      window.clearInterval(intervalId);
-      window.removeEventListener('focus', refreshIfIdle);
       controllerRef.current?.abort();
+      controllerRef.current = null;
     };
   }, [refreshWafStatus]);
 

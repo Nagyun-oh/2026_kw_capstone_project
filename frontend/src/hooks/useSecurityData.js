@@ -1,16 +1,18 @@
-import { useRef,useState } from 'react';
+import { useEffect,useRef,useState } from 'react';
 import apiClient from '../api/apiClient';
 
 function useSecurityData() {
 
   /* == 검색 조건 상태 == */
   const EMPTY_LOG_SEARCH = {
+    logId:"",
     ip:"",
     method:"",
     statusCode:"",
   };
 
   const EMPTY_THREAT_SEARCH = {
+    threatId: "",
     source: "",
     severity: "",
   };
@@ -21,9 +23,7 @@ function useSecurityData() {
   };
 
   const [logSearch,setLogSearch] = useState(EMPTY_LOG_SEARCH);
-  const [threatSearch,setThreatSearch] = useState(EMPTY_THREAT_SEARCH);
-  const [blacklistSearch,setBlacklistSearch] = useState(EMPTY_BLACKLIST_SEARCH);
-  
+
   // 가장 최근 목록 조회와 적용된 검색 조건을 기억한다.
   const blacklistRequestIdRef = useRef(0);
   const blacklistSearchRef = useRef(EMPTY_BLACKLIST_SEARCH);
@@ -57,58 +57,159 @@ function useSecurityData() {
     totalElements:0,
     size:10,
   });
- 
+
+  // 마지막으로 요청한 검색 조건과 페이지
+  const logQueryRef = useRef({
+    page:0,
+    search: EMPTY_LOG_SEARCH,
+  });
+
+  const threatQueryRef = useRef({
+    page:0,
+    search: EMPTY_THREAT_SEARCH,
+  });
+
+  const blacklistQueryRef = useRef({
+    page:0,
+    search: EMPTY_BLACKLIST_SEARCH,
+  });
+
+  // 자동 조회가 진행 중인 요청과 겹치지 않도록 한다.
+  const logBusyRef = useRef(false);
+  const threatBusyRef = useRef(false);
+  const blacklistBusyRef = useRef(false);
+
+  // 로그 목록에도 오래된 응답 방지 적용
+  const logRequestIdRef = useRef(0);
+
+  const [logError,setLogError] = useState('');
+  const [blacklistError,setBlacklistError] = useState('');
+
   /* == 조회 함수 ( 전체 로그, 위협, 블랙리스트) == */
-  const fetchLogs = (page =0, search = logSearch) => {
-    const params = {
+  const fetchLogs =  async (
+    page = 0,
+    search = logQueryRef.current.search,
+    { background = false} = {}
+   ) => {
+    
+    // 백그라운드 중복 요청방지
+    if (background && logBusyRef.current){
+      return null;
+    }
+
+    // 요청 번호와 조회 조건 기록
+    const requestId = ++logRequestIdRef.current;
+
+    // 요청 중임을 기록하고, 이번에 요청하는 페이지와 검색 조건을 저장
+    logBusyRef.current = true;
+    logQueryRef.current = {
       page,
-      size:10
+      search: {...search},
     };
+
+    // 일반 조회시 기존 오류 메시지 지우기
+    if(!background){
+      setLogError('');
+    }
+
+    // 검색 파라미터 설정
+    const params = {page,size:10};
+    const logId = String(search.logId?? '').trim();  // Long ID가 JS number 변환으로 변형되지 않게 문자열로 전달
+
+    if(logId){
+      params.logId = logId;
+    }
 
     if(search.ip.trim()){
       params.ip = search.ip.trim();
     }
 
-    if(search.method){
+    if (search.method) {
       params.method = search.method;
     }
 
-    if(search.statusCode !== ""){
+    if (search.statusCode !== '') {
       params.statusCode = Number(search.statusCode);
     }
 
-    apiClient.get(
-      '/api/v1/logs',
-      {params}
-    )
-    .then(response => {
-      // 현재 페이지의 로그 목록 저장
+    try {
+      
+      // 검색 조건을 쿼리 파라미터로 전달해서 GET 요청을 보내고 응답을 기다림
+      const response = await apiClient.get('/api/v1/logs',{
+        params,
+      })
+
+      if(requestId !== logRequestIdRef.current){
+        return null;
+      }
+
       setLogs(response.data.content ?? []);
 
-      // 백엔드 Page 응답의 페이지 정보 저장
       setLogPage({
         number: response.data.number,
         totalPages: response.data.totalPages,
         totalElements: response.data.totalElements,
         size: response.data.size,
       });
-    })
-    .catch(error =>{
-      console.error("로그 조회 실패",error);
-    });
-  };
+
+      setLogError('');
+      return true;
+    } catch (error){
+      if(requestId !== logRequestIdRef.current){
+        return null;
+      }
+
+      const status = error.response?.status;
+
+      setLogError(
+        status ===401
+          ? '로그인이 만료되었습니다. 다시 로그인해주세요.'
+          : status === 400
+          ? '로그 검색 조건을 확인해주세요.'
+          : '로그 목록을 갱신하지 못했습니다.'
+      );
+
+      // 마지막으로 성공한 목록은 유지
+      return false;
+    } finally {
+      if(requestId === logRequestIdRef.current){
+        logBusyRef.current = false;
+      }
+    }
+   };
 
   const fetchLogById = async id => {
-    const response = await apiClient.get(
-      `/api/v1/logs/${id}`
-    );
+  const response = await apiClient.get(`/api/v1/logs/${id}`);
 
     return response.data;
-  };
+   };
 
-  const fetchThreats = async (page =0, search = threatSearch) => {
+  const fetchThreats = async (
+    page =0, 
+    search = threatQueryRef.current.search,
+    {background = false} = {}
+  ) => {
+
+    if(background && threatBusyRef.current){
+      return null;
+    }
+
     const requestId = ++threatRequestIdRef.current;
+
+    // 요청 중임을 기록하고, 이번에 요청하는 페이지와 검색 조건을 저장
+    threatBusyRef.current = true;
+    threatQueryRef.current = {
+      page,
+      search: {...search},
+    };
+
     const params = {page, size:10};
+
+    const threatId = String(search.threatId ?? '').trim();
+
+    if(threatId){
+      params.threatId = threatId;
+    }
 
     if(search.source){
       params.source = search.source;
@@ -118,11 +219,13 @@ function useSecurityData() {
       params.severity = search.severity;
     }
 
-    setIsThreatLoading(true);
-    setThreatError('');
-
+    if(!background){
+      setIsThreatLoading(true);
+      setThreatError('');
+    }
+    
     try{
-      const response = await apiClient.get("api/v1/threats",{
+      const response = await apiClient.get("api/v1/threats/grouped",{
         params,
       });
 
@@ -137,17 +240,23 @@ function useSecurityData() {
         totalElements: response.data.totalElements,
         size: response.data.size,
       });
+
+      setThreatError('');
+      return true;
     
     } catch (error){
       if(requestId !== threatRequestIdRef.current) return;
 
-      setThreats([]);
-      setThreatPage({
-        number: 0,
-        totalPages: 0,
-        totalElements: 0,
-        size: 10,
-      });
+      if(!background){
+        setThreats([]);
+
+        setThreatPage({
+          number: 0,
+          totalPages: 0,
+          totalElements: 0,
+          size: 10,
+        });
+    }
 
       if(error.response?.status === 401){
         setThreatError("로그인이 만료되었습니다. 다시 로그인해주세요.");
@@ -157,8 +266,11 @@ function useSecurityData() {
         setThreatError("위협 목록을 불러오지 못했습니다.")
       }
 
+      return false;
+
     } finally {
       if(requestId === threatRequestIdRef.current){
+        threatBusyRef.current = false;
         setIsThreatLoading(false);
       }
     }
@@ -166,10 +278,28 @@ function useSecurityData() {
 
   const fetchBlacklists = async (
     page =0, 
-    search = blacklistSearch
+    search = blacklistQueryRef.current.search,
+    {background = false} = {}
   ) => {
+
+    if (background && blacklistBusyRef.current) {
+      return null;
+    }
+
     const requestId = ++blacklistRequestIdRef.current;
+
+    blacklistBusyRef.current = true;
+
+    blacklistQueryRef.current = {
+      page,
+      search: {...search},
+    };
+
     blacklistSearchRef.current = {...search};
+
+    if(!background){
+      setBlacklistError('');
+    }
 
     const params = {page,size:10};
 
@@ -201,6 +331,8 @@ function useSecurityData() {
         size: response.data.size,
       });
 
+      setBlacklistError('');
+
       return true;
     } catch (error){
       if(requestId !== blacklistRequestIdRef.current){
@@ -208,7 +340,17 @@ function useSecurityData() {
       }
 
       console.error('블랙리스트 조회 실패',error);
+      setBlacklistError(
+        error.response?.status === 401
+        ? '로그인이 만료되었습니다. 다시 로그인해주세요.'
+        : '블랙리스트 목록을 갱신하지 못했습니다.'
+      );
+
       return false;
+    } finally{
+      if(requestId === blacklistRequestIdRef.current){
+        blacklistBusyRef.current = false;
+      }
     }
   };
 
@@ -222,11 +364,27 @@ function useSecurityData() {
     return fetchBlacklists(0,blacklistSearchRef.current);
   }
   
-  /* 전체 새로고침 */
-  const fetchAllData = () => {
-    fetchLogs(0);
-    fetchThreats(0);
-    fetchBlacklists(0);
+  // 현재 검색 조건과 페이지를 유지해서 다시 조회한다.
+  const fetchAllData = ({background = false} = {}) => {
+   return Promise.all([
+    fetchLogs(
+      logQueryRef.current.page,
+      logQueryRef.current.search,
+      {background}
+    ),
+
+    fetchThreats(
+      threatQueryRef.current.page,
+      threatQueryRef.current.search,
+      {background}
+    ),
+
+    fetchBlacklists(
+      blacklistQueryRef.current.page,
+      blacklistQueryRef.current.search,
+      {background}
+    ),
+   ]);
   };
 
   /* 검색 적용 및 초기화 함수 */
@@ -240,25 +398,36 @@ function useSecurityData() {
   }
 
   const searchThreats = condition => {
-    setThreatSearch(condition);
     fetchThreats(0,condition);
   };
 
   const resetThreatSearch = () => {
-    setThreatSearch(EMPTY_THREAT_SEARCH);
     fetchThreats(0,EMPTY_THREAT_SEARCH);
   };
 
   const searchBlacklists = condition => {
-    setBlacklistSearch(condition);
     fetchBlacklists(0,condition);
   };
 
   const resetBlacklistSearch= () => {
-    setBlacklistSearch(EMPTY_BLACKLIST_SEARCH);
     fetchBlacklists(0,EMPTY_BLACKLIST_SEARCH);
   }
 
+  const addBlacklist = async request => {
+    await apiClient.post('/api/v1/blacklist',request);
+  };
+
+  useEffect(() => {
+    return() => {
+      logRequestIdRef.current +=1;
+      threatRequestIdRef.current +=1;
+      blacklistRequestIdRef.current +=1;
+
+      logBusyRef.current = false;
+      threatBusyRef.current = false;
+      blacklistBusyRef.current = false;
+    };
+  },[]);
 
   /* 
     반환 객체
@@ -288,6 +457,9 @@ function useSecurityData() {
       threatError,
       deleteBlacklist,
       refreshBlacklists,
+      addBlacklist,
+      logError,
+      blacklistError,
   };
 }
 

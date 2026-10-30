@@ -46,9 +46,6 @@ public class ThreatServiceTest {
     private ThreatRepository threatRepository;
 
     @Mock
-    private BlacklistService blacklistService;
-
-    @Mock
     private NotificationService notificationService;
 
     private MeterRegistry meterRegistry;
@@ -61,6 +58,9 @@ public class ThreatServiceTest {
     @Mock
     private RequestAlertService requestAlertService;
 
+    @Mock
+    AutoBlacklistPolicyService autoBlacklistPolicyService;
+
     @BeforeEach
     void setUp(){
         meterRegistry = new SimpleMeterRegistry();
@@ -68,7 +68,7 @@ public class ThreatServiceTest {
         threatService = new ThreatService(
                 logRepository,
                 threatRepository,
-                blacklistService,
+                autoBlacklistPolicyService,
                 notificationService,
                 meterRegistry,
                 requestCorrelationService,
@@ -149,12 +149,11 @@ public class ThreatServiceTest {
                 "HIGH"
                 ).count()).isEqualTo(1.0);
 
-        verifyNoInteractions(blacklistService);
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    @DisplayName("dangerLevel 4이상이면, Threat 저장 + blacklist 등록 + 긴급 알림 전송")
+    @DisplayName("HTTP 보조 API의 고위험 위협은 저장과 알림만 수행한다")
     void saveDetectedThreat_whenDangerLevelIsFour_thenSaveThreatAndBlacklist(){
 
         // given
@@ -164,6 +163,11 @@ public class ThreatServiceTest {
                 4,
                 "Repeated_attack"
         );
+
+        LogEntry logEntry = LogEntry.builder()
+                .id(1L)
+                .ipAddress("192.168.0.10")
+                .build();
 
         // 저장소가 반환할 위협 객체 설정
         DetectedThreat savedThreat = DetectedThreat.builder()
@@ -185,12 +189,9 @@ public class ThreatServiceTest {
                 "CRITICAL"
         ).count()).isEqualTo(1.0);
 
-        verify(blacklistService).addToBlacklist(
-                eq("192.168.0.10"),
-                contains("BRUTE_FORCE"),
-                eq(4),
-                same(savedThreat)
-        );
+
+        verifyNoInteractions(autoBlacklistPolicyService);
+
         verify(notificationService).sendUrgentAlert(
                 eq("192.168.0.10"),
                 anyString(),
@@ -238,7 +239,7 @@ public class ThreatServiceTest {
     }
 
     @Test
-    @DisplayName(" AI score가 0.8 이상이면 CRITICAL 저장 + blacklist 등록")
+    @DisplayName("AI 고위험 탐지를 저장하고 알림 기록과 공통 차단 정책 판단을 수행한다")
     void saveAiDetectedThreat_whenCriticalScore_thenSaveAndBlacklist(){
 
         // given
@@ -280,12 +281,7 @@ public class ThreatServiceTest {
                 "CRITICAL"
         ).count()).isEqualTo(1.0);
 
-        verify(blacklistService).addToBlacklist(
-                eq("192.168.0.10"),
-                eq("AI detected"),
-                eq(4),
-                same(savedThreat)
-        );
+        verify(autoBlacklistPolicyService).evaluate(logEntry);
 
         verify(requestCorrelationService).lockForAiResult(logEntry);
 
@@ -329,7 +325,6 @@ public class ThreatServiceTest {
                 "HIGH"
         ).count()).isEqualTo(1.0);
 
-        verifyNoInteractions(blacklistService);
         verifyNoInteractions(notificationService);
 
         verify(requestAlertService).recordAi(
@@ -360,7 +355,6 @@ public class ThreatServiceTest {
 
         verify(logRepository).findById(1L);
         verifyNoInteractions(threatRepository);
-        verifyNoInteractions(blacklistService);
         verifyNoInteractions(notificationService);
     }
 
@@ -420,23 +414,9 @@ public class ThreatServiceTest {
         verify(threatRepository, never()).save(any(DetectedThreat.class));
         verifyNoInteractions(requestAlertService);
         verifyNoInteractions(notificationService);
-        verifyNoInteractions(blacklistService);
     }
 
 }
-
-
-/*
-테스트:
-    1. 검색 조건으로 위협을 조회하고 Entity Page를 DTO Page로 변환한다.
-    2. dangerLevel 3이면, Threat만 저장하고 blacklist 등록은 안한다.
-    3. dangerLevel 4이상이면, Threat 저장 + blacklist 등록 + 긴급 알림 전송
-    4. AI 응답 logId가 null 이면 예외 발생
-    5. AI 응답 logId에 해당하는 로그가 없으면 예외 발생
-    6. AI score가 0.8 이상이면 CRITICAL 저장 + blacklist 등록
-    7. AI score가 0.8 미만이면 HIGH 저장 + blacklist 등록 안함
-    8. AI 응답 IP가 0.0.0.0이면 아무 작업도 하지 않는다.
-*/
 
 
 

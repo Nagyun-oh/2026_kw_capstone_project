@@ -18,14 +18,25 @@ function useDashboardSummary(){
 
     const controllerRef = useRef(null);
 
-    const refreshSummary = useCallback(async () =>{
+    const refreshSummary = useCallback(async (
+        {background = false} = {}
+    ) =>{
+
+        // 자동 갱신은 진행 중인 조회를 취소하지 않는다.
+        if(background && controllerRef.current) {
+            return;
+        }
+
         // 이전 조회가 진행 중이라면 취소
         controllerRef.current?.abort();
 
         const controller = new AbortController();
         controllerRef.current = controller;
 
-        setIsLoading(true);
+        if(!background){
+            setIsLoading(true);
+        }
+
         setErrorMessage('');
 
         try{
@@ -39,10 +50,13 @@ function useDashboardSummary(){
             if (controller.signal.aborted) return;
 
             setErrorMessage(
-                '요약 정보를 갱신하지 못했습니다. 다시 시도해주세요.'
+                '요약 정보를 갱신하지 못했습니다.\n 다시 시도해주세요. '
             );
         } finally {
-            if(!controller.signal.aborted){
+            if(!controller.signal.aborted &&
+                controllerRef.current === controller
+            ){
+                controllerRef.current = null;
                 setIsLoading(false);
             }
         }
@@ -53,6 +67,7 @@ function useDashboardSummary(){
 
         return () =>{
             controllerRef.current?.abort();
+            controllerRef.current = null;
         };
     } , [refreshSummary]);
 

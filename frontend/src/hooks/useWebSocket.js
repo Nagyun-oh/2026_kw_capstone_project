@@ -143,10 +143,10 @@ function useWebSocket(onThreatReceived) {
             if(highlightTimerRef.current){
               clearTimeout(highlightTimerRef.current);
             }
-            // 2초 후 강조 효과 해제
+            // 5초 후 강조 효과 해제
             highlightTimerRef.current = setTimeout( () =>{
               setIsNewThreat(false);
-            }, 10000);
+            }, 5000);
           }
         );
       },

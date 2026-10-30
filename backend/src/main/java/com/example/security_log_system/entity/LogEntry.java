@@ -37,12 +37,3 @@ public class LogEntry {
     private LocalDateTime createdAt; // 로그 수신 시간
 
 }
-
-/*
-TODO
-    - 필드에 @Column(name = "...")를 명시해서 DB 컬럼명 통일성 확보
-    - createdAt 자동 설정을 위해 @PrePersist 또는 Auditing 적용 검토
-    - statusCode가 0으로 저장될 수 있는 케이스 검토
-    - AI 처리 상태(PENDING, COMPLETED, FAILED) 필드 추가 검토
-    - DetectedThreat와 양방향 관계가 필요한지 검토
-*/

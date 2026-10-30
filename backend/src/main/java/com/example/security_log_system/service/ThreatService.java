@@ -1,9 +1,6 @@
 package com.example.security_log_system.service;
 
-import com.example.security_log_system.dto.AiResponseDto;
-import com.example.security_log_system.dto.ThreatDto;
-import com.example.security_log_system.dto.ThreatResponseDto;
-import com.example.security_log_system.dto.ThreatSearchCondition;
+import com.example.security_log_system.dto.*;
 import com.example.security_log_system.entity.DetectedThreat;
 import com.example.security_log_system.entity.LogEntry;
 import com.example.security_log_system.repository.LogRepository;
@@ -18,9 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.security_log_system.util.UtcDateTime;
+import com.example.security_log_system.dto.GroupedThreatResponseDto;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
@@ -30,7 +32,7 @@ public class ThreatService {
 
     private final LogRepository logRepository;
     private final ThreatRepository threatRepository;
-    private final BlacklistService blacklistService;
+    private final AutoBlacklistPolicyService autoBlacklistPolicyService;
     private final NotificationService notificationService;
     private final MeterRegistry meterRegistry;
     private final RequestCorrelationService requestCorrelationService;
@@ -64,14 +66,7 @@ public class ThreatService {
 
         // 위험도가 높으면 자동으로 블랙리스트 등록
         if (threatDto.getDangerLevel() >= 4) {
-            blacklistService.addToBlacklist(threatDto.getClientIp(), " [API 수동 테스트]" + threatDto.getThreatType()
-                    , threatDto.getDangerLevel(),savedThreat);
-
             notificationService.sendUrgentAlert(threatDto.getClientIp(),"[API 수동 테스트]",threatDto.getDangerLevel());
-            log.warn("Critical threat added to blacklist. type={}, dangerLevel={}",
-                    threat.getThreatType(),
-                    threat.getSeverity()
-            );
         }
     }
 
@@ -114,16 +109,91 @@ public class ThreatService {
 
         incrementThreatDetectedMetric(threat.getSeverity());
 
-        if(aiResponse.getThreatScore() >= 0.8){
-            blacklistService.addToBlacklist(entry.getIpAddress(), aiResponse.getReason(), 4,savedThreat);
-        }
-
         requestAlertService.recordAi(
                 entry.getRequestId(),
                 entry.getId(),
                 entry.getIpAddress(),
                 severity
         );
+
+        autoBlacklistPolicyService.evaluate(entry);
+
+    }
+
+    @Transactional(readOnly = true)
+    public Page<GroupedThreatResponseDto> getGroupedThreats(
+            ThreatSearchCondition condition,
+            Pageable pageable
+    ){
+        String source = StringUtils.hasText(condition.getSource())
+                ? condition.getSource()
+                : null;
+
+        String severity = StringUtils.hasText(condition.getSeverity())
+                ? condition.getSeverity().trim().toUpperCase(Locale.ROOT)
+                : null;
+
+        String threatType = StringUtils.hasText(condition.getThreatType())
+                ? condition.getThreatType().trim()
+                : null;
+
+        return threatRepository.findGroupedThreats(
+                source,
+                severity,
+                threatType,
+                condition.getThreatId(),
+                pageable
+        ).map(this::toGroupedThreatResponse);
+    }
+
+    private GroupedThreatResponseDto toGroupedThreatResponse(
+            ThreatRepository.GroupedThreatRow row
+    ){
+        Long wafId = row.getWafThreatId();
+        Long aiId = row.getAiThreatId();
+
+        List<String> types = new ArrayList<>();
+
+        if(wafId !=null && aiId !=null){
+            if(wafId < aiId){
+                types.add("WAF Detection");
+                types.add("AI Detection");
+            } else {
+                types.add("AI Detection");
+                types.add("WAF Detection");
+            }
+        } else if(wafId !=null){
+            types.add("WAF Detection");
+        }else if(aiId !=null){
+            types.add("AI Detection");
+        }else {
+            types.add(row.getFallbackType() !=null
+            ? row.getFallbackType()
+            : "UNKNOWN");
+        }
+
+        String severity = switch(row.getSeverityRank()){
+            case 4 -> "CRITICAL";
+            case 3 -> "HIGH";
+            case 2 -> "MEDIUM";
+            case 1 -> "LOW";
+            default -> "UNKNOWN";
+        };
+
+        return GroupedThreatResponseDto.builder()
+                .id(row.getId())
+                .logId(row.getLogId())
+                .wafThreatId(wafId)
+                .aiThreatId(aiId)
+                .threatTypes(List.copyOf(types))
+                .severity(severity)
+                .wafDescription(row.getWafDescription())
+                .aiDescription(row.getAiDescription())
+                .otherDescription(
+                        wafId ==null && aiId == null
+                        ? row.getFallbackDescription() : null
+                )
+                .build();
     }
 
     private void incrementThreatDetectedMetric(String severity){

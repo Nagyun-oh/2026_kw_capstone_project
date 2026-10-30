@@ -16,10 +16,12 @@ function LogTable({
   onPageChange,
   onSearch,
   onReset, 
-  onViewLog
+  onViewLog,
+  error = '',
 }) {
   
   const [form,setForm] = useState({
+    logId:"",
     ip: "",
     method: "",
     statusCode: "",
@@ -41,6 +43,7 @@ function LogTable({
 
   const handleReset = () => {
     const emptyForm = {
+      logId: "",
       ip: "",
       method: "",
       statusCode: "",
@@ -63,6 +66,21 @@ function LogTable({
       </header>
 
       <form className="data-filters" onSubmit={handleSubmit}>
+        <label className="data-field">
+          <span>로그 번호</span>
+
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[1-9][0-9]*"
+            maxLength = {19}
+            name="logId"
+            value={form.logId}
+            onChange={handleChange}
+            placeholder='예: 4000'
+          />
+        </label>
+
         <label className="data-field data-field--wide">
           <span>IP 주소</span>
           <input
@@ -123,6 +141,12 @@ function LogTable({
           </button>
         </div>
       </form>
+
+      {error && (
+        <p className="dashboard-error" role="alert">
+          {error}
+        </p>
+      )}
 
       <div
         className="data-table-scroll"
