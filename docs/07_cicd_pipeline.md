@@ -1,6 +1,8 @@
 # CI/CD 파이프라인
 
-GitHub Actions로 테스트·빌드를 자동화하고, `develop` 반영 시 단일 EC2([06_aws_deployment.md](06_aws_deployment.md))에 자동 배포하는 구성을 정리한다.
+GitHub Actions로 테스트·빌드를 자동화하고, `develop`에서 검증한 변경을 `main`에 릴리스한 뒤 단일 EC2([06_aws_deployment.md](06_aws_deployment.md))에 수동 배포하는 운영 기준을 정리한다. `main` 머지만으로 자동 배포되지는 않는다.
+
+> 배포 브랜치를 `develop`에서 `main`으로 전환하려면 `deploy.yml`의 브랜치 검사·EC2 fetch 대상과 AWS IAM 신뢰 정책을 함께 변경해야 한다. 이 문서는 전환 후의 배포 기준이며, 문서 수정만으로 실제 설정은 변경되지 않는다. 전환 순서는 8장을 따른다.
 
 ## 1. 구성 요약
 
@@ -9,19 +11,23 @@ GitHub Actions로 테스트·빌드를 자동화하고, `develop` 반영 시 단
 | CI (테스트·빌드·AI 기동 확인) | 적용 | [.github/workflows/ci.yml](../.github/workflows/ci.yml) |
 | 모델 버전 고정·검증 | 적용 | [AI_new/models.lock.json](../AI_new/models.lock.json), [scripts/fetch_models.py](../scripts/fetch_models.py) |
 | AWS·GitHub 사전 설정 | 진행 필요 (4~5장) | - |
-| CD (ECR push → EC2 배포) | 작성 완료, 수동 실행으로 첫 검증 예정 (8장) | [.github/workflows/deploy.yml](../.github/workflows/deploy.yml), [scripts/deploy.sh](../scripts/deploy.sh) |
+| CD (ECR push → EC2 배포) | 수동 실행. main 배포 전 전환 설정 확인 (8장) | [.github/workflows/deploy.yml](../.github/workflows/deploy.yml), [scripts/deploy.sh](../scripts/deploy.sh) |
 
-**변경 전:** EC2에 SSH 접속 → `git pull` → 모델 수동 전달 → EC2에서 이미지 빌드.
-
-**변경 후 (CD 적용 시):**
+**개발·릴리스·배포 흐름:**
 
 ```
-develop에 merge
+기능 PR → develop에 merge (CI·리뷰)
+   │
+   ▼
+릴리스 PR → main에 merge (CI·리뷰)
+   │
+   ▼
+Deploy to EC2 수동 실행 (Branch: main, sha: 비움)
    │
    ▼
 GitHub Actions
  ├─ CI : 백엔드 테스트(MySQL) · 프론트 빌드 · AI 이미지 빌드 + /health · WAF 스크립트 테스트 · Compose 검증
- └─ CD : 모델 다운로드·SHA-256 검증 → 이미지 3개 빌드 → ECR push (태그 = git SHA)
+ └─ CD (수동) : 모델 다운로드·SHA-256 검증 → 이미지 3개 빌드 → ECR push (태그 = git SHA)
    │     AWS 인증은 OIDC 임시 자격 증명 (GitHub에 AWS 키 저장 안 함)
    ▼
 SSM Run Command → EC2
@@ -30,7 +36,7 @@ SSM Run Command → EC2
 
 설계 원칙:
 
-- **이미지는 CI에서 빌드한다.** EC2에서 torch 설치·빌드를 하지 않아 메모리·시간 부담이 없다.
+- **이미지는 GitHub Actions에서 빌드한다.** EC2에서 torch 설치·빌드를 하지 않아 메모리·시간 부담이 없다.
 - **이미지 태그 = git SHA.** 어떤 코드와 모델이 배포됐는지 태그로 추적하고, 이전 SHA로 되돌려 롤백한다.
 - **비밀값은 EC2의 `.env.aws`에만 둔다.** GitHub를 거치지 않는다.
 - **SSH 포트를 배포에 사용하지 않는다.** SSM으로 명령을 전달한다.
@@ -104,7 +110,7 @@ IAM → Identity providers → Add provider.
 
 ### 4-3. GitHub Actions용 IAM Role (`github-actions-deploy`)
 
-IAM → Roles → Create role → **Custom trust policy**에 아래를 넣는다. 이 저장소의 `develop` 브랜치에서 실행된 workflow만 이 Role을 사용할 수 있다.
+IAM → Roles → Create role → **Custom trust policy**에 아래를 넣는다. 이 저장소의 `main` 브랜치에서 실행된 workflow만 이 Role을 사용할 수 있도록 제한한다. 이미 사용하는 Role이 있다면 새로 만들지 않고 신뢰 정책의 브랜치 조건을 변경한다. 실제 정책에 저장소 식별 정보가 추가되어 있다면 그 부분은 유지하고 `refs/heads/develop`만 `refs/heads/main`으로 변경한다.
 
 ```json
 {
@@ -117,7 +123,7 @@ IAM → Roles → Create role → **Custom trust policy**에 아래를 넣는다
       "Condition": {
         "StringEquals": {
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-          "token.actions.githubusercontent.com:sub": "repo:Nagyun-oh/2026_kw_capstone_project:ref:refs/heads/develop"
+          "token.actions.githubusercontent.com:sub": "repo:Nagyun-oh/2026_kw_capstone_project:ref:refs/heads/main"
         }
       }
     }
@@ -221,25 +227,25 @@ aws ecr get-login-password --region ap-northeast-2 \
 
 - [ ] ECR 저장소 3개 생성, Immutable·Lifecycle policy 적용
 - [ ] IAM OIDC 공급자 등록
-- [ ] `github-actions-deploy` Role: trust policy(develop 제한) + inline policy
+- [ ] `github-actions-deploy` Role: trust policy(main 제한) + inline policy
 - [ ] `ec2-security-platform` Role 생성 및 인스턴스 연결
 - [ ] EC2: `aws sts get-caller-identity`, ECR `Login Succeeded`, Fleet Manager `Online`
 - [ ] GitHub Variables 4개 등록
 
 ## 7. CD 동작 (`deploy.yml`)
 
-현재는 **수동 실행(`workflow_dispatch`)만** 가능하다. 첫 배포 검증 후 CI 성공 시 자동 배포하도록 트리거를 추가한다.
+배포는 **수동 실행(`workflow_dispatch`)**으로 유지한다. `develop`은 통합·검증에, `main`은 배포할 릴리스 관리에 사용한다. CI는 두 브랜치 모두에서 실행하며, 배포 전 `main` 릴리스의 CI 성공과 리뷰를 확인한다. 브랜치 전환만으로 자동 배포 트리거를 추가하지 않는다.
 
 | Job | 내용 |
 | --- | --- |
-| Resolve target | develop 브랜치·Variables 확인, 배포할 SHA 결정 (입력이 없으면 현재 develop) |
+| Resolve target | main 브랜치·Variables 확인, 배포할 SHA 결정 (입력이 없으면 해당 main 실행의 커밋) |
 | Build & push | backend·frontend·ai 이미지를 병렬 빌드해 `ECR_REGISTRY/security-<서비스>:<SHA>`로 push. AI는 빌드 전 모델 다운로드·검증 |
 | Deploy on EC2 | SSM으로 EC2에 명령 전달 → 결과·로그를 Actions 화면에 출력 |
 
 EC2에서 실행되는 순서:
 
 1. 저장소에 커밋되지 않은 수정이 있으면 **덮어쓰지 않고 중단**한다.
-2. ubuntu 계정으로 `git fetch` → 배포 SHA로 `git checkout --detach`. (설정 파일·스키마 SQL·WAF 규칙을 코드와 같은 버전으로 맞춤)
+2. ubuntu 계정으로 `git fetch --quiet origin main` → 배포 SHA로 `git checkout --detach`. (설정 파일·스키마 SQL·WAF 규칙을 코드와 같은 버전으로 맞춤)
 3. `scripts/deploy.sh <SHA>` (root)
    - ECR 로그인 → 앱 이미지 3개 pull → `compose up -d --no-build`
    - `.env.aws`의 `IMAGE_REGISTRY_PREFIX`·`IMAGE_TAG` 두 줄만 갱신 (비밀값은 건드리지 않음)
@@ -247,9 +253,22 @@ EC2에서 실행되는 순서:
    - 실패하면 최근 로그를 출력하고 실패 처리
    - 성공하면 이전 배포의 앱 이미지를 정리
 
-EC2에서 더 이상 모델을 받거나 이미지를 빌드하지 않는다. 모델은 AI 이미지 안에 포함된다.
+EC2에서 더 이상 모델을 받거나 이미지를 빌드하지 않는다. 모델은 AI 이미지 안에 포함된다. EC2의 detached HEAD는 정상적인 배포 상태이며, Actions 실행 전에 SSH에서 별도로 `git pull`할 필요는 없다.
 
 ## 8. 첫 배포와 롤백
+
+### develop → main 배포 전환
+
+1. 기능 변경을 PR·CI·리뷰를 거쳐 `develop`에 통합한다.
+2. `.github/workflows/deploy.yml`의 다음 항목을 `main` 기준으로 변경하고 PR로 반영한다.
+   - 실행 브랜치 검사: `refs/heads/main`만 허용.
+   - 오류 메시지·주석·`sha` 입력란 설명: main 기준으로 안내.
+   - SSM 명령의 EC2 fetch 대상: `git fetch --quiet origin main`.
+3. `base: main`, `compare: develop`인 릴리스 PR을 생성하고, CI·리뷰 후 머지한다. main에는 PR과 필수 CI 검사를 요구하는 보호 규칙을 설정한다.
+4. GitHub의 `AWS_ROLE_ARN`이 가리키는 배포용 IAM Role의 실제 신뢰 정책을 4-3절처럼 main으로 제한한다. EC2 Instance Role과 구분한다.
+5. 아래 수동 실행 절차로 main 릴리스를 배포한다. `main` 머지만으로는 배포되지 않는다.
+
+CI·CodeQL의 `develop`·`main` 검사는 유지한다. 배포 브랜치를 바꾸기 위해 GitHub 기본 브랜치까지 반드시 변경할 필요는 없다. 동일한 EC2·ECR·Role을 사용한다면 `scripts/deploy.sh`, Compose, DB 설정과 GitHub Variables 값은 브랜치 전환만으로 변경할 필요가 없다.
 
 ### 첫 배포 (수동 실행)
 
@@ -259,13 +278,13 @@ EC2에서 더 이상 모델을 받거나 이미지를 빌드하지 않는다. �
    cd ~/2026_kw_capstone_project && git status --short
    ```
    `.env.aws`, `waf/logs`, 모델 `.pkl`은 Git 제외 대상이라 표시되지 않는다. 다른 파일이 보이면 먼저 정리한다.
-3. GitHub → Actions → **Deploy to EC2** → **Run workflow** → Branch `develop`, sha는 비워 두고 실행. (Write 권한으로 실행 가능)
+3. GitHub → Actions → **Deploy to EC2** → **Run workflow** → Branch `main`, `sha`는 비워 두고 실행. 새 배포에서 SHA를 입력하면 빌드를 생략하므로 임의로 입력하지 않는다. (Write 권한으로 실행 가능)
 4. 3개 job이 모두 성공하고 Summary에 `status: Success`가 표시되는지 확인한다.
 5. 대시보드 접속과 공격 요청 1건의 탐지 표시까지 확인한다. ([06 문서 6장](06_aws_deployment.md#6-전체-실행과-통합-검증))
 
 ### 롤백
 
-Actions → **Deploy to EC2** → Run workflow에서 **이전에 성공한 배포의 SHA**를 입력해 실행한다. 빌드를 생략하고 ECR에 남아 있는 이미지로 교체한다. ECR은 최근 10개 이미지만 보관하므로 그보다 오래된 SHA는 입력한 SHA로 다시 빌드해야 한다.
+Actions → **Deploy to EC2** → Run workflow에서 **Branch `main`을 선택하고**, `sha`에 **이전에 성공한 배포의 40자리 SHA**를 입력해 실행한다. 빌드를 생략하고 ECR에 남아 있는 이미지로 교체한다. ECR은 최근 10개 이미지만 보관하므로 이미지가 삭제된 SHA는 이 방법으로 롤백할 수 없다. SHA 입력 경로는 이미지를 자동으로 다시 빌드하지 않는다.
 
 ### CD를 쓸 수 없을 때 (수동 복구)
 
@@ -274,7 +293,8 @@ EC2에서 ubuntu 계정으로 기존 방식(06 문서)대로 빌드할 수 있�
 ```bash
 cd ~/2026_kw_capstone_project
 sed -i '/^IMAGE_REGISTRY_PREFIX=/d; /^IMAGE_TAG=/d' .env.aws
-git switch develop && git pull --ff-only
+git fetch origin main
+git checkout --detach FETCH_HEAD
 python3 scripts/fetch_models.py
 sudo docker compose --env-file .env.aws -f compose.aws.yaml up -d --build
 ```
@@ -282,6 +302,6 @@ sudo docker compose --env-file .env.aws -f compose.aws.yaml up -d --build
 ## 9. 보안·비용 메모
 
 - GitHub에는 장기 AWS 키가 없다. OIDC 토큰은 workflow 실행 동안만 유효하다.
-- `github-actions-deploy`는 이 저장소의 `develop`에서만, 3개 ECR 저장소와 1개 인스턴스에만 권한이 있다.
+- 배포용 IAM 신뢰 정책은 이 저장소의 `main`에서 실행된 workflow만 허용하도록 제한한다. ECR push·SSM 권한은 기존 3개 ECR 저장소와 1개 인스턴스 범위를 유지한다.
 - ECR 비용은 저장 용량 기준이며 Lifecycle policy로 이미지 10개만 유지한다. AI 이미지는 CPU 전용 torch라 수백 MB~1GB 수준이다.
 - ECR 기본 스캔(OS 패키지 취약점)은 추가 비용이 없다. ECR → Private registry → Scanning configuration에서 push 시 스캔을 켤 수 있다.
