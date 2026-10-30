@@ -1,13 +1,13 @@
 name: Deploy to EC2
 
 # 앱 이미지(backend/frontend/ai)를 빌드해 ECR에 push하고, SSM으로 EC2에서 교체한다.
-# 첫 배포는 수동 실행으로 검증한다. 검증 후 CI 성공 시 자동 배포하도록 트리거를 추가한다.
+# main에서 수동 배포
 # 설정 절차: docs/07_cicd_pipeline.md
 on:
   workflow_dispatch:
     inputs:
       sha:
-        description: '배포할 커밋 SHA(40자). 비우면 현재 develop을 빌드해 배포. 롤백 시 이전 배포 SHA 입력(빌드 생략)'
+        description: '배포할 커밋 SHA(40자). 비우면 현재 main을 빌드해 배포. 롤백 시 이전 배포 SHA 입력(빌드 생략)'
         required: false
         default: ''
 
@@ -37,9 +37,9 @@ jobs:
     steps:
       - name: Check branch and variables
         run: |
-          # IAM trust policy도 develop만 허용하지만, 실패 원인을 명확히 하기 위해 먼저 확인한다.
-          if [ "$GITHUB_REF" != "refs/heads/develop" ]; then
-            echo "::error::develop 브랜치에서만 배포할 수 있습니다. (현재: $GITHUB_REF)"; exit 1
+          # IAM 신뢰 정책과 함께 main 브랜치만 허용한다.
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::main 브랜치에서만 배포할 수 있습니다. (현재: $GITHUB_REF)"; exit 1
           fi
           for v in AWS_REGION AWS_ROLE_ARN ECR_REGISTRY EC2_INSTANCE_ID; do
             if [ -z "${!v}" ]; then echo "::error::Repository variable $v 가 없습니다. (docs/07 5장)"; exit 1; fi
@@ -133,7 +133,7 @@ jobs:
               "set -eu",
               "cd \($dir)",
               "sudo -u ubuntu -H git diff --quiet HEAD || { echo \"EC2 저장소에 커밋되지 않은 수정이 있습니다. git status 확인 후 다시 실행하세요.\"; sudo -u ubuntu -H git status --short; exit 1; }",
-              "sudo -u ubuntu -H git fetch --quiet origin develop",
+              "sudo -u ubuntu -H git fetch --quiet origin main",
               "sudo -u ubuntu -H git checkout --quiet --detach \($sha)",
               "ECR_REGISTRY=\($reg) AWS_REGION=\($region) bash scripts/deploy.sh \($sha)"
             ],

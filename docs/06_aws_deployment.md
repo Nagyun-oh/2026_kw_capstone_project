@@ -227,7 +227,7 @@ location / {
 
 ## 3. 코드와 모델 전달
 
-AWS 준비 PR이 develop에 머지됐다면 `<DEPLOY_BRANCH>`에 `develop`을 사용한다. 삭제된 작업 브랜치를 지정하지 않는다. 비공개 저장소는 별도 GitHub 인증이 필요하며 토큰을 URL에 넣지 않는다.
+`develop`에서 통합 검증한 변경을 릴리스 PR로 `main`에 머지한 뒤, `<DEPLOY_BRANCH>`에 `main`을 사용한다. 배포에 필요한 Compose·워크플로·스키마 파일이 `main`에 포함됐는지 확인한다. 삭제된 작업 브랜치를 지정하지 않는다. 비공개 저장소는 별도 GitHub 인증이 필요하며 토큰을 URL에 넣지 않는다.
 
 **EC2:**
 
@@ -487,9 +487,11 @@ systemctl list-timers --all | grep -i certbot
 
 ### 코드 변경 반영
 
-현재 [.github/workflows/deploy.yml](../.github/workflows/deploy.yml)은 `workflow_dispatch`만 사용한다. 기본 흐름은 **PR → CI·리뷰 → develop 머지 → Deploy to EC2 수동 실행 → AWS 검증**이다. 상세 사전 설정은 [CI/CD 문서](07_cicd_pipeline.md)를 참고한다.
+배포 기준 브랜치는 `main`이며, [.github/workflows/deploy.yml](../.github/workflows/deploy.yml)의 `workflow_dispatch`로 수동 실행한다. 기본 흐름은 **기능 PR → CI·리뷰 → develop 통합 → 릴리스 PR·CI·리뷰 → main 머지 → Deploy to EC2 수동 실행 → AWS 검증**이다. `main` 머지만으로 자동 배포되지는 않는다. 상세 사전 설정은 [CI/CD 문서](07_cicd_pipeline.md)를 참고한다.
 
-1. PR CI의 백엔드 테스트·빌드, 프론트 빌드, AI 이미지 기동 및 Compose 검사를 확인한다. 프론트 자동 테스트는 현재 실행하지 않는다.
+> `develop` 배포에서 전환할 때는 `deploy.yml`의 브랜치 검사·EC2 fetch 대상뿐 아니라 GitHub Actions용 IAM Role의 실제 OIDC 신뢰 정책도 `main`을 허용하도록 변경해야 한다. 전환 절차는 [CI/CD 문서 8장](07_cicd_pipeline.md#8-첫-배포와-롤백)을 따른다. 문서 수정만으로 AWS 설정이 변경되지는 않는다.
+
+1. 기능 PR과 `develop` → `main` 릴리스 PR의 CI·리뷰를 확인하고, 배포할 변경이 `main`에 머지됐는지 확인한다. CI의 백엔드 테스트·빌드, 프론트 빌드, AI 이미지 기동, WAF 스크립트 테스트 및 Compose 검사를 확인한다. 프론트 자동 테스트는 현재 실행하지 않는다.
 2. EC2의 `.env.aws`에 HTTPS CORS 주소를 반영하고, 4-1절에 따라 최초 관리자 발급 여부를 결정한다.
 3. EC2 저장소의 변경을 확인한다. 워크플로는 추적 파일에 미커밋 변경이 있으면 덮어쓰지 않고 중단한다.
 
@@ -507,7 +509,7 @@ git status --short
 
 stash는 실행 중인 컨테이너를 바꾸지 않지만 디스크의 Compose 파일은 이전 상태로 돌아간다. **새 커밋 배포 전에는 이 이전 파일로 `compose up`을 실행하지 않는다.** 배포 후에도 포트 변경이 이미 포함되어 있으므로 stash를 바로 재적용하지 않는다. 강제 reset으로 변경을 버리지 않는다.
 
-5. GitHub → Actions → **Deploy to EC2 → Run workflow**, 브랜치 `develop`, `sha`는 비워 실행한다. SHA를 입력하면 현재 워크플로는 빌드를 생략하므로 새 배포에 임의의 SHA를 넣지 않는다.
+5. GitHub → Actions → **Deploy to EC2 → Run workflow**, 브랜치 `main`, `sha`는 비워 실행한다. SHA를 입력하면 현재 워크플로는 빌드를 생략하므로 새 배포에 임의의 SHA를 넣지 않는다.
 6. ECR push·SSM 배포 성공 후 EC2의 커밋과 이미지 태그, 6절의 HTTPS 인증·실시간 연결을 확인한다.
 
 ```bash
@@ -516,13 +518,13 @@ sudo docker compose --env-file .env.aws -f compose.aws.yaml images
 sudo docker compose --env-file .env.aws -f compose.aws.yaml ps -a
 ```
 
-CD는 새 이미지를 pull하고 컨테이너를 재생성하며 `.env.aws`의 `IMAGE_*` 값을 갱신한다. 이미지에 포함되는 `frontend/nginx.conf`는 호스트 파일 편집이나 컨테이너 `restart`만으로 교체되지 않는다. 환경변수 변경도 재생성이 필요하다. 호스트 Nginx 설정은 2절처럼 별도로 검사·reload한다.
+CD는 `git fetch --quiet origin main`으로 코드를 가져와 배포 SHA로 `checkout --detach`한 뒤, 새 이미지를 pull하고 컨테이너를 재생성하며 `.env.aws`의 `IMAGE_*` 값을 갱신한다. EC2의 detached HEAD는 정상적인 배포 상태이며, Actions 배포 전에 SSH에서 별도로 `git pull`할 필요는 없다. 이미지에 포함되는 `frontend/nginx.conf`는 호스트 파일 편집이나 컨테이너 `restart`만으로 교체되지 않는다. 환경변수 변경도 재생성이 필요하다. 호스트 Nginx 설정은 2절처럼 별도로 검사·reload한다.
 
 ### 수동 복구와 롤백
 
-CD를 쓸 수 없어 EC2에서 빌드해야 한다면, 먼저 변경을 보존하고 사용할 커밋을 확정한다. `.env.aws`를 별도로 안전하게 보관한 뒤 ECR용 `IMAGE_REGISTRY_PREFIX`·`IMAGE_TAG`를 제거해 기본 `security-*:aws` 이름을 사용한다. 이후 3절 모델 준비와 5절 빌드를 수행한다. ECR SHA 태그 아래에 로컬 빌드 이미지를 덮어쓰는 방식과 혼합하지 않는다.
+CD를 쓸 수 없어 EC2에서 빌드해야 한다면, 먼저 변경을 보존하고 사용할 `main` 릴리스 또는 이전 검증된 배포 커밋을 확정한다. `.env.aws`를 별도로 안전하게 보관한 뒤 ECR용 `IMAGE_REGISTRY_PREFIX`·`IMAGE_TAG`를 제거해 기본 `security-*:aws` 이름을 사용한다. 이후 3절 모델 준비와 5절 빌드를 수행한다. 명령 예시는 [CI/CD 문서의 수동 복구 절차](07_cicd_pipeline.md#cd를-쓸-수-없을-때-수동-복구)를 참고한다. ECR SHA 태그 아래에 로컬 빌드 이미지를 덮어쓰는 방식과 혼합하지 않는다.
 
-CD 롤백은 ECR에 존재하는 이전 성공 SHA로 실행할 수 있지만, **HTTPS 전환 전 커밋은 WAF 80번 바인딩 등 현재 호스트 Nginx와 충돌할 수 있다.** 이전 Compose·인증·환경변수 호환성을 확인한 뒤 수행한다. 앱 이미지 롤백이 DB 데이터나 호스트 Nginx 설정을 되돌리는 것은 아니다.
+CD 롤백은 **Run workflow의 브랜치를 `main`으로 선택하고**, `sha`에 ECR에 존재하는 이전 성공 배포의 40자리 SHA를 입력해 실행한다. 이 경로는 이미지 빌드를 생략하므로 해당 이미지가 ECR에 남아 있어야 한다. **HTTPS 전환 전 커밋은 WAF 80번 바인딩 등 현재 호스트 Nginx와 충돌할 수 있다.** 이전 Compose·인증·환경변수 호환성을 확인한 뒤 수행한다. 앱 이미지 롤백이 DB 데이터나 호스트 Nginx 설정을 되돌리는 것은 아니다.
 
 ### WAF Permission denied
 
@@ -562,15 +564,6 @@ sudo docker compose --env-file .env.aws -f compose.aws.yaml restart frontend
 - `NXDOMAIN`: `duckdns.org` 철자와 DNS 레코드를 확인한다.
 - 인증서는 정상인데 로그인·실시간 연결 실패: 새 앱 이미지 적용 여부, CORS의 HTTPS 주소, 쿠키 속성, 두 Nginx의 전달 헤더·Upgrade 설정을 확인한다.
 - 웹 화면만 보는 팀원에게 SSH 키나 22 포트 허용은 필요하지 않다.
-
-## 9. 후속 작업
-
-- [ ] 인증·대시보드·UTC 시각·HTTPS 설정 PR의 CI·리뷰 완료 및 새 이미지 배포.
-- [ ] 운영 최초 관리자 발급 여부 확인, 생성 후 옵션·비밀값 제거 및 재로그인 검증.
-- [ ] 새 이미지에서 Secure 쿠키·CSRF·권한·세션 만료·WebSocket·탐지 통합 검증.
-- [ ] HTTPS 접속 확인 후 3000번 외부 인바운드 규칙 제거 확인.
-- [x] Fluent Bit 읽기 위치·버퍼 영속화 (`fluent-bit-state` 볼륨).
-- [ ] 로그 보관·중복 처리(백엔드 중복 방지 키) 정책 확정.
 
 > **`fluent-bit-state` 볼륨이 처음 적용되는 배포 전 1회 작업**
 > 첫 배포에서는 볼륨이 비어 있어 Fluent Bit가 EC2의 기존 `access.log`를 처음부터 다시 보내고, 로그·위협이 중복 저장된다. Deploy 워크플로를 실행하기 전에 EC2에서 기존 access 로그를 보관 폴더로 옮긴다.
