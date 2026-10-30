@@ -1,0 +1,19 @@
+{
+  "bundle_bytes": 1653054,
+  "bundle_filename": "model_bundle.pkl",
+  "bundle_format": "security_ai_http_transformer_deployment",
+  "bundle_schema_version": 1,
+  "bundle_sha256": "fd062264ef61b7cef149d3b3802ffde0b08c17ea9102463a8931d174c8ff19a3",
+  "component_hashes": {
+    "contract_sha256": "61580d5db88cbf5414932a55245f523a89547ec354d8c2e4f8f40e9f74f8c0f6",
+    "model_config_sha256": "0ad9b9dc6a5a9c23aba35349a86e4d3236c64c073116775aefd3fd81b79eafa0",
+    "state_dict_sha256": "ef2fd0d3d5e12000ccd5883977e66ed8a1779c825f4f0f053b08e4dc3d0f7499",
+    "taxonomy_sha256": "25363a3339933b216bf343fec8f961443e9035b44bf6995fca42a00abe739a1e",
+    "tokenizer_sha256": "916bfa2ded09448d19907ff2b3d8c210e498c0eab29b68f12fc7dc14f5028c16"
+  },
+  "created_at": "2026-09-19T15:08:16.541428+00:00",
+  "manifest_format": "security_ai_model_bundle_manifest",
+  "manifest_schema_version": 1,
+  "source_deployment_checkpoint_sha256": "3cb8b1419158ac101898d82b26cd32f7fac98cf3851f9fd24796759b9f781a87",
+  "status": "PASS"
+}

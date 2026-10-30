@@ -1,0 +1,12 @@
+services:
+  waf:
+    environment:
+      - BACKEND=http://juiceshop:3000
+    depends_on:
+      - juiceshop
+
+  juiceshop:
+    image: bkimminich/juice-shop
+    container_name: juiceshop
+    expose:
+      - "3000"

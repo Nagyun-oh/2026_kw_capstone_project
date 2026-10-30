@@ -1,16 +1,7 @@
-# Compiled class file
+# ========================
+# Java / Spring Boot
+# ========================
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
 *.nar
@@ -18,7 +9,98 @@
 *.zip
 *.tar.gz
 *.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+*.log
+*.ctxt
+.mtj.tmp/
 hs_err_pid*
 replay_pid*
+
+# Gradle Wrapper jar는 커밋 대상
+!gradle/wrapper/gradle-wrapper.jar
+
+# ========================
+# JetBrains (IntelliJ)
+# ========================
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# ========================
+# Gradle
+# ========================
+.gradle/
+build/
+
+# ========================
+# Environment Variables
+# ========================
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+
+# ========================
+# Python
+# ========================
+# 가상환경
+capstone/Lib/site-packages/
+venv/
+.venv/
+env/
+
+# 캐시
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# ========================
+# AI 모델 & 데이터
+# ========================
+# 모델 파일 (바이너리, 용량 큼)
+*.h5
+*.pth
+*.pkl
+*.onnx
+*.model
+*.weights
+
+# 데이터셋
+data/
+datasets/
+*.csv
+*.jsonl
+*.parquet
+
+# 프로젝트 데이터 파일
+cisc_anomalousTraffic_test.txt
+cisc_normalTraffic_test.txt
+cisc_normalTraffic_train.txt
+
+# ========================
+# Docker & Database
+# ========================
+mysql_data/
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+# Windows에서 내려받은 파일에 생기는 ADS 흔적
+*:Zone.Identifier
+
+# ========================
+# IDE (기타)
+# ========================
+.vscode/
+
+# 내가 추가했다.
+AI/capstone/
+AI/catboost_info/
+# AI_new Transformer runtime Python source
+!AI_new/security_ai/data/
+!AI_new/security_ai/data/*.py

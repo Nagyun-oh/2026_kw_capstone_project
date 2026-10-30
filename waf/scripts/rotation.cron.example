@@ -1,0 +1,6 @@
+# 참고용 예시. 설치하거나 실행하지 않으면 예약 작업은 활성화되지 않는다.
+# WSL/Linux의 Docker 접근 가능한 사용자 crontab에 등록한다.
+# 아래 /absolute/path/to/project를 실제 저장소 절대 경로로 바꾼다.
+# 호스트 시간 기준 매일 00:00, 12:00에 교체한다. 삭제/압축은 하지 않는다.
+# WSL과 Docker가 실행 중이어야 하며, 꺼져 있던 시간의 작업은 소급 실행되지 않는다.
+# 0 0,12 * * * /bin/bash /absolute/path/to/project/waf/scripts/rotate-logs.sh

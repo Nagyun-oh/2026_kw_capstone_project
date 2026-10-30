@@ -1,0 +1,21 @@
+# 모든 파일을 기본적으로 제외
+**
+
+# 빌드에 필요한 파일만 허용
+!package.json
+!package-lock.json
+!nginx.conf
+
+!public/
+!public/**
+
+!src/
+!src/**
+
+# 허용된 폴더 내부에서도 비밀값 파일은 제외
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.jks

@@ -1,0 +1,234 @@
+name: security-platform-aws
+
+# 앱 이미지(backend/frontend/ai) 이름
+# - CD 배포: scripts/deploy.sh가 .env.aws에 IMAGE_REGISTRY_PREFIX(ECR 주소/)와 IMAGE_TAG(git SHA)를 기록한다.
+# - 수동 빌드: 두 값이 없으면 기존처럼 security-*:aws 이름으로 EC2에서 빌드한다.
+
+services:
+  # ────────────────── MySQL ──────────────────────
+  db:
+    image: mysql:8.0
+    restart: unless-stopped 
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+      MYSQL_DATABASE: security_db
+      MYSQL_USER: ${DB_USERNAME:?DB_USERNAME IS required}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - type: bind
+        source: ./docs/db/security-db-schema.sql
+        target: /docker-entrypoint-initdb.d/01-schema.sql
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          MYSQL_PWD="$${MYSQL_PASSWORD}"
+          mysql -h 127.0.0.1 -u "$${MYSQL_USER}" -D security_db
+          -e 'SELECT 1 FROM admin_users LIMIT 0;
+          SELECT 1 FROM network_logs LIMIT 0;
+          SELECT 1 FROM detected_threats LIMIT 0;
+          SELECT 1 FROM ip_blacklist LIMIT 0;' 
+          >/dev/null 2>&1
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+  # ────────────────── Zookeeper ──────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-log:/var/lib/zookeeper/log
+  # ────────────────── Kafka ──────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_started
+    environment:
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test:
+        - CMD
+        - kafka-topics
+        - --bootstrap-server
+        - kafka:29092
+        - --list
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 40s
+  # ────────────────── Spring Boot ──────────────────────
+  backend:
+    build:
+      context: ./backend
+    image: ${IMAGE_REGISTRY_PREFIX:-}security-backend:${IMAGE_TAG:-aws}
+    restart: unless-stopped
+    depends_on:
+      db: 
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: "jdbc:mysql://db:3306/security_db?serverTimezone=Asia/Seoul"
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:? CORS_ALLOWED_ORIGINS is required}
+      APP_BOOTSTRAP_ADMIN_ENABLED: ${APP_BOOTSTRAP_ADMIN_ENABLED:-false}
+      APP_BOOTSTRAP_ADMIN_USERNAME: ${APP_BOOTSTRAP_ADMIN_USERNAME:-}
+      APP_BOOTSTRAP_ADMIN_PASSWORD: ${APP_BOOTSTRAP_ADMIN_PASSWORD:-}
+      WAF_CONSUMER_ENABLED: ${WAF_CONSUMER_ENABLED:-false}
+      WAF_EVENT_ZONE: ${WAF_EVENT_ZONE:-UTC}
+      WAF_SYNC_TOKEN: ${WAF_SYNC_TOKEN:-}
+      SESSION_COOKIE_SECURE: "true"
+      SERVER_FORWARD_HEADERS_STRATEGY: native
+      WAF_ID: ${WAF_ID:-aws-waf-1}
+      WAF_SYNC_STALE_AFTER_SECONDS: ${WAF_SYNC_STALE_AFTER_SECONDS:-60}
+  # ────────────────── React + Nginx ──────────────────────
+  frontend:
+    build:
+      context: ./frontend
+    image: ${IMAGE_REGISTRY_PREFIX:-}security-frontend:${IMAGE_TAG:-aws}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+        restart: true
+    ports:
+      - "127.0.0.1:3000:80"
+  # ────────────────── FastAPI AI ──────────────────────
+  ai:
+    build:
+      context: ./AI_new
+    image: ${IMAGE_REGISTRY_PREFIX:-}security-ai:${IMAGE_TAG:-aws}
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c 
+        - "import json, urllib.request; data =
+        json.load(urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)); raise SystemExit(0 if data.get('model_loaded') is True else 1) "
+      interval: 15s
+      timeout: 10s
+      retries: 6
+      start_period: 60s
+  # ────────────────── 테스트 웹서버 ──────────────────────
+  juiceshop:
+    image: bkimminich/juice-shop
+    restart: unless-stopped
+    expose:
+      - "3000"
+  # ────────────────── WAF ──────────────────────
+  # 블랙리스트 상태 볼륨을 WAF 실행 계정(nginx, 101)이 쓸 수 있게 하고 빈 룰 파일을 만든 뒤 종료한다.
+  # CUSTOM-003이 Include할 파일이 없으면 WAF가 시작되지 않으므로 WAF보다 먼저 실행한다.
+  waf-blacklist-init:
+    image: owasp/modsecurity-crs:nginx
+    user: "0:0"
+    entrypoint: ["bash", "/opt/waf-blacklist/blacklist-sync.sh", "init-volume"]
+    volumes:
+      - ./waf/sync/blacklist-sync.sh:/opt/waf-blacklist/blacklist-sync.sh:ro
+      - waf-blacklist-state:/var/lib/waf-blacklist
+
+  waf:
+      image: owasp/modsecurity-crs:nginx
+      restart: unless-stopped
+      depends_on:
+        juiceshop:
+          condition: service_started
+        waf-blacklist-init:
+          condition: service_completed_successfully
+      ports:
+        # 호스트 Nginx만 접근하도록 loopback에 바인딩한다. 외부에 열린 채로 X-Forwarded-For를
+        # 신뢰하면 클라이언트가 IP를 위조할 수 있으므로 127.0.0.1 바인딩을 유지해야 한다.
+        - "127.0.0.1:8081:8080"
+      environment:
+        BACKEND: http://juiceshop:3000
+        # 신뢰할 프록시(Docker 게이트웨이를 거친 호스트 Nginx)가 보낸 X-Forwarded-For만 실제 IP로 복원한다.
+        SET_REAL_IP_FROM: ${WAF_TRUSTED_PROXY:?WAF_TRUSTED_PROXY is required}
+        REAL_IP_HEADER: X-Forwarded-For
+        PORT: "8080"
+        MODSEC_RULE_ENGINE: DetectionOnly
+        MODSEC_AUDIT_LOG: /var/log/nginx/waf-audit.log
+        PARANOIA: "2"
+        ANOMALY_INBOUND: "5"
+        ANOMALY_OUTBOUND: "4"
+        BLOCKING_PARANOIA: "1"
+        # 백엔드 블랙리스트 동기화(waf/sync/blacklist-sync.sh). 토큰은 backend와 같은 값을 쓴다.
+        # 게이트웨이와 SET_REAL_IP_FROM(단일 IP)은 스크립트가 자동으로 차단에서 제외한다.
+        WAF_SYNC_TOKEN: ${WAF_SYNC_TOKEN:-}
+        WAF_SYNC_INTERVAL: ${WAF_SYNC_INTERVAL:-10}
+        WAF_SYNC_EXCLUDE_IPS: ${WAF_SYNC_EXCLUDE_IPS:-}
+        # 상태 보고(POST /internal/waf/sync-status)에 쓰는 고정 WAF 이름
+        WAF_ID: ${WAF_ID:-aws-waf-1}
+      volumes:
+        - ./waf/rules/CUSTOM-001-ai-align.conf:/etc/modsecurity.d/owasp-crs/rules/CUSTOM-001-ai-align.conf
+        - ./waf/rules/CUSTOM-002-blacklist.conf:/etc/modsecurity.d/owasp-crs/rules/CUSTOM-002-blacklist.conf
+        - ./waf/rules/CUSTOM-003-blacklist-sync.conf:/etc/modsecurity.d/owasp-crs/rules/CUSTOM-003-blacklist-sync.conf:ro
+        - ./waf/logs:/var/log/nginx
+        - ./waf/nginx-logging.conf.template:/etc/nginx/templates/conf.d/logging.conf.template
+        - ./waf/nginx.conf.template:/etc/nginx/templates/nginx.conf.template
+        - ./waf/modsecurity.conf.template:/etc/nginx/templates/conf.d/modsecurity.conf.template
+        - ./waf/njs:/etc/nginx/njs
+        - ./waf/sync/blacklist-sync.sh:/opt/waf-blacklist/blacklist-sync.sh:ro
+        - ./waf/sync/99-blacklist-sync.sh:/docker-entrypoint.d/99-blacklist-sync.sh:ro
+        - waf-blacklist-state:/var/lib/waf-blacklist
+
+
+
+  # ────────────────── WAF 로그 수집 ──────────────────────
+  fluent-bit:
+    image: fluent/fluent-bit:2.2
+    restart: unless-stopped
+    depends_on:
+      waf:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    volumes:
+      - ./waf/logs:/var/log/nginx:ro
+      - ./waf/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./waf/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - ./waf/waf-detection.lua:/fluent-bit/etc/waf-detection.lua:ro
+      # 읽기 위치(DB)와 전송 대기 버퍼를 보존해 컨테이너 재생성 시 로그 전체 재전송을 막는다.
+      - fluent-bit-state:/var/lib/fluent-bit
+
+  # ────────────────── security-platform-aws 프로젝트의 새 볼륨 및 네트워크 생성 ──────────────────────
+volumes:
+  mysql-data:
+  kafka-data:
+  zookeeper-data:
+  zookeeper-log:
+  fluent-bit-state:
+  # WAF가 마지막으로 적용한 블랙리스트 룰. 재시작 직후 백엔드 연결 전에도 이전 차단을 유지한다.
+  waf-blacklist-state:
+networks:
+  default:

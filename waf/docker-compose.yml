@@ -1,0 +1,66 @@
+services:
+  waf:
+    # OWASP CRS와 Nginx가 포함된 공식 WAF 이미지
+    image: owasp/modsecurity-crs:nginx
+    container_name: waf
+    ports:
+      # 호스트 WAF_PORT(기본 80)를 컨테이너의 Nginx 포트 8080에 연결
+      - "${WAF_PORT:-80}:8080"
+    environment:
+      # WAF가 정상 요청을 전달할 백엔드 주소
+      - BACKEND=${BACKEND_URL:-http://host.docker.internal:8080}
+      # 컨테이너 내부 Nginx 리스닝 포트
+      - PORT=8080
+      # ModSecurity 룰 엔진 활성화(On), 탐지만 하려면 DetectionOnly 사용
+      - MODSEC_RULE_ENGINE=DetectionOnly
+      - MODSEC_AUDIT_LOG=/var/log/nginx/waf-audit.log
+      # CRS 탐지 민감도(1~4). 높을수록 탐지 룰이 많아지고 오탐 가능성도 증가
+      - PARANOIA=2
+      # 요청(inbound) 누적 이상 점수가 이 값 이상이면 차단
+      - ANOMALY_INBOUND=5
+      # 응답(outbound) 누적 이상 점수가 이 값 이상이면 차단
+      - ANOMALY_OUTBOUND=4
+      # 실제 차단 판단에 반영할 CRS 파라노이아 레벨
+      - BLOCKING_PARANOIA=1
+    volumes:
+      # AI 모델 특성과 맞춘 커스텀 WAF 룰 추가
+      - ./rules/CUSTOM-001-ai-align.conf:/etc/modsecurity.d/owasp-crs/rules/CUSTOM-001-ai-align.conf
+      # 블랙리스트 IP 차단 룰 추가
+      - ./rules/CUSTOM-002-blacklist.conf:/etc/modsecurity.d/owasp-crs/rules/CUSTOM-002-blacklist.conf
+      # WAF access/error 로그를 호스트 waf/logs 폴더에 저장
+      - ./logs:/var/log/nginx
+      # access.log를 JSON + 요청 바디 포함 포맷으로 남기도록 기본 템플릿을 덮어씀
+      - ./nginx-logging.conf.template:/etc/nginx/templates/conf.d/logging.conf.template
+      # njs 모듈 로드 + 전체 요청 헤더를 JSON으로 만드는 변수($all_headers) 정의 (기본 nginx.conf 템플릿 덮어씀)
+      - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template
+      # 모든 요청 헤더를 JSON으로 직렬화하는 njs 스크립트
+      - ./njs:/etc/nginx/njs
+      - ./modsecurity.conf.template:/etc/nginx/templates/conf.d/modsecurity.conf.template
+    extra_hosts:
+      # 컨테이너에서 Windows/호스트 머신의 localhost 서비스에 접근하기 위한 별칭
+      - "host.docker.internal:host-gateway"
+
+  fluent-bit:
+    # WAF access.log를 읽어 Kafka로 전송하는 로그 수집기
+    image: fluent/fluent-bit:2.2
+    container_name: waf-fluent-bit
+    depends_on:
+      - waf
+    volumes:
+      # WAF 로그를 읽기 전용으로 공유
+      - ./logs:/var/log/nginx:ro
+      # Fluent Bit 입력/출력 설정
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      # Nginx access.log 파서 설정
+      - ./parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - ./waf-detection.lua:/fluent-bit/etc/waf-detection.lua:ro
+      # 컨테이너 재생성 후에도 읽기 위치와 전송 대기 청크 유지
+      - fluent-bit-state:/var/lib/fluent-bit
+
+volumes:
+  fluent-bit-state:
+
+networks:
+  default:
+    # backend/docker-compose.yml의 Kafka/MySQL과 같은 Docker 네트워크 사용
+    name: security-net

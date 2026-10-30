@@ -1,0 +1,248 @@
+name: security-platform
+
+services:
+  # ────────────────── MySQL ──────────────────────
+  db:
+    image: mysql:8.0
+    container_name: security-mysql
+    restart: unless-stopped 
+    ports:
+      - "127.0.0.1:3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      MYSQL_DATABASE: security_db
+    volumes:
+      - type: bind
+        source: ${MYSQL_DATA_DIR:-./backend/mysql_data}
+        target: /var/lib/mysql
+        bind:
+          create_host_path: false
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          MYSQL_PWD="$${MYSQL_ROOT_PASSWORD}"
+          mysql -h 127.0.0.1 -u root -D security_db
+          -e 'SELECT 1' >/dev/null 2>&1
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+  # ────────────────── Zookeeper ──────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-log:/var/lib/zookeeper/log
+    healthcheck:
+      test: ["CMD", "cub", "zk-ready", "localhost:2181", "5"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    stop_grace_period: 30s
+  # ────────────────── Kafka ──────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:9092:9092"
+    environment:
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test:
+        - CMD
+        - kafka-topics
+        - --bootstrap-server
+        - kafka:29092
+        - --list
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 40s
+    stop_grace_period: 60s
+  # ────────────────── Spring Boot ──────────────────────
+  backend:
+    build:
+      context: ./backend
+    image: security-backend:local
+    container_name: security-backend-local
+    restart: unless-stopped
+    depends_on:
+      db: 
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: "jdbc:mysql://db:3306/security_db?serverTimezone=Asia/Seoul"
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+      SESSION_COOKIE_SECURE: "false"
+      WAF_CONSUMER_ENABLED: ${WAF_CONSUMER_ENABLED:-false}
+      WAF_EVENT_ZONE: ${WAF_EVENT_ZONE:-UTC}
+      WAF_SYNC_TOKEN: ${WAF_SYNC_TOKEN:-}
+      WAF_ID: ${WAF_ID:-local-waf-1}
+      WAF_SYNC_STALE_AFTER_SECONDS: ${WAF_SYNC_STALE_AFTER_SECONDS:-60}
+  # ────────────────── React + Nginx ──────────────────────
+  frontend:
+    build:
+      context: ./frontend
+    image: security-frontend:local
+    container_name: security-frontend-local
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+        restart: true
+    ports:
+      - "127.0.0.1:3000:80"
+  # ────────────────── FastAPI AI ──────────────────────
+  ai:
+    build:
+      context: ./AI_new
+    image: security-ai:local
+    container_name: security-ai-local
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c 
+        - "import json, urllib.request; data =
+        json.load(urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)); raise SystemExit(0 if data.get('model_loaded') is True else 1) "
+      interval: 15s
+      timeout: 10s
+      retries: 6
+      start_period: 60s
+  # ────────────────── 테스트 웹서버 ──────────────────────
+  juiceshop:
+    image: bkimminich/juice-shop
+    container_name: juiceshop
+    restart: unless-stopped
+    expose:
+      - "3000"
+  # ────────────────── WAF ──────────────────────
+  # 블랙리스트 상태 볼륨을 WAF 실행 계정(nginx, 101)이 쓸 수 있게 하고 빈 룰 파일을 만든 뒤 종료한다.
+  # CUSTOM-003이 Include할 파일이 없으면 WAF가 시작되지 않으므로 WAF보다 먼저 실행한다.
+  waf-blacklist-init:
+    image: owasp/modsecurity-crs:nginx
+    user: "0:0"
+    entrypoint: ["bash", "/opt/waf-blacklist/blacklist-sync.sh", "init-volume"]
+    volumes:
+      - ./waf/sync/blacklist-sync.sh:/opt/waf-blacklist/blacklist-sync.sh:ro
+      - waf-blacklist-state:/var/lib/waf-blacklist
+
+  waf:
+      image: owasp/modsecurity-crs:nginx
+      container_name: waf
+      restart: unless-stopped
+      depends_on:
+        juiceshop:
+          condition: service_started
+        waf-blacklist-init:
+          condition: service_completed_successfully
+      ports:
+        - "127.0.0.1:80:8080"
+      environment:
+        BACKEND: http://juiceshop:3000
+        PORT: "8080"
+        MODSEC_RULE_ENGINE: DetectionOnly
+        MODSEC_AUDIT_LOG: /var/log/nginx/waf-audit.log
+        PARANOIA: "2"
+        ANOMALY_INBOUND: "5"
+        ANOMALY_OUTBOUND: "4"
+        BLOCKING_PARANOIA: "1"
+        # 백엔드 블랙리스트 동기화(waf/sync/blacklist-sync.sh). 토큰은 backend와 같은 값을 쓴다.
+        WAF_SYNC_TOKEN: ${WAF_SYNC_TOKEN:-}
+        WAF_SYNC_INTERVAL: ${WAF_SYNC_INTERVAL:-10}
+        WAF_SYNC_EXCLUDE_IPS: ${WAF_SYNC_EXCLUDE_IPS:-}
+        # 상태 보고(POST /internal/waf/sync-status)에 쓰는 고정 WAF 이름
+        WAF_ID: ${WAF_ID:-local-waf-1}
+      volumes:
+        - ./waf/rules/CUSTOM-001-ai-align.conf:/etc/modsecurity.d/owasp-crs/rules/CUSTOM-001-ai-align.conf
+        - ./waf/rules/CUSTOM-002-blacklist.conf:/etc/modsecurity.d/owasp-crs/rules/CUSTOM-002-blacklist.conf
+        - ./waf/rules/CUSTOM-003-blacklist-sync.conf:/etc/modsecurity.d/owasp-crs/rules/CUSTOM-003-blacklist-sync.conf:ro
+        - ./waf/logs:/var/log/nginx
+        - ./waf/nginx-logging.conf.template:/etc/nginx/templates/conf.d/logging.conf.template
+        - ./waf/nginx.conf.template:/etc/nginx/templates/nginx.conf.template
+        - ./waf/modsecurity.conf.template:/etc/nginx/templates/conf.d/modsecurity.conf.template
+        - ./waf/njs:/etc/nginx/njs
+        - ./waf/sync/blacklist-sync.sh:/opt/waf-blacklist/blacklist-sync.sh:ro
+        - ./waf/sync/99-blacklist-sync.sh:/docker-entrypoint.d/99-blacklist-sync.sh:ro
+        - waf-blacklist-state:/var/lib/waf-blacklist
+
+
+
+  # ────────────────── WAF 로그 수집 ──────────────────────
+  fluent-bit:
+    image: fluent/fluent-bit:2.2
+    container_name: waf-fluent-bit
+    restart: unless-stopped
+    depends_on:
+      waf:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    volumes:
+      - ./waf/logs:/var/log/nginx:ro
+      - ./waf/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./waf/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - ./waf/waf-detection.lua:/fluent-bit/etc/waf-detection.lua:ro
+      # 읽기 위치(DB)와 전송 대기 버퍼를 보존해 컨테이너 재생성 시 로그 전체 재전송을 막는다.
+      - fluent-bit-state:/var/lib/fluent-bit
+
+  # ────────────────── 기존 저장 공간 연결 ──────────────────────
+volumes:
+  kafka-data:
+    external: true
+    name: ${KAFKA_DATA_VOLUME:?KAFKA_DATA_VOLUME is required}
+
+  zookeeper-data:
+    external: true
+    name: ${ZOOKEEPER_DATA_VOLUME:?ZOOKEEPER_DATA_VOLUME is required}
+
+  zookeeper-log:
+    external: true
+    name: ${ZOOKEEPER_LOG_VOLUME:?ZOOKEEPER_LOG_VOLUME is required}
+
+  # Fluent Bit 읽기 위치·버퍼. 이전할 기존 상태가 없어 external이 아닌 일반 볼륨으로 자동 생성한다.
+  # down -v로 지우면 다음 기동 때 Read_from_Head True에 따라 로그를 처음부터 다시 보낸다.
+  fluent-bit-state:
+
+  # WAF가 마지막으로 적용한 블랙리스트 룰. 재시작 직후 백엔드 연결 전에도 이전 차단을 유지한다.
+  waf-blacklist-state:
+
+  # ────────────────── 기존 Docker 네트워크 재사용 ──────────────────────
+networks:
+  default:
+    external: true
+    name: security-net

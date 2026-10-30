@@ -1,0 +1,16 @@
+{
+  "short_name": "DualGuard",
+  "name": "DualGuard 보안 모니터링",
+  "icons": [
+    {
+      "src": "dualguard-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1b1d2a",
+  "background_color": "#ffffff"
+}

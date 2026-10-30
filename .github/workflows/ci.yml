@@ -1,0 +1,178 @@
+name: Project CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 백엔드 테스트, 프론트엔드 빌드, AI 이미지 기동 확인, WAF 스크립트 테스트, Compose 설정 검증을 수행한다.
+# 배포는 별도 workflow에서 수행한다. 모델 평가(정확도 측정)는 포함하지 않는다.
+jobs:
+  backend:
+    name: Backend test & build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      # contextLoads 테스트가 실제 DB 연결과 JPA validate를 수행하므로 테스트 전용 MySQL을 띄운다.
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci-root
+          MYSQL_DATABASE: security_db
+          MYSQL_USER: ci
+          MYSQL_PASSWORD: ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci-root"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+          cache-dependency-path: |
+            backend/*.gradle
+            backend/gradle/wrapper/gradle-wrapper.properties
+      - name: Load DB schema
+        # ddl-auto=validate라 테이블을 자동 생성하지 않는다. 운영과 같은 스키마 SQL을 적용한다.
+        run: |
+          for _ in $(seq 1 30); do
+            docker exec ${{ job.services.mysql.id }} mysql -h127.0.0.1 -uci -pci -e "SELECT 1" security_db >/dev/null 2>&1 && break
+            sleep 2
+          done
+          docker exec -i ${{ job.services.mysql.id }} mysql -h127.0.0.1 -uroot -pci-root security_db < docs/db/security-db-schema.sql
+          docker exec -i ${{ job.services.mysql.id }} mysql -h127.0.0.1 -uroot -pci-root security_db < docs/db/add-waf-detections.sql
+          docker exec -i ${{ job.services.mysql.id }} mysql -h127.0.0.1 -uroot -pci-root security_db < docs/db/add-request-correlation.sql
+          docker exec -i ${{ job.services.mysql.id }} mysql -h127.0.0.1 -uroot -pci-root security_db < docs/db/add-request-alerts.sql
+      - name: Run tests and build executable JAR
+        working-directory: backend
+        env:
+          SPRING_PROFILES_ACTIVE: local
+          DB_URL: jdbc:mysql://127.0.0.1:3306/security_db?serverTimezone=Asia/Seoul
+          DB_USERNAME: ci
+          DB_PASSWORD: ci
+        run: |
+          # 테스트 전용 일회성 JWT 키
+          JWT_SECRET="$(openssl rand -base64 32)"
+          export JWT_SECRET
+          bash ./gradlew --no-daemon test bootJar
+      - name: Upload test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-report
+          path: backend/build/reports/tests/test/
+          retention-days: 7
+
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Build production assets
+        working-directory: frontend
+        run: npm run build
+
+  ai:
+    name: AI image build & health
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          # AI_new/Dockerfile의 python:3.12 이미지와 버전을 맞춘다.
+          python-version: '3.12'
+      - name: Compile Python sources without executing or training
+        run: python -m compileall -q AI_new
+      - name: Cache model files
+        uses: actions/cache@v4
+        with:
+          path: |
+            AI_new/models/model_bundle_tree_schema.pkl
+            AI_new/models/transformer/model_bundle.pkl
+          key: ai-models-${{ hashFiles('AI_new/models.lock.json') }}
+      - name: Fetch and verify model files
+        # 캐시가 있어도 SHA-256을 다시 검증한다.
+        run: python scripts/fetch_models.py
+      - uses: docker/setup-buildx-action@v3
+      - name: Build AI image
+        uses: docker/build-push-action@v6
+        with:
+          context: AI_new
+          load: true
+          tags: security-ai:ci
+          cache-from: type=gha,scope=ai
+          cache-to: type=gha,scope=ai,mode=max
+      - name: Check /health (model_loaded)
+        # Kafka 없이 기동해 모델 로딩까지만 확인한다. Kafka 연동은 배포 환경에서 확인한다.
+        run: |
+          docker run -d --name ai -p 8000:8000 security-ai:ci
+          for _ in $(seq 1 40); do
+            if curl -fsS localhost:8000/health -o health.json; then break; fi
+            sleep 3
+          done
+          cat health.json; echo
+          python -c "import json,sys; sys.exit(0 if json.load(open('health.json')).get('model_loaded') is True else 1)"
+      - name: Show AI logs
+        if: always()
+        run: docker logs ai 2>&1 | tail -50 || true
+
+  waf:
+    name: WAF script tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run blacklist sync and log rotation tests
+        # Docker·실제 nginx 없이 가짜 백엔드·nginx로 waf/sync, waf/scripts의 셸 스크립트를 검증한다.
+        # 동기화 스크립트가 쓰는 perl JSON::PP는 러너 기본 perl에 포함돼 있다(WAF 이미지와 같다).
+        run: python3 -m unittest discover -s waf/tests -v
+
+  compose:
+    name: Compose configuration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose files without starting services
+        # 루트 Compose 파일은 필수 환경변수가 있어야 해석되므로 검증용 더미 값을 넣는다.
+        env:
+          MYSQL_ROOT_PASSWORD: dummy
+          DB_USERNAME: dummy
+          DB_PASSWORD: dummy
+          JWT_SECRET: dummy
+          CORS_ALLOWED_ORIGINS: http://localhost:3000
+          KAFKA_DATA_VOLUME: dummy
+          ZOOKEEPER_DATA_VOLUME: dummy
+          ZOOKEEPER_LOG_VOLUME: dummy
+          WAF_TRUSTED_PROXY: 172.18.0.1
+        run: |
+          docker compose -f backend/docker-compose.yml config --quiet
+          docker compose -f waf/docker-compose.yml config --quiet
+          docker compose -f waf/docker-compose.yml -f targets/juiceshop/docker-compose.yml config --quiet
+          docker compose -f compose.yaml config --quiet
+          docker compose -f compose.aws.yaml config --quiet

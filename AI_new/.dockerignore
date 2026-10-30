@@ -1,0 +1,13 @@
+# 기본적으로 모든 파일 제외 (데이터셋·실험용 번들이 이미지에 들어가지 않도록)
+**
+
+# 서버 실행에 필요한 파일만 포함
+!requirements.txt
+!main.py
+!features_v2.py
+!schema_expert.py
+!security_ai/**
+!models/**
+
+**/*:Zone.Identifier
+**/__pycache__

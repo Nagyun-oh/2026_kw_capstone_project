@@ -1,0 +1,53 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+/bin/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+mysql_data/
+
+### Gradle ###
+.gradle/
+build/
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Spring Boot ###
+# 민감한 정보(비밀번호 등)가 들어갈 수 있는 설정 파일
+# 나중에 팀원과 공유할 때는 예시 파일(application.yml.sample)을 올리는 게 정석입니다.
+# 일단은 포함시키되, 중요한 정보가 들어가면 나중에 제외를 고려해보세요.

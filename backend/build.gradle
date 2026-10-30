@@ -1,0 +1,88 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.11'
+	id 'io.spring.dependency-management' version '1.1.7'
+
+	// Open Source Security Check
+	id 'org.owasp.dependencycheck' version '12.2.2'
+	id 'org.cyclonedx.bom' version '3.2.4'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+description = 'Demo project for Spring Boot'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.kafka:spring-kafka'
+	implementation 'org.springframework.security:spring-security-messaging'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// Swagger (SpringDoc OpenAPI)
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
+    // @Valid, @NotBlank, @Min, @Max
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+	testImplementation 'org.springframework.security:spring-security-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+dependencyCheck {
+	formats = ['HTML','JSON']
+	outputDirectory = layout.buildDirectory
+			.dir("reports/dependency-check")
+			.get()
+			.asFile
+			.toString()
+
+	//빌드 실패 방지
+	failBuildOnCVSS = 11
+
+	// Dependency-Check 실행 속도 안정을 위해 사용
+	nvd {
+		apiKey = System.getenv("NVD_API_KEY")
+	}
+}
+
+tasks.named('cyclonedxDirectBom') {
+	includeConfigs = ['runtimeClasspath']
+	skipConfigs = ['testRuntimeClasspath']
+
+	jsonOutput.set(file("build/reports/cyclonedx-direct/bom.json"))
+	xmlOutput.set(file("build/reports/cyclonedx-direct/bom.xml"))
+}
+
+tasks.named('cyclonedxBom') {
+	jsonOutput.set(file("build/reports/cyclonedx/bom.json"))
+	xmlOutput.set(file("build/reports/cyclonedx/bom.xml"))
+}

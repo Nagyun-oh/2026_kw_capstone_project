@@ -1,0 +1,17 @@
+# AI_new — 3모델(트랜스포머+트리+스키마) 소프트보팅 앙상블 서빙용 의존성
+# Kafka/FastAPI 통신 규격은 main (1).py / AI_v0/main_v2.py와 동일 (변경 없음).
+#
+# 주의: torch는 반드시 2.8.0 고정 (models/transformer/model_bundle.pkl이 로드 시점에
+# major.minor 버전을 엄격 검증함 — 다르면 ModelArtifactError 발생. AI/requirements.txt와
+# 동일 버전으로 맞춘 것이며, Windows torch 2.9+ c10.dll 회귀를 피하기 위한 고정이기도 함).
+
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+pydantic==2.7.4
+scikit-learn==1.8.0
+joblib>=1.3.0
+numpy>=1.26.0
+pandas==2.2.2
+kafka-python-ng==2.2.3
+torch==2.8.0
+requests>=2.31.0
