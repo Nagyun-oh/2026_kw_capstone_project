@@ -15,6 +15,7 @@ public class BlacklistRequestDto {
     private String ipAddress;
 
     @NotBlank(message= "Reason is required.")
+    @Size(max = 255, message = "Reason must contain at most 255 characters.")
     private String reason;
 
     @Min(value = 1 , message = "Danger level must be at least 1.")

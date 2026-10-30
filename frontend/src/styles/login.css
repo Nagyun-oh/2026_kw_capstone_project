@@ -45,18 +45,6 @@
   font-weight: 700;
 }
 
-.login-brand__mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-  background: #6d28d9;
-  font-size: 22px;
-}
-
 .login-eyebrow {
   margin: 0 0 12px;
   color: #6d28d9;
@@ -268,4 +256,11 @@
   .login-panel {
     padding: 32px 28px;
   }
+}
+
+.login-brand__logo {
+  display: block;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
 }

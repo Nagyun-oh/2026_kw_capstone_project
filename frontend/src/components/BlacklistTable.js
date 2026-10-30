@@ -18,6 +18,8 @@ function BlacklistTable({
   onViewLog,
   onDelete,
   deletingId,
+  onRegister,
+  error = '',
 }) {
   const [form, setForm] = useState({
     ip: '',
@@ -51,9 +53,21 @@ function BlacklistTable({
           <p>목록에 등록된 IP와 등록 사유, 연관 위협을 확인하세요.</p>
         </div>
 
-        <span className="data-count">
-          목록 기준 {pageInfo.totalElements.toLocaleString('ko-KR')}건
-        </span>
+        <div className="blacklist-header-actions">
+          <button
+            type="button"
+            className="dashboard-button dashboard-button--danger blacklist-add-button"
+            onClick={onRegister}
+            aria-label="IP 수동 차단"
+            title="IP 수동 차단"
+          >
+            +
+          </button>
+
+          <span className="data-count">
+            목록 기준 {pageInfo.totalElements.toLocaleString('ko-KR')}건
+          </span>
+        </div>
       </header>
 
       <form className="data-filters" onSubmit={handleSubmit}>
@@ -100,6 +114,12 @@ function BlacklistTable({
           </button>
         </div>
       </form>
+
+      {error && (
+        <p className="dashboard-error" role="alert">
+          {error}
+        </p>
+      )}
 
       <div
         className="data-table-scroll"
@@ -196,9 +216,6 @@ function BlacklistTable({
                         {deletingId === entry.id ? '삭제 중…' : '삭제'}
                       </button>
                     </td>
-
-
-
                   </tr>
                 );
               })

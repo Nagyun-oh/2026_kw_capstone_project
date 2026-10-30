@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.security_log_system.dto.GroupedThreatResponseDto;
 
 @Tag(name = "Threat API", description = "위협 데이터 조회 및 관리 API")
 @RestController
@@ -36,6 +37,19 @@ public class ThreatController {
         );
 
         return ResponseEntity.ok(threatService.getThreats(condition,pageable));
+    }
+
+    @GetMapping("/grouped")
+    public ResponseEntity<Page<GroupedThreatResponseDto>> getGroupedThreats(
+            @Valid @ModelAttribute ThreatSearchCondition condition,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ){
+        // 정렬은 요청별 최신 탐지 ID를 기준으로 SQL에서 수행한다.
+        PageRequest pageable = PageRequest.of(page,size);
+
+        return ResponseEntity.ok(threatService.getGroupedThreats(condition,pageable));
+
     }
 
 

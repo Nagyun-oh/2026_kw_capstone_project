@@ -13,6 +13,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LogSearchCondition {
 
+    @Min(value = 1, message = "Log ID must be at least 1.")
+    private Long logId;
+
     @ValidIpAddress
     private String ip;
 

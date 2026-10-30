@@ -181,7 +181,7 @@ function WafSyncStatusPanel({
           ) : (
             <>
               <p className="waf-sync-panel__notice">
-                다음 {excludedIps.length}개 값은 보고된 적용 목록에서
+                다음 {excludedIps.length}개 값은 보고된 블랙리스트의
                 차단 대상에서 제외됐습니다.
               </p>
 
@@ -251,12 +251,6 @@ function WafSyncStatusPanel({
             </dl>
           </details>
         )}
-
-        <p className="waf-sync-panel__footnote">
-          적용 확인은 WAF 설정 반영 기준입니다.
-          제외 IP를 포함한 모든 등록 IP의 차단 완료를 의미하지 않으며,
-          개별 요청의 실제 차단 여부는 별도 검증이 필요합니다.
-        </p>
       </div>
     </section>
   );

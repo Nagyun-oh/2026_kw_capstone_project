@@ -21,6 +21,13 @@ public final class ThreatSpecification {
         return (root, query,builder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            if(condition.getThreatId() !=null){
+                predicates.add(builder.equal(
+                        root.get("id"),
+                        condition.getThreatId()
+                ));
+            }
+
             if(StringUtils.hasText(condition.getSource())){
                 String threatType = switch (condition.getSource()){
                     case "AI" -> "AI Detection";

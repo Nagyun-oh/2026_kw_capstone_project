@@ -43,6 +43,7 @@ public class WafDetectionWriter {
     private final ZoneId eventZone;
     private final RequestCorrelationService requestCorrelationService;
     private final RequestAlertService requestAlertService;
+    private final AutoBlacklistPolicyService autoBlacklistPolicyService;
 
     public WafDetectionWriter(
             ThreatRepository threatRepository,
@@ -50,6 +51,7 @@ public class WafDetectionWriter {
             ObjectMapper objectMapper,
             RequestCorrelationService requestCorrelationService,
             RequestAlertService requestAlertService,
+            AutoBlacklistPolicyService autoBlacklistPolicyService,
             @Value("${app.kafka.waf.event-zone:UTC}") String eventZone
     ){
         this.threatRepository = threatRepository;
@@ -57,6 +59,7 @@ public class WafDetectionWriter {
         this.objectMapper = objectMapper;
         this.requestCorrelationService = requestCorrelationService;
         this.requestAlertService = requestAlertService;
+        this.autoBlacklistPolicyService = autoBlacklistPolicyService;
         this.eventZone = ZoneId.of(eventZone);
     }
 
@@ -114,6 +117,10 @@ public class WafDetectionWriter {
                 event.getClientIp(),
                 severity
         );
+
+        if(linkedLog != null){
+            autoBlacklistPolicyService.evaluate(linkedLog);
+        }
     }
 
 

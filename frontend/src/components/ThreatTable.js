@@ -2,6 +2,7 @@ import { useState } from 'react';
 import TablePagination from './TablePagination';
 
 const EMPTY_FORM = {
+  threatId: '',
   source: '',
   severity: '',
 };
@@ -67,7 +68,7 @@ function ThreatTable({
             )}
           </div>
 
-          <p>AI와 WAF 탐지 결과를 출처별로 확인하세요.</p>
+          <p>같은 요청의 WAF·AI 탐지 결과와 근거를 함께 확인하세요.</p>
         </div>
 
         <span className="data-count">
@@ -82,6 +83,21 @@ function ThreatTable({
       </header>
 
       <form className="data-filters" onSubmit={handleSubmit}>
+        <label className='data-field'>
+          <span>위협 번호</span>
+
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern = "[1-9][0-9]*"
+            maxLength={19}
+            name="threatId"
+            value={form.threatId}
+            onChange={handleChange}
+            placeholder="예: 1"
+          />
+        </label>
+
         <label className="data-field data-field--wide">
           <span>탐지 출처</span>
 
@@ -150,7 +166,8 @@ function ThreatTable({
             <col className="data-column-reference" />
             <col className="data-column-type" />
             <col className="data-column-severity" />
-            <col />
+            <col className="threat-column-waf-description" />
+            <col className="threat-column-ai-description" />
           </colgroup>
 
           <thead>
@@ -159,83 +176,94 @@ function ThreatTable({
               <th scope="col">상세</th>
               <th scope="col">탐지 유형</th>
               <th scope="col">위험도</th>
-              <th scope="col">탐지 설명</th>
+              <th scope="col">탐지 설명 (WAF Detection)</th>
+              <th scope="col">탐지 설명 (AI Detection)</th>
             </tr>
           </thead>
 
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="data-empty" role="status">
+                <td colSpan={6} className="data-empty" role="status">
                   위협 목록을 불러오는 중입니다…
                 </td>
               </tr>
             ) : threats.length === 0 ? (
               <tr>
-                <td colSpan={5} className="data-empty">
+                <td colSpan={6} className="data-empty">
                   {error
                     ? '목록을 표시할 수 없습니다.'
                     : '검색 조건에 해당하는 위협 기록이 없습니다.'}
                 </td>
               </tr>
             ) : (
-              threats.map(threat => {
-                const isWaf = threat.threatType === 'WAF Detection';
+              threats.map(threat => (
+                <tr key={threat.id}>
+                  <td className="data-muted">
+                    #{threat.id}
+                  </td>
 
-                return (
-                  <tr key={threat.id}>
-                    <td className="data-muted">#{threat.id}</td>
+                  <td>
+                    <div className="threat-detail-actions">
+                      {threat.wafThreatId != null && (
+                        <button
+                          type="button"
+                          className="data-reference-button"
+                          onClick={() => onViewWaf(threat.wafThreatId)}
+                          aria-label={`위협 ${threat.wafThreatId} WAF 상세 보기`}
+                        >
+                          WAF 상세
+                        </button>
+                      )}
 
-                    <td>
-                      <div className="threat-detail-actions">
-                        {isWaf && (
-                          <button
-                            type="button"
-                            className="data-reference-button"
-                            onClick={() => onViewWaf(threat.id)}
-                            aria-label={`위협 ${threat.id} WAF 상세 보기`}
-                          >
-                            WAF 상세
-                          </button>
-                        )}
+                      {threat.logId != null && (
+                        <button
+                          type="button"
+                          className="data-reference-button"
+                          onClick={() => onViewLog(threat.logId)}
+                          aria-label={`원본 로그 ${threat.logId} 상세 보기`}
+                        >
+                          로그 #{threat.logId}
+                        </button>
+                      )}
 
-                        {threat.logId != null && (
-                          <button
-                            type="button"
-                            className="data-reference-button"
-                            onClick={() => onViewLog(threat.logId)}
-                            aria-label={`원본 로그 ${threat.logId} 상세 보기`}
-                          >
-                            로그 #{threat.logId}
-                          </button>
-                        )}
+                      {threat.wafThreatId == null && threat.logId == null && (
+                        <span className="data-muted">
+                          연결 없음
+                        </span>
+                      )}
+                    </div>
+                  </td>
 
-                        {!isWaf && threat.logId == null && (
-                          <span className="data-muted">연결 없음</span>
-                        )}
-                      </div>
-                    </td>
+                  <td className="data-description">
+                    {(threat.threatTypes ?? []).join(', ') || '—'}
 
-                    <td className="data-description">
-                      {threat.threatType || '—'}
-                    </td>
+                    {threat.otherDescription && (
+                      <p className="data-muted">
+                        설명: {threat.otherDescription}
+                      </p>
+                    )}
+                  </td>
 
-                    <td>
-                      <span
-                        className={`data-badge data-badge--${
-                          SEVERITY_TONES[threat.severity] ?? 'neutral'
-                        }`}
-                      >
-                        {threat.severity || '미지정'}
-                      </span>
-                    </td>
+                  <td>
+                    <span
+                      className={`data-badge data-badge--${
+                        SEVERITY_TONES[threat.severity] ?? 'neutral'
+                      }`}
+                    >
+                      {threat.severity || '미확인'}
+                    </span>
+                  </td>
 
-                    <td className="data-description">
-                      {threat.description || '—'}
-                    </td>
-                  </tr>
-                );
-              })
+                  <td className="data-description">
+                    {threat.wafDescription || '—'}
+                  </td>
+
+                  <td className="data-description">
+                    {threat.aiDescription || '—'}
+                  </td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>

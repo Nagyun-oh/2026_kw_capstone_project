@@ -56,18 +56,17 @@ function LoginPage({onLogin,noticeMessage = ''}){
             <div className='login-shell'>
                 <aside className='login-brand'>
                     <div className='login-brand__identity'>
-                        <span
-                            className='login-brand__mark'
-                            aria-hidden="true"
-                        >
-                            s
-                        </span>
-                        <span>Security Monitor</span>
+                        <img
+                            className='login-brand__logo'
+                            src = '/dualguard-icon.svg'
+                            alt= ''
+                        />
+                        <span>DualGuard</span>
                     </div>
 
                     <div className='login-brand__intro'>
                         <p className='login-eyebrow'>
-                            SECURITY_MONITORING
+                            Light SOAR
                         </p>
 
                         <h2>
@@ -82,7 +81,7 @@ function LoginPage({onLogin,noticeMessage = ''}){
                     </div>
 
                     <p className='login-brand__footer'>
-                        AI 기반 보안 위협 분석 시스템
+                        2026 Capstone Project
                     </p>
                 </aside>
 

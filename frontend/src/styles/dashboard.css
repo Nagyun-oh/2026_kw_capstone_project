@@ -1277,3 +1277,87 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.blacklist-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.blacklist-register-fields {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.blacklist-header-actions .blacklist-add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.blacklist-register-fields textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--dashboard-text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.data-table--threats {
+  min-width: 1320px;
+}
+
+.data-table--threats .data-column-type {
+  width: 230px;
+}
+
+/* 남는 공간을 확보해 설명 영역을 오른쪽으로 밀기 */
+.data-table--threats .data-column-severity {
+  width: auto;
+}
+
+/* 설명 두 열은 고정 너비 */
+.data-table--threats .threat-column-waf-description {
+  width: 260px;
+}
+
+.data-table--threats .threat-column-ai-description {
+  width: 320px;
+}
+
+/* 위험도 제목과 배지를 오른쪽으로 이동 */
+.data-table--threats th:nth-child(4),
+.data-table--threats td:nth-child(4) {
+  padding-left: 48px;
+}
+
+.dashboard-toolbar--refresh {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.dashboard-toolbar--refresh p {
+  margin: 0;
+  text-align: right;
+  font-size: 12px;
+}
+
+.dashboard-brand__logo {
+  display: block;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
