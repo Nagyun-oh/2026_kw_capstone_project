@@ -3,19 +3,19 @@ const SUMMARY_CARDS = [
         key: 'totalLogs',
         label: '저장된 로그',
         description: '현재 저장된 전체 로그',
-        tone: 'primary',
+        tone: 'neutral',
     },
     {
         key: 'totalThreats',
-        label: '위협 탐지 기록',
-        description: '현재 저장된 전체 탐지 기록',
-        tone: 'danger',
+        label: '통합 위협 기록',
+        description: '같은 요청의 WAF·AI 탐지를 통합한 기록',
+        tone: 'primary',
     },
     {
         key: 'totalBlacklistEntries',
         label: '차단 목록 등록',
-        description: '실제 WAF 차단 여부와 별개인 등록 건수',
-        tone: 'neutral',
+        description: 'IP 차단',
+        tone: 'danger',
     },
 ];
 

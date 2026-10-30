@@ -17,7 +17,7 @@ export async function getDashboardSummary(signal){
     const [logsResponse, threatsResponse, blacklistResponse]=
         await Promise.all([
             apiClient.get('/api/v1/logs',config),
-            apiClient.get('/api/v1/threats',config),
+            apiClient.get('/api/v1/threats/grouped',config),
             apiClient.get('/api/v1/blacklist',config),
         ]);
 
