@@ -182,7 +182,7 @@ function ThreatTable({
           </thead>
 
           <tbody>
-            {loading ? (
+            {loading && threats.length === 0 ?(
               <tr>
                 <td colSpan={6} className="data-empty" role="status">
                   위협 목록을 불러오는 중입니다…
