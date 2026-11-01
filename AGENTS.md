@@ -14,7 +14,7 @@ DualGuard는 WAF·AI 탐지를 결합한 졸업 프로젝트다. 기능뿐 아�
 
 - `backend/`: Java 17, Spring Boot, JPA, Spring Kafka, 세션 인증, WebSocket/STOMP.
 - `frontend/`: React + Create React App(`react-scripts`), Axios. 운영에서는 Nginx가 빌드 산출물을 제공한다.
-- `AI_new/`: 현재 Compose·CI·배포 대상인 Python/FastAPI AI 서비스. `AI/`는 이전 코드이므로 대상을 혼동하지 않는다.
+- `AI_new/`: 현재 Compose·CI·배포 대상인 Python/FastAPI AI 서비스. 이전 단일 모델 서비스 `AI/`는 제거됐고, 비교용 기록만 `docs/archive/ai-v1/`에 있다.
 - `waf/`: Nginx/ModSecurity, Fluent Bit 설정, 블랙리스트 동기화, 로그 회전, 관련 테스트.
 - `compose.yaml`: 로컬. `compose.aws.yaml`: EC2. DB는 MySQL, 메시지 브로커는 Kafka/Zookeeper.
 
