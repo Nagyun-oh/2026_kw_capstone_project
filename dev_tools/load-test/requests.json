@@ -1,0 +1,17 @@
+[
+  {"group": "api", "method": "GET", "path": "/rest/admin/application-configuration"},
+  {"group": "api", "method": "GET", "path": "/rest/admin/application-version"},
+  {"group": "api", "method": "GET", "path": "/rest/languages"},
+  {"group": "api", "method": "GET", "path": "/rest/products/search?q="},
+  {"group": "api", "method": "GET", "path": "/rest/products/search?q=apple"},
+  {"group": "api", "method": "GET", "path": "/api/Products/1"},
+  {"group": "api", "method": "GET", "path": "/rest/products/1/reviews"},
+  {"group": "api", "method": "GET", "path": "/api/Quantitys/"},
+  {"group": "static", "method": "GET", "path": "/"},
+  {"group": "static", "method": "GET", "path": "/styles.css"},
+  {"group": "static", "method": "GET", "path": "/polyfills.js"},
+  {"group": "static", "method": "GET", "path": "/assets/i18n/en.json"},
+  {"group": "static", "method": "GET", "path": "/assets/public/images/products/apple_juice.jpg"},
+  {"group": "static", "method": "GET", "path": "/main.js"},
+  {"group": "login", "method": "POST", "path": "/rest/user/login", "body": "{\"email\":\"customer@example.com\",\"password\":\"not-the-password-123\"}"}
+]

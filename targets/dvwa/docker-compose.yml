@@ -1,0 +1,43 @@
+# DVWA(Damn Vulnerable Web Application) 로컬 대상 — T2(다른 웹사이트) 오탐 측정용.
+#
+# JuiceShop(Node.js/JSON API)과 다른 스택(PHP·폼 전송·쿠키 세션)에서, 이 사이트의 정상 사용
+# 요청이 WAF·AI에 오탐으로 걸리는지 보려고 띄운다. 평가 절차는 wafs/README.md "T2" 참고.
+#
+# 격리: 자체 네트워크(dvwa-net)만 쓰고 호스트에는 127.0.0.1로만 연다. 메인 스택·실험실과 분리된다.
+# 포트 4280은 정상 트래픽 생성 스크립트(dev_tools/scripts/capture_dvwa_traffic.py)가 직접 접속할 때만 쓴다.
+#
+#   docker compose -f targets/dvwa/docker-compose.yml up -d
+#
+# DVWA는 의도적으로 취약한 학습용 앱이다. 외부에 노출하지 않는다(로컬·허가 범위 안에서만 사용).
+name: dvwa-target
+
+services:
+  dvwa:
+    image: ghcr.io/digininja/dvwa:latest@sha256:8029450682bd70e2e8cd1ffe8e46dd1885ff2a913296091cebfa8ba0a7d36498
+    container_name: dvwa
+    depends_on:
+      - dvwa-db
+    environment:
+      - DB_SERVER=dvwa-db
+      - DB_DATABASE=dvwa
+      - DB_USERNAME=dvwa
+      - DB_PASSWORD=p@ssw0rd
+    ports:
+      - "127.0.0.1:4280:80"
+    networks:
+      - dvwa-net
+
+  dvwa-db:
+    image: mariadb:10.11
+    container_name: dvwa-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=dvwa
+      - MYSQL_DATABASE=dvwa
+      - MYSQL_USER=dvwa
+      - MYSQL_PASSWORD=p@ssw0rd
+    networks:
+      - dvwa-net
+
+networks:
+  dvwa-net:
+    driver: bridge

@@ -1,0 +1,60 @@
+# WAF 비교 실험실: 같은 백엔드 앞에 여러 WAF를 차단 모드로 두고 차단 응답(403)으로 요청 탐지를 비교한다.
+# 메인 스택(compose.yaml)과 네트워크·로그 수집이 분리돼 있어 Kafka·백엔드·DB에 기록이 남지 않는다.
+# 실행·측정 방법은 wafs/README.md 참고.
+#
+# 비교 조건을 같게 하려고 CRS 버전(4.25.1)과 CRS 설정(차단 PL1, 탐지 PL2, 요청 임계값 5)을 맞추고,
+# 이미지는 digest로 고정한다. 메인 WAF 커스텀 룰 중 탐지 룰(10001~10003)은 넣지 않고(CRS만 비교),
+# 앱 호환 설정(10004 허용 메서드)만 같게 맞춘다.
+# 응답 단계 차단은 끈다(응답 임계값 10000). AI는 요청만 보므로 WAF도 요청 단계 탐지만 비교한다.
+# 그래서 차단 여부는 백엔드와 무관하며, 백엔드는 모든 요청에 200을 주는 nginx로 둔다(backend.conf).
+#
+# PL 비교: LAB_BLOCKING_PL·LAB_DETECTION_PL로 바꿔 띄운다(기본 1·2, 메인 WAF와 같음).
+# 탐지 PL은 차단 PL 이상이어야 한다. 낮으면 CRS 901500이 모든 요청을 500으로 거부한다.
+#   LAB_BLOCKING_PL=3 LAB_DETECTION_PL=3 docker compose -f wafs/docker-compose.yml up -d modsecurity
+# 요청 임계값: LAB_INBOUND_THRESHOLD(기본 5)
+name: waf-lab
+
+services:
+  backend:
+    image: nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2
+    volumes:
+      - ./backend.conf:/etc/nginx/conf.d/default.conf:ro
+
+  # 메인 WAF와 같은 이미지·CRS 설정을 차단 모드로 실행한다(판정 방식 검증용 대조군).
+  modsecurity:
+    image: owasp/modsecurity-crs:nginx@sha256:941c045ca601c4eb5b77863832be7b1e226c27687554767e7bb3f3f8c2442d05
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:8090:8080"
+    environment:
+      BACKEND: http://backend:8080
+      PORT: "8080"
+      MODSEC_RULE_ENGINE: "On"
+      # 이 이미지에서 PARANOIA는 탐지 범위(detection) 레벨이다.
+      PARANOIA: "${LAB_DETECTION_PL:-2}"
+      BLOCKING_PARANOIA: "${LAB_BLOCKING_PL:-1}"
+      ANOMALY_INBOUND: "${LAB_INBOUND_THRESHOLD:-5}"
+      ANOMALY_OUTBOUND: "10000"   # 응답 단계 차단 끔(요청 단계만 비교)
+      # 메인 WAF CUSTOM-001(10004)과 같은 앱 호환 설정: JuiceShop REST API의 PUT·PATCH·DELETE 허용
+      ALLOWED_METHODS: "GET HEAD POST PUT PATCH DELETE OPTIONS"
+
+  # 같은 CRS 4.25.1을 Go 엔진(Coraza)으로 실행한다.
+  coraza:
+    image: ghcr.io/coreruleset/coraza-crs:4.25.1-nginx-202609260209@sha256:6811a038b1c0d06d762873055b754d50dfc74506880152fc3f0bb2d565abba63
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:8091:8080"
+    environment:
+      # nginx upstream에 그대로 들어가므로 스킴 없이 호스트:포트로 적는다.
+      BACKEND: backend:8080
+      PORT: "8080"
+      CORAZA_RULE_ENGINE: "On"
+      # 이 이미지는 탐지 범위를 DETECTION_PARANOIA로 따로 지정한다.
+      BLOCKING_PARANOIA: "${LAB_BLOCKING_PL:-1}"
+      DETECTION_PARANOIA: "${LAB_DETECTION_PL:-2}"
+      ANOMALY_INBOUND: "${LAB_INBOUND_THRESHOLD:-5}"
+      ANOMALY_OUTBOUND: "10000"   # 응답 단계 차단 끔(요청 단계만 비교)
+      # 메인 WAF CUSTOM-001(10004)과 같은 앱 호환 설정: JuiceShop REST API의 PUT·PATCH·DELETE 허용
+      ALLOWED_METHODS: "GET HEAD POST PUT PATCH DELETE OPTIONS"
