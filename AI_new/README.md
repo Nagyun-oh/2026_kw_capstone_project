@@ -1,15 +1,14 @@
 # AI_new — 3모델 소프트보팅 앙상블 위협 탐지 서버
 
-Spring 백엔드 ↔ Kafka ↔ AI 서버 통신 규격은 레포 루트의 `main (1).py`(GitHub 기준 최신)를
-그대로 유지하면서, AI 판정 로직만 **트랜스포머 + 트리 + 스키마 전문가** 3모델 소프트보팅
-앙상블로 교체한 서버입니다. `AI_v0/main.py`, `AI_v0/main_v2.py`, 레포 루트 `main (1).py`는
-전혀 건드리지 않았습니다 — 이 디렉토리는 완전히 새로운 통합 지점입니다.
+Spring 백엔드가 Kafka(`ai-request-topic`)로 보낸 HTTP 요청을 **트랜스포머 + 트리 + 스키마 전문가**
+3모델 소프트보팅 앙상블로 판정하고, 결과(공격이면 판정 근거 포함)를 `ai-result-topic`으로 돌려주는
+서버입니다. Compose·CI·EC2 배포가 모두 이 디렉터리를 AI 서비스로 사용합니다.
 
 ## 1. 왜 이게 필요한가
 
 - 목표1(앙상블): 트랜스포머(바이트 단위) + 트리(HistGradientBoosting) + 스키마 전문가
   (HistGradientBoosting, 애플리케이션 구조 기반) 3개를 로짓 공간 소프트보팅으로 결합합니다.
-- 목표2(경량화): 예전 4모델(RF/ET/XGB/HGB) 앙상블은 pkl 하나가 3GB를 넘었습니다. 지금은
+- 목표2(경량화): 예전 4모델(RF/ET/XGB/HGB) 앙상블([이전 모델 기록](../docs/archive/ai-v1/))은 pkl 하나가 3GB를 넘었습니다. 지금은
   HistGradientBoosting 단일 모델 조합으로 대체해서 트리+스키마 결합 pkl이 13.75MB입니다.
 - 목표3(오탐 해결): `user_agent_encoded` 같은 출처 식별 지름길 피처를 제거하고, 규칙 게이트 +
   3모델 통계 판정을 병행해서 오탐을 줄였습니다.
@@ -18,7 +17,7 @@ Spring 백엔드 ↔ Kafka ↔ AI 서버 통신 규격은 레포 루트의 `main
 
 | 모델 | 알고리즘 | 피처 수 | 최종 하이퍼파라미터 | 역할 |
 |---|---|---|---|---|
-| 트랜스포머 | 바이트 단위 Transformer (hidden=96, layer=3) | 바이트 시퀀스 + 구조 피처 19개 | `AI/` 학습 파이프라인 산출물 | 내용 기반 판단 |
+| 트랜스포머 | 바이트 단위 Transformer (hidden=96, layer=3) | 바이트 시퀀스 + 구조 피처 19개 | 학습 파이프라인 산출물 (저장소 외부) | 내용 기반 판단 |
 | 트리 | HistGradientBoostingClassifier | 28개 (`features_v2.py`) | `trial_36` | 내용+통계 기반 판단 |
 | 스키마 전문가 | HistGradientBoostingClassifier | 12개 (`schema_expert.py`) | `trial_18` | 구조 기반 판단 (positive security model) |
 
@@ -41,7 +40,9 @@ threshold = 0.9650                                         # source_robust_score
 AI_new/
 ├── main.py                    # FastAPI + Kafka 서버 (실제 배포 진입점)
 ├── schema_expert.py           # 스키마 전문가 피처 계산 + soft_vote()
-├── features_v2.py             # 트리 피처 계산 + 규칙 게이트(rule_hits) + explain()
+├── features_v2.py             # 트리 피처 계산 + 규칙 게이트(rule_hits) + explain() + 근거 문자열(feature_evidence)
+├── ensemble_explainer.py      # 판정 근거 분해 (TreeSHAP + 로짓 분해 → reason·explanation, 9장)
+├── tests/                     # 판정 설명 테스트 (pytest)
 ├── requirements.txt
 ├── models/
 │   ├── model_bundle_tree_schema.pkl   # 트리(trial_36)+스키마(trial_18) 결합 배포 번들
@@ -49,7 +50,7 @@ AI_new/
 │   └── transformer/
 │       ├── model_bundle.pkl               # 트랜스포머 원본 (파일명 변경 금지, 아래 4장 참고)
 │       └── model_bundle.pkl.manifest.json # 위 pkl의 SHA-256 무결성 매니페스트
-├── security_ai/                # AI/src/security_ai에서 트랜스포머 추론에 필요한 부분만 vendoring
+├── security_ai/                # 학습 파이프라인의 security_ai 패키지에서 트랜스포머 추론에 필요한 부분만 vendoring
 │   ├── data/                   # HttpRecord, sanitize_record (train/serve skew 방지용)
 │   ├── model/                  # HttpByteTransformer, ByteHttpTokenizer
 │   ├── serving/                # ModelRuntime, model_artifact(무결성 검증), schemas
@@ -72,7 +73,7 @@ AI_new/
 없습니다. 3모델을 한 파일에 재포장한 비교용 산출물도 실험했지만 원본과 같은 파일 기반 무결성
 검증을 그대로 적용할 수 없어 실제 배포에는 사용하지 않습니다.
 
-## 5. Kafka/API 통신 규격 (변경 없음, `main (1).py`와 동일)
+## 5. Kafka/API 통신 규격 (응답에 설명 필드 추가)
 
 ```
 토픽:        ai-request-topic  (Spring → AI)
@@ -80,10 +81,9 @@ AI_new/
 컨슈머 그룹: ai-service-group
 ```
 
-**⚠️ 중요**: `AI_v0/main_v2.py`, 레포 루트 `main (1).py`와 토픽·컨슈머그룹이 완전히 동일합니다.
-이 서버를 띄울 때 그 두 서버가 동시에 실행 중이면 안 됩니다 — 같은 컨슈머 그룹에 여러 프로세스가
-붙으면 카프카가 파티션을 나눠 배정해서, 앙상블이 되는 게 아니라 요청마다 트래픽이 조용히
-반씩(또는 셋 중 하나로) 분할됩니다. **셋 중 하나만 실행하세요.**
+**⚠️ 중요**: 같은 컨슈머 그룹(`ai-service-group`)에 **다른 모델 서버**를 함께 붙이면 카프카가
+파티션을 나눠 배정해서, 앙상블이 되는 게 아니라 요청이 서버별로 조용히 나뉩니다.
+**이 그룹으로는 이 서버만 실행하세요.**
 
 요청/응답 필드 (Spring 쪽 스키마 변경 없음):
 
@@ -91,7 +91,11 @@ AI_new/
 Request  (Spring → FastAPI): method, url_path, query_params, body_content, user_agent,
                               ip_address, timestamp, log_id
 Response (FastAPI → Spring): threat_score, ip_address, reason, log_id
+                             + decision_source, explanation (판정 근거 설명, 9장)
 ```
+
+`decision_source`·`explanation`은 필드를 추가한 것이라 기존 소비자는 무시해도 됩니다(Spring의 기본
+ObjectMapper는 모르는 필드를 무시). `reason`의 형식만 바뀌었습니다(`[규칙] …` / `[모델] …`).
 
 입력 처리 규칙:
 
@@ -104,7 +108,7 @@ Response (FastAPI → Spring): threat_score, ip_address, reason, log_id
 
 ## 6. 학습에 사용한 데이터셋
 
-`AI_v0/data/`, `AI/data/`에 여러 공개 데이터셋 원본이 있지만, 실제로 학습(train/validation/test)에
+여러 공개 데이터셋을 검토했지만, 실제로 학습(train/validation/test)에
 쓴 건 4개뿐입니다 (`features_v2_dataset.parquet`, `schema_features.parquet`의 `source` 컬럼 기준,
 전체 1,527,243행):
 
@@ -169,7 +173,7 @@ python -m pip install -r requirements.txt
 ```
 
 **⚠️ torch==2.8.0 고정 필수** — 트랜스포머 pkl이 로드 시점에 정확히 이 major.minor 버전인지
-검증합니다(다르면 `ModelArtifactError` 발생). `AI/requirements.txt`와 동일한 이유로 고정되어
+검증합니다(다르면 `ModelArtifactError` 발생). 학습 환경과 같은 버전으로 고정되어
 있습니다 (Windows torch 2.9+ 환경에서 발생하는 `c10.dll` 회귀 회피).
 
 모델 파일 배치 (Kaggle에서 받은 경우):
@@ -210,6 +214,13 @@ Kafka consumer와 모델 상태가 프로세스 안에 있으므로 운영 서�
 
 카프카 브로커 주소는 `main.py` 상단의 `KAFKA_BOOTSTRAP_SERVERS`에서 바꿀 수 있습니다
 (기본값 `localhost:9092`).
+
+테스트 (판정 설명, Kafka 워커는 띄우지 않음):
+```powershell
+python -m pip install pytest
+python -m pytest tests
+```
+모델 파일(`models/*.pkl`)이 없으면 모델이 필요한 테스트는 건너뜁니다.
 
 ## 8. API
 
@@ -252,12 +263,53 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8000/predict `
   "log_id": 1001,
   "threat_score": 0.0312,
   "ip_address": "0.0.0.0",
-  "reason": "-"
+  "reason": "-",
+  "decision_source": null,
+  "explanation": null
 }
 ```
 
 공격이면 입력 IP와 탐지 근거가 반환되고, 정상이면 `ip_address="0.0.0.0"`, `reason="-"`가
 반환됩니다. `/predict/batch`는 같은 요청 객체의 JSON 배열을 받습니다.
+
+공격 응답 예시 (`explanation`은 일부 생략, 필드 설명은 9장):
+
+```json
+{
+  "log_id": 1002,
+  "threat_score": 0.9991,
+  "ip_address": "203.0.113.7",
+  "reason": "[모델] URL 인코딩 문자 5개 [%22×4, %3D] +3.0 · 문자 비율 0.46 +1.8 · 처음 보는 경로·파라미터 조합 +1.6 · 검토 권장: 구조 특성 위주 판정",
+  "decision_source": "model",
+  "explanation": {
+    "method": "tree_shap+logit_decomposition",
+    "model_score": 0.9991,
+    "logit": 7.0656,
+    "threshold_logit": 3.3168,
+    "base_logit": -3.595,
+    "transformer_logit": 0.374,
+    "adjustment": 0.0,
+    "model_probabilities": {"transformer": 0.9994, "tree": 0.9982, "schema": 1.0},
+    "toward_attack": [
+      {"model": "tree", "feature": "encoded_char_count", "label": "URL 인코딩 문자", "value": 5,
+       "display": "URL 인코딩 문자 5개", "contribution": 2.9943,
+       "evidence": [{"text": "%22", "count": 4}, {"text": "%3D", "count": 1}]}
+    ],
+    "toward_normal": [
+      {"model": "tree", "feature": "sql_keyword_count", "label": "SQL 키워드", "value": 0,
+       "display": "SQL 키워드 0개", "contribution": -0.4093, "evidence": []}
+    ],
+    "rules": [],
+    "pattern_share": 0.397,
+    "review_recommended": true,
+    "note": "기여도는 모델이 공격 쪽으로 기운 정도이며 공격 성공이나 피해의 증거가 아닙니다."
+  }
+}
+```
+
+규칙 게이트가 판정하면 `reason`은 `[규칙] UNION SELECT 구문 [union select] · 공격 도구 User-Agent [sqlmap]`처럼
+걸린 규칙과 매칭된 문자열이 되고, `explanation.rules`에 같은 내용이, `toward_attack`·`toward_normal`에는
+같은 요청을 3모델이 어떻게 봤는지가 들어갑니다.
 
 카프카가 연결되면 `ai-request-topic`을 컨슈밍해서 자동으로 판정 후 `ai-result-topic`에
 결과를 보냅니다(HTTP API와 동일한 판정 로직 공유).
@@ -271,7 +323,74 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8000/predict `
 | result topic | `ai-result-topic` |
 | consumer group | `ai-service-group` |
 
-## 9. 내부 평가 결과
+## 9. 판정 근거 설명 (XAI)
+
+판정(점수·임계값·규칙)은 그대로 두고 **공격으로 판정한 요청에만** 근거를 붙입니다
+(`ensemble_explainer.py`, 탐지 1건당 약 6ms). 정상 요청에는 계산하지 않습니다.
+
+**판정 출처** (`decision_source`)
+
+- `rule`: 규칙 게이트가 판정. `reason`은 걸린 규칙과 매칭된 문자열이며, 규칙이 곧 판정 근거입니다.
+- `model`: 3모델이 판정. `reason`은 아래 기여도 상위 3개와 근거 문자열입니다.
+
+**기여도 분해 (TreeSHAP)** — 최종 판정 로짓은 세 모델 로짓의 가중합이고, 트리·스키마 모델
+(HistGradientBoosting)의 로짓은 TreeSHAP으로 '기준값 + 피처별 기여'로 정확히 나뉩니다.
+
+```
+최종 로짓 = base_logit + Σ contribution(트리 28개 + 스키마 12개) + transformer_logit + adjustment
+공격 판정: 최종 로짓 ≥ threshold_logit (= logit(0.965) ≈ 3.32)
+```
+
+- `contribution`은 최종 로짓 단위입니다(트리는 0.85×SHAP, 스키마는 0.10×SHAP). 양수면 공격 쪽입니다.
+- 트랜스포머(가중치 0.05)는 바이트 입력이라 피처로 나누지 않고 `transformer_logit` 한 항목으로 둡니다.
+- `adjustment`는 확률 클리핑(±13.8)으로 생긴 차이이며 보통 0입니다.
+- 서버 시작 시 '기준값 + SHAP 합 = 모델 로짓'을 확인하고, 맞지 않으면(shap·sklearn 버전 불일치 등)
+  설명을 끄고 기존 reason을 씁니다. 설명 중 오류가 나도 탐지 결과는 기존 reason으로 그대로 보냅니다.
+- 근거 문자열(`evidence`)은 피처를 계산한 정규식을 같은 입력에 다시 적용해서 찾습니다
+  (`features_v2.feature_evidence`). 트리는 body 없이 판정하므로 트리 피처의 근거도 body를 뺀 입력에서 찾습니다.
+
+**검토 권장 표시** (`review_recommended`) — 모델 판정 중, 트리 기여에서 시그니처형 피처(기존 `explain()`이
+근거로 쓰던 SQL·XSS·경로 탈출·명령어·NoSQL·템플릿 패턴, 봇 UA, URL 인코딩·특수문자 수)의 비율
+(`pattern_share`)이 0.5 미만이면 표시합니다. 경로 깊이·확장자·길이·비율처럼 요청의 '모양'이 주도한 판정은
+데이터셋 지름길일 수 있어서입니다. 기준 0.5는 평가 전에 정한 값입니다.
+
+| `explanation` 필드 | 의미 |
+|---|---|
+| `model_score` | 3모델 결합 확률. 규칙 판정이면 `threat_score`(최소 0.90)와 다를 수 있음 |
+| `logit`, `threshold_logit`, `base_logit` | 최종 로짓, 판정 기준 로짓, 기준값 |
+| `transformer_logit`, `adjustment` | 트랜스포머 항목, 클리핑 보정 |
+| `model_probabilities` | 모델별 단독 공격 확률 |
+| `toward_attack` / `toward_normal` | 공격 쪽 상위 5개 / 정상 쪽 상위 3개 피처 (`model`, `feature`, `label`, `value`, `display`, `contribution`, `evidence`) |
+| `rules` | 걸린 규칙과 매칭 문자열 (규칙 판정일 때) |
+| `pattern_share`, `review_recommended` | 시그니처형 근거 비율, 검토 권장 여부 |
+
+**census 평가** (2026-10-23, 테스트셋 `test.jsonl`의 층화 표본 86,067건 · 평가 스크립트는 저장소 미포함) — 모델 판정 탐지 35,263건
+(그중 정상 라벨 2,261건). 규칙 판정 8,341건은 규칙이 곧 근거라 제외했습니다.
+
+| 항목 | 결과 |
+|---|---|
+| 충실도: 지목한 피처를 정상 기준값으로 바꿨을 때 판정이 정상으로 뒤집히는 비율 | SHAP 상위 1/2/3개 65.8% / 94.5% / 97.4% (무작위 6.2% / 11.8% / 17.3%) |
+| 같은 개수로 비교 (기존 reason이 피처를 언급한 27,964건, 평균 2.1개) | 기존 reason 65.4% / SHAP 83.4% / 무작위 12.6% |
+| 기존 reason이 '통계적 이상'(근거 없음)이던 7,299건 | SHAP 상위 3개를 바꾸면 99.8%가 뒤집힘 |
+| 커버리지 (모델 근거가 있는 설명) | 기존 79.3% → 100% |
+| 검토 권장 표시 | 모델 판정의 64.8%에 표시. 표시된 쪽 오탐 9.8% vs 표시 안 된 쪽 0.3%, 오탐의 98.6%가 표시된 쪽 |
+| 계산 시간 (탐지 1건) | p50 6.0ms, p95 6.6ms |
+
+**독립 공개셋 재평가** (2026-10-25, 학습과 출처가 다른 `open_testset_v1` 304,027건) — 모델 판정 탐지 8,478건에서
+충실도 SHAP 상위 1/3개 99.3% / 100% (무작위 8.9% / 24.3%). 오탐이 2건뿐이라 검토 권장의 오탐 분리 효과는 측정하지 못했습니다.
+
+**한계**
+
+- 기여도는 모델이 공격 쪽으로 기운 정도이지 공격 성공이나 피해의 증거가 아닙니다.
+- 모델의 지름길도 그대로 드러납니다. census에서 1순위 근거가 '경로 깊이'인 모델 판정이 21.8%였고, 표본
+  4,000건으로 확인하니 전부 루트 `/` 요청(WCP 출처)이었습니다. POST `/`는 트리가 body를 보지 않는데도
+  경로 깊이만으로 공격 판정이 났습니다. 재학습 전까지 이런 판정은 검토 권장으로 표시됩니다.
+- 검토 권장은 표시 범위가 넓습니다(모델 판정의 65%). 기준을 census로 다시 맞추면 평가 데이터에 맞춘 셈이
+  되므로 Juice Shop holdout 같은 별도 데이터에서 조정하세요.
+- 트랜스포머의 바이트 구간 하이라이트(`security_ai/xai/explainer.py`, Integrated Gradients)는 요청당 약
+  65ms라 운영 경로에서는 켜지 않았습니다.
+
+## 10. 내부 평가 결과
 
 최종 구성(Transformer 0.05 + Tree trial 36 0.85 + Schema trial 18 0.10)의 공통 test split 결과:
 
@@ -288,25 +407,32 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8000/predict `
 안 됩니다. CAPEC FPR도 출처별 목표 0.5%를 초과합니다. 최종 일반화·오탐 검증은 새로 수집한
 Juice Shop holdout에서 수행해야 합니다.
 
-## 10. 알려진 제약 사항 / 남은 작업
+## 11. 알려진 제약 사항 / 남은 작업
 
-- **실제 카프카 왕복 테스트 미완료** — 지금까지는 카프카 브로커 없는 환경에서 `run_predict()`
-  직접 호출 + FastAPI `TestClient`로만 검증했습니다. 실제 브로커 붙여서 최종 확인 필요.
+- **카프카 왕복 확인 완료** (2026-11-01, 로컬 Compose 전체 스택) — WAF → Fluent Bit → Kafka → 백엔드 → AI →
+  Kafka → 백엔드 → DB 경로로 정상·규칙 판정·모델 판정 요청 3건을 보내, 판정 결과와 설명(`reason`)이
+  `detected_threats.description`에 저장되는 것을 확인했습니다. EC2는 배포 후 같은 방식으로 따로 확인해야 합니다.
 - **스키마 사전(dictionary)이 잠정안** — 지금은 학습셋 혼합 코퍼스 기준(경로 29만여 개)이라
   `schema_expert.py` 설계 의도(보호 대상 앱 전용 positive security model)와 다릅니다. Juice Shop
   정상 트래픽 확보되면 사전만 교체하면 됩니다(모델 재학습 불필요).
 - **트랜스포머 body 처리 조건 미확인** — production 조건(body 제거)으로 export된 확률이 맞는지
   트랜스포머 쪽 확인 대기 중.
 - **트랜스포머 추론 지연시간 미측정** — 목표2(경량화) 관점에서 아직 실측 안 함.
+- **판정 설명이 드러낸 지름길** — 경로 깊이 0(루트 요청), 확장자, URL 인코딩 여부(인코딩 없는 SQLi는 정상 쪽으로
+  기움)가 큰 근거로 쓰입니다(9장). 재학습 때 데이터 출처 편향을 함께 확인해야 합니다.
+- **규칙 게이트가 `+`를 공백으로 풀지 않음** — `features_v2.py`가 `unquote`로 디코딩해서 `"+OR+"1"="1` 같은
+  SQLi를 규칙이 놓치고 모델 판정으로 넘어갑니다(census '통계적 이상' 7,299건 중 5,160건). 고치면 판정이
+  바뀌므로 실험 결과와 분리해 처리하고, 모델 피처에는 적용하지 않아야 합니다(학습·서빙 분포 불일치).
 - Codex 코드리뷰로 발견된 정확성 문제 4건(스키마 `path_depth` 학습·서빙 불일치, 트리 body 입력
   조건 불일치, 트랜스포머 동시성 락 우회, 모듈 경로 의존성)은 전부 수정 완료했습니다
   (`ai_team_sync/STATUS_tree_schema.md` 아홉 번째 업데이트 참고).
 
-## 11. Git/Kaggle 배포 구분
+## 12. Git/Kaggle 배포 구분
 
 Git에 포함할 파일:
 
-- `README.md`, `main.py`, `features_v2.py`, `schema_expert.py`, `requirements.txt`
+- `README.md`, `main.py`, `features_v2.py`, `schema_expert.py`, `ensemble_explainer.py`, `requirements.txt`
+- `tests/*.py`
 - `security_ai/**/*.py` 전체 (`security_ai/data/`도 실행 코드이므로 포함)
 - `models/attack_taxonomy.json`
 - `models/transformer/model_bundle.pkl.manifest.json`
