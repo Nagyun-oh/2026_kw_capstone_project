@@ -4,6 +4,7 @@ import {Client,ReconnectionTimeMode } from '@stomp/stompjs';
 import { toast } from 'react-toastify';
 import {WS_URL} from '../config';
 import apiClient from '../api/apiClient';
+import {emitE2ETrace} from '../utils/e2eTrace';
 
 function useWebSocket(onThreatReceived) {
   // 새로운 위협이 들어왔을 때 테이블 테두리 강조
@@ -88,6 +89,7 @@ function useWebSocket(onThreatReceived) {
               }
             
               alertRevisionsRef.current.set(message.alertId, revision);
+              emitE2ETrace('received', message);
 
               const toastId = `request-alert-${message.alertId}`;
               const text =
@@ -149,19 +151,23 @@ function useWebSocket(onThreatReceived) {
             }, 5000);
           }
         );
+        emitE2ETrace('ready');
       },
       // > WebSocket 연결 자체가 실패한 경우
       onWebSocketError: error => {
+        emitE2ETrace('disconnected');
         console.error("WebSocket connection failed",error);
         setConnectionStatus("reconnecting");
       },
       // > WebSocket 연결이 종료된 경우
       onWebSocketClose: event => {
+        emitE2ETrace('disconnected');
         console.warn("WebSocket connection closed",event);
         setConnectionStatus("reconnecting");
       },
       // > STOMP Broker에서 오류 응답을 보낸 경우
       onStompError: frame => {
+        emitE2ETrace('disconnected');
         console.error("STOMP broker error",frame.headers.message,frame.body);
         setConnectionStatus("error");
       },

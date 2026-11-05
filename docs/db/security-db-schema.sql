@@ -149,3 +149,46 @@ CREATE TABLE waf_sync_status (
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_0900_bin;
+
+
+/*
+| 필드 | 역할 |
+| `log_id` | 원본 로그와 연결. PK로 로그 하나당 작업 하나 보장 |
+| `payload` | 나중에 재발행할 AI 요청 JSON |
+| `state` | `PENDING` / `IN_FLIGHT` / `SENT` |
+| `attempts` | 선점·발행 시도 횟수 |
+| `lease_token` | 현재 처리자의 식별값. 이전 처리자가 상태를 덮어쓰는 것 방지 |
+| `available_at` | 다음 재시도 시각 또는 처리 선점 만료 시각 |
+| `last_error_code` | 실패 종류. 요청 본문·비밀값은 저장하지 않음 |
+| `published_at` | Kafka 전송 성공을 확인하고 완료 처리한 시각 |
+*/
+  CREATE TABLE ai_request_outbox (
+    log_id BIGINT NOT NULL,                 
+    payload MEDIUMTEXT NOT NULL,
+
+    state VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+    attempts BIGINT NOT NULL DEFAULT 0,
+
+    lease_token CHAR(36) NULL,
+    available_at DATETIME(6) NOT NULL,
+
+    last_error_code VARCHAR(100) NULL,
+
+    created_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6) NOT NULL,
+    published_at DATETIME(6) NULL,
+
+    PRIMARY KEY (log_id),
+
+    INDEX idx_ai_outbox_ready (
+        state,
+        available_at,
+        log_id
+    ),
+
+    CONSTRAINT fk_ai_outbox_log
+        FOREIGN KEY (log_id)
+        REFERENCES network_logs (id)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_bin;

@@ -7,19 +7,15 @@ import com.example.security_log_system.dto.ThreatResponseDto;
 import com.example.security_log_system.dto.ThreatSearchCondition;
 import com.example.security_log_system.entity.DetectedThreat;
 import com.example.security_log_system.entity.LogEntry;
-import com.example.security_log_system.repository.BlacklistRepository;
 import com.example.security_log_system.repository.LogRepository;
 import com.example.security_log_system.repository.ThreatRepository;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.apache.juli.logging.Log;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -28,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
+import com.example.security_log_system.exception.AiLogNotReadyException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -61,6 +58,9 @@ public class ThreatServiceTest {
     @Mock
     AutoBlacklistPolicyService autoBlacklistPolicyService;
 
+    @Mock
+    private PipelineTrace pipelineTrace;
+
     @BeforeEach
     void setUp(){
         meterRegistry = new SimpleMeterRegistry();
@@ -72,7 +72,8 @@ public class ThreatServiceTest {
                 notificationService,
                 meterRegistry,
                 requestCorrelationService,
-                requestAlertService
+                requestAlertService,
+                pipelineTrace
         );
     }
 
@@ -228,9 +229,12 @@ public class ThreatServiceTest {
         when(logRepository.findById(1L)).thenReturn(Optional.empty());
 
         // then
-        assertThatThrownBy(() -> threatService.saveAiDetectedThreat(aiResponseDto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("LogEntry not found");
+        assertThatThrownBy(() ->
+                threatService.saveAiDetectedThreat(aiResponseDto)
+        )
+                .isInstanceOf(AiLogNotReadyException.class)
+                .hasMessageContaining("logId=1");
+
         assertThat(meterRegistry.find("security.threats.detected").counter())
                 .isNull();
 
@@ -308,6 +312,15 @@ public class ThreatServiceTest {
 
         // when
         when(logRepository.findById(1L)).thenReturn(Optional.of(logEntry));
+
+        // 추가: 저장소가 반환할 객체 설정
+        when(threatRepository.save(any(DetectedThreat.class)))
+                .thenReturn(
+                        DetectedThreat.builder()
+                                .id(10L)
+                                .build()
+                );
+
         threatService.saveAiDetectedThreat(aiResponseDto);
 
         ArgumentCaptor<DetectedThreat> captor = ArgumentCaptor.forClass(DetectedThreat.class);
@@ -332,6 +345,14 @@ public class ThreatServiceTest {
                 1L,
                 "192.168.0.10",
                 "HIGH"
+        );
+
+        verify(pipelineTrace).afterCommit(
+                "AI_RESULT_COMMITTED",
+                "DETECTED",
+                null, // 이 테스트의 logEntry에는 requestId가 없음
+                1L,
+                10L
         );
     }
 

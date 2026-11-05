@@ -29,6 +29,7 @@ http {
     js_path "/etc/nginx/njs/";
     js_import log_headers from headers.js;
     js_set $all_headers log_headers.dump;
+    js_set $dg_request_start_epoch_s log_headers.requestStart;
 
     include /etc/nginx/conf.d/*.conf;
 }

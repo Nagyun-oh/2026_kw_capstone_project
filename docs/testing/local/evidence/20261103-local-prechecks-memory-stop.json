@@ -1,0 +1,61 @@
+{
+  "recorded_at": "2026-11-03T11:38:11.885937+00:00",
+  "purpose": "local 3RPS then 5RPS, one precheck each; no formal three-run stage verdict",
+  "group_id": "20261103T203156+0900-local-e2e-prechecks-r19",
+  "attempt_id": "20261103T203223+0900-local-e2e-rps3-r19",
+  "verdict": "INCONCLUSIVE",
+  "state": "ABORTED",
+  "abort": {
+    "code": "host_memory",
+    "reason": "호스트 여유 메모리 1GiB 미만이 15초 지속됐습니다.",
+    "verdict": "INCONCLUSIVE",
+    "evidence": {
+      "total_bytes": 17063960576,
+      "available_bytes": 762716160,
+      "source": "Windows GlobalMemoryStatusEx"
+    },
+    "at": "2026-11-03T11:32:54.604130+00:00"
+  },
+  "measurement_started": false,
+  "rate5_executed": false,
+  "automatic_local_login": "succeeded; caller-authorized form input from hidden stdin; credentials/session files not preserved",
+  "login_helper_tests": {
+    "passed": 4,
+    "scope": "local-origin restriction, actual form, authentication failure, exception redaction; mock page"
+  },
+  "post_abort": {
+    "recorded_at": "2026-11-03T11:38:11.014651+00:00",
+    "scope": "post-abort read-only diagnosis; does not change INCONCLUSIVE verdict",
+    "clients": 24,
+    "measurement_clients": 0,
+    "database": {
+      "logs": 24,
+      "sent": 24,
+      "outbox": 24,
+      "pending": 0,
+      "inFlight": 0,
+      "uniqueRequestIds": 24
+    },
+    "ai_completed_after_abort": 24,
+    "memory": {
+      "total_bytes": 17063960576,
+      "available_bytes": 1954258944,
+      "source": "Windows GlobalMemoryStatusEx"
+    },
+    "services": "juiceshop running \nkafka running healthy\nai running healthy\nbackend running \nfrontend running \ndb running healthy\nwaf running healthy\nfluent-bit running \nzookeeper running healthy\n"
+  },
+  "artifacts_sha256": {
+    "build\\test-runs\\20261103T203223+0900-local-e2e-rps3-r19\\manifest.json": "27be1f75fe92c6c5c4cfc591a89ff3b1cb8249b2a9e862f84efaad5fc77184f9",
+    "build\\test-runs\\20261103T203223+0900-local-e2e-rps3-r19\\metrics.json": "acf0acf5c11b7ca5c156ea0ca842fad0e2b61b8beb7947b0ef2e35d0a69e322e",
+    "build\\test-runs\\20261103T203223+0900-local-e2e-rps3-r19\\post-abort.json": "8e9b170c7c1e1a8630dd84c15d6299766afbdb9e1d5a01c9736f006a0202d173",
+    "build\\test-runs\\20261103T203223+0900-local-e2e-rps3-r19\\events.jsonl": "5cf9af29ae6b158fb7cb665ca836142901676bdebd0324702b019b1b5ef3e162",
+    "build\\test-runs\\20261103T203223+0900-local-e2e-rps3-r19\\client-requests.jsonl": "a8f08add6ec5c91f547dc408e8a03eb32075d567a226aa2484b1f52a6e6d22c5"
+  },
+  "limits": [
+    "Memory safety threshold unchanged",
+    "No user applications closed or host/Docker memory limits modified",
+    "First run stopped during 1RPS warmup, not a measured 3RPS application failure",
+    "5RPS not attempted because first precheck was inconclusive"
+  ],
+  "next": "free at least 2GiB host memory, recheck services/lag/policy, retry with new IDs; preserve r19"
+}

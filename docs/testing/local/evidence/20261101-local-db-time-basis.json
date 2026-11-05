@@ -1,0 +1,26 @@
+{
+  "observed_at": "2026-11-01T04:21:40.864068Z",
+  "run_id": "20261101T131829+0900-local-normal-smoke-r08",
+  "source": "실험 원본 대조 및 읽기 전용 MySQL 시계·실행 중 backend DB_URL의 시간대 값 조회",
+  "database_clock": {
+    "now": "2026-11-01 04:21:40.864068",
+    "utc_now": "2026-11-01 04:21:40.864068",
+    "session_time_zone": "SYSTEM",
+    "system_time_zone": "UTC"
+  },
+  "runtime_jdbc_server_timezone": "Asia/Seoul",
+  "example": {
+    "log_id": 4645,
+    "collector_v1_db_datetime_with_assumed_Z": "2026-11-01T13:18:34.114704Z",
+    "waf_access_at": "2026-11-01T13:18:33+09:00",
+    "ai_handled_at": "2026-11-01T04:18:34.391Z"
+  },
+  "findings": [
+    "r08에서 DB DATETIME에 UTC를 붙인 해석은 다른 두 관측 시각과 약 9시간 모순된다.",
+    "현재 로컬 r08의 DB DATETIME을 +09:00 기준으로 해석하면 WAF access와 AI 완료 시각 사이에 놓인다.",
+    "JDBC serverTimezone=Asia/Seoul은 원인 후보지만, JDBC 바인딩·런타임 코드·기존 전체 데이터의 저장 의미를 모두 검증한 것은 아니다."
+  ],
+  "measurement_change": "local-pipeline-v2에서 DB 저장 시각 해석 기준을 실행 인자로 명시하고 SQL CONVERT_TZ로 UTC 변환한다. 원본 DATETIME도 보존하며 시각 모순 시 DB 관련 지연을 미측정으로 둔다.",
+  "unchanged": "r08 보고서·판정·원본은 보존한다. 앱 전역 시간대·엔티티·DB 값·스키마는 변경하지 않았다.",
+  "limits": "이 근거만으로 모든 로컬·EC2·과거 DB 행이 +09:00이라고 일반화하지 않는다. 환경별 저장 시각 의미는 별도 확인한다."
+}

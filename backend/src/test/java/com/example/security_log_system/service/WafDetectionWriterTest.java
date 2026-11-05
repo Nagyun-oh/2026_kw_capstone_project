@@ -63,6 +63,9 @@ class WafDetectionWriterTest {
     private ObjectMapper objectMapper;
     private WafDetectionWriter writer;
 
+    @Mock
+    private PipelineTrace pipelineTrace;
+
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
@@ -74,6 +77,7 @@ class WafDetectionWriterTest {
                 requestCorrelationService,
                 requestAlertService,
                 autoBlacklistPolicyService,
+                pipelineTrace,
                 "UTC"
         );
 
@@ -148,6 +152,7 @@ class WafDetectionWriterTest {
                 requestCorrelationService,
                 requestAlertService,
                 autoBlacklistPolicyService,
+                pipelineTrace,
                 "Asia/Seoul"
         );
 

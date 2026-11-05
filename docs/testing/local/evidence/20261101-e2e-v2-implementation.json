@@ -1,0 +1,53 @@
+{
+  "date": "2026/11/01",
+  "scope": "local-e2e-v2 implementation verification",
+  "source": "이번 작업의 실제 도구 실행 결과. 서비스 전체 E2E 실행 결과가 아님",
+  "checks": {
+    "python_mock_tests": {
+      "count": 106,
+      "result": "PASS",
+      "command": "python -m unittest discover -s scripts/testing -p test_*.py (검증 프로세스 tempfile.tempdir=workspace/build)"
+    },
+    "frontend_observer_tests": {
+      "count": 4,
+      "result": "PASS",
+      "command": "CI=true npm test -- --watchAll=false --runInBand e2eTrace.test.js browserTrace.test.js"
+    },
+    "frontend_build": {
+      "result": "PASS",
+      "command": "CI=true npm run build"
+    },
+    "waf_metadata_tests": {
+      "count": 2,
+      "result": "PASS",
+      "command": "python -X utf8 -m unittest discover -s waf/tests -p test_measurement_metadata.py -v"
+    },
+    "k6_inspect": {
+      "result": "PASS",
+      "scope": "background 9/10s + coordinator probe 1/10s, request metadata and p50/p95/p99 config"
+    },
+    "dry_run": {
+      "result": "PASS",
+      "scope": "connection-check plan only; HTTP/DB/browser/files not created"
+    },
+    "full_waf_shell_tests": {
+      "result": "ENVIRONMENT_FAILURE",
+      "reason": "Windows bash/CP949 subprocess errors; metadata unit tests are separate"
+    },
+    "playwright_install": {
+      "result": "ENVIRONMENT_BLOCKED",
+      "reason": "package installation DNS getaddrinfo failed in restricted environment"
+    },
+    "real_nginx_and_browser_integration": {
+      "result": "NOT_RUN",
+      "reason": "Docker socket permission, browser dependency and interactive admin login required"
+    }
+  },
+  "unchanged": [
+    "existing run reports and raw data",
+    "database values and schema",
+    "blocking/authentication policies",
+    "backend trace code applied by user"
+  ],
+  "next": "docs/testing/local/e2e-runner.md sections 1-3 then formal 1/3/5 RPS only after connection verification"
+}

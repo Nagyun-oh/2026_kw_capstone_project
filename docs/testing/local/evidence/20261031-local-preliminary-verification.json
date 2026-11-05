@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "kind": "post_run_verification",
+  "documented_at": "2026-10-31T09:04:49.144860+00:00",
+  "run_id": "20261031T175050+0900-local-normal-smoke-r05",
+  "evaluation_version": "arrival-smoke-v2",
+  "automatic_verdict": "PASS",
+  "http": {
+    "http_requests": 61,
+    "completed_iterations": 61,
+    "http_p95_ms": 5.4422,
+    "normal_ok_rate": 1,
+    "dropped_iterations": 0,
+    "http_avg_ms": 4.969454098360657,
+    "http_max_ms": 35.6837
+  },
+  "manual_db_verification": {
+    "source_kind": "user_provided_mysql_console_output",
+    "source_path": "build/test-evidence/20261031-local-preliminary/r05-db-console.txt",
+    "source_sha256": "7498e25f6f7aeeb913c4e9949c0d91ba096f77b7530502cbf52657ac7b2821ff",
+    "expected_request_url": "/?test_run=20261031T175050%2B0900-local-normal-smoke-r05",
+    "run_association": "사용자가 r05 검증 결과로 제공한 출력. SQL 출력에는 SET @run_url의 실제 값이 포함되지 않아 세션 변수 값은 독립 재확인하지 않음.",
+    "query_executed_at": null,
+    "live_db_requeried_during_documentation": false,
+    "saved_logs": 61,
+    "distinct_request_ids": 61,
+    "http_200_count": 61,
+    "ai_join_rows": 61,
+    "distinct_ai_log_ids": 61,
+    "distinct_ai_threat_ids": 61,
+    "log_id_range": [
+      4524,
+      4584
+    ],
+    "ai_threat_id_range": [
+      218,
+      278
+    ],
+    "ai_rows_per_log_in_provided_result": 1,
+    "ai_quality_review_owner": "AI 담당 팀원",
+    "ai_quality_assessment_in_scope": false
+  },
+  "kafka": {
+    "automatic_snapshots": [
+      {
+        "at": "2026-10-31T08:50:53.345150+00:00",
+        "label": "before",
+        "rows": [
+          {
+            "group": "ai-result-group",
+            "topic": "ai-result-topic",
+            "partition": 0,
+            "lag": 0
+          },
+          {
+            "group": "ai-service-group",
+            "topic": "ai-request-topic",
+            "partition": 0,
+            "lag": 0
+          },
+          {
+            "group": "log-group",
+            "topic": "log-topic",
+            "partition": 0,
+            "lag": 0
+          },
+          {
+            "group": "waf-detection-group",
+            "topic": "waf-detection-topic",
+            "partition": 0,
+            "lag": 0
+          }
+        ]
+      },
+      {
+        "at": "2026-10-31T08:51:54.921960+00:00",
+        "label": "after",
+        "rows": [
+          {
+            "group": "ai-result-group",
+            "topic": "ai-result-topic",
+            "partition": 0,
+            "lag": 0
+          },
+          {
+            "group": "ai-service-group",
+            "topic": "ai-request-topic",
+            "partition": 0,
+            "lag": 3
+          },
+          {
+            "group": "log-group",
+            "topic": "log-topic",
+            "partition": 0,
+            "lag": 0
+          },
+          {
+            "group": "waf-detection-group",
+            "topic": "waf-detection-topic",
+            "partition": 0,
+            "lag": 0
+          }
+        ]
+      }
+    ],
+    "followup_started_at_utc": "2026-10-31 09:03:34 UTC",
+    "followup_finished_at_utc": "2026-10-31 09:03:38 UTC",
+    "followup_rows": [
+      {
+        "group": "ai-result-group",
+        "topic": "ai-result-topic",
+        "partition": 0,
+        "lag": 0
+      },
+      {
+        "group": "ai-service-group",
+        "topic": "ai-request-topic",
+        "partition": 0,
+        "lag": 0
+      },
+      {
+        "group": "log-group",
+        "topic": "log-topic",
+        "partition": 0,
+        "lag": 0
+      },
+      {
+        "group": "waf-detection-group",
+        "topic": "waf-detection-topic",
+        "partition": 0,
+        "lag": 0
+      }
+    ],
+    "followup_source_path": "build/test-evidence/20261031-local-preliminary/kafka-followup.json",
+    "followup_source_sha256": "7d474275dd25598f83ff08fa56786697468cdbe55b7ef6f7f422c115398fd5a5",
+    "backlog_drain_seconds": null
+  },
+  "resource_samples": 9,
+  "resource_peaks": {
+    "juiceshop": {
+      "cpu_percent_max": 1.11,
+      "memory_percent_max": 1.83
+    },
+    "kafka": {
+      "cpu_percent_max": 22.07,
+      "memory_percent_max": 12.99
+    },
+    "security-ai-local": {
+      "cpu_percent_max": 41.87,
+      "memory_percent_max": 8.2
+    },
+    "security-backend-local": {
+      "cpu_percent_max": 4.04,
+      "memory_percent_max": 7.09
+    },
+    "security-frontend-local": {
+      "cpu_percent_max": 0.0,
+      "memory_percent_max": 0.16
+    },
+    "security-mysql": {
+      "cpu_percent_max": 6.74,
+      "memory_percent_max": 5.41
+    },
+    "waf": {
+      "cpu_percent_max": 8.03,
+      "memory_percent_max": 1.09
+    },
+    "waf-fluent-bit": {
+      "cpu_percent_max": 0.33,
+      "memory_percent_max": 0.08
+    },
+    "zookeeper": {
+      "cpu_percent_max": 65.15,
+      "memory_percent_max": 2.37
+    }
+  },
+  "run_raw_hashes_verified": true,
+  "e2e_scope": {
+    "request_to_log_to_ai_detection_db": "confirmed_by_automatic_http_and_user_db_evidence",
+    "waf_detection_correlation": "not_verified_in_this_run",
+    "websocket_delivery_and_dashboard": "not_verified_in_this_run",
+    "automatic_blacklist_and_actual_403": "not_verified_in_this_run"
+  },
+  "unmeasured": [
+    "요청부터 AI 저장까지의 지연",
+    "알림 전달과 브라우저 수신",
+    "실제 차단·해제",
+    "연속 Kafka lag·적체 해소 시간",
+    "DLT·Kafka 중복 전달 횟수",
+    "AI 탐지 정확도"
+  ],
+  "evidence_retention": "build/ 원본은 Git 제외. 별도 보관 위치·기한 미확정."
+}

@@ -1,0 +1,157 @@
+{
+  "at": "2026-11-03T09:40:17.845217+00:00",
+  "verdict": "PASS",
+  "runs": [
+    {
+      "id": "20261103T182623+0900-local-e2e-rps1-r16",
+      "verdict": "PASS",
+      "metrics_sha256": "d12b3c591beaaed48d0886421665203d77efe59c94fc6836bc61debef93bdef6",
+      "db_start_counts": "5056\t425"
+    },
+    {
+      "id": "20261103T183007+0900-local-e2e-rps1-r17",
+      "verdict": "PASS",
+      "metrics_sha256": "6e5850f51e94c47246a63bd86508fec5ef636cbd8aeb58a5a1f2aac4bc0442e2",
+      "db_start_counts": "5207\t455"
+    },
+    {
+      "id": "20261103T183545+0900-local-e2e-rps1-r18",
+      "verdict": "PASS",
+      "metrics_sha256": "e0a2c55340c6eb4eee95f76f0a433ccd3e380b4b3ed93b8bed570bab1be36072",
+      "db_start_counts": "5360\t485"
+    }
+  ],
+  "conditions": {
+    "rate": 1,
+    "seconds": 120,
+    "warmup_seconds": 30,
+    "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+    "contract_sha256": "44ee9bf23fbcd1ea453d79c3b5c528e5b8d216e66377b2e155978bfd84df7732",
+    "runner_files_sha256": {
+      "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+      "e2e_background.js": "b4217e4857a0e65472b2185172d3dd5e268d3094b8f33e703d5b2d4ba51c719a",
+      "e2e_core.py": "986710549007921cbc395f7979e2c0d7de3d7473d4ced1c730e6b54fed108be6",
+      "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+      "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+      "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+      "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+      "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+      "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+      "run_e2e.py": "f2ffdb8145f2e942deaf0f2e1e363dd915fa035678d0c22a435301072ae4a5c8",
+      "run_experiment.py": "bf00ed5b141b892c06cc45934c68135d7f5f1744fb6194398058b2ce41dac2bb",
+      "run_recovery_verification.py": "b1d93d2f492ea1f4e9a776e03f6d156bddb55175df0b41a625ab56010be51806",
+      "summarize_e2e.py": "421e89ad0b3cf4a6ab634662c4ee53834d90068d0697788b4e56a567b2d21b92",
+      "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+      "test_e2e_runtime.py": "c29eb4bd8563e1073052761025b3ec3f47164786e13ed39379304e1a7cce3858",
+      "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+      "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+      "test_recovery_verification.py": "3cf69da6b0f845a81aa8a2b4a1f22cc778be3b68a532131d4082ee96ed245eab",
+      "test_run_experiment.py": "cc8be737144b3edaedc5fe07ddd427408b7567f01038d4d5fbbf05e249de4fab"
+    },
+    "app_sources_sha256": {
+      "waf\\nginx-logging.conf.template": "5304494e91761548cc18a9a8ae7904f89f7b998a7be8aa0de713774050a50375",
+      "waf\\nginx.conf.template": "c78baedd0fd5f0700936ebaba8503a398a504d595a6d0bae3cc965eee9d2b747",
+      "waf\\njs\\headers.js": "20de942c3e3366595d4ded681c4668bbc522d0f065574128d3b0936810f14a3e",
+      "frontend\\src\\hooks\\useWebSocket.js": "6fb02bf362f3acc1ac6b9f152491af90f8e64279ced0ea8113a9052199d211f8",
+      "frontend\\src\\utils\\e2eTrace.js": "93e775dd728965e0fc440ebb4833ec95c99fa3175e63e067fe104486ae07626a",
+      "AI_new\\models.lock.json": "e99694826e50ac00aae00d303236b62c43c788be1df1b8f1c69d25b64c7baa6f"
+    },
+    "ip_policy_confirmed": true,
+    "versions": {
+      "python": "3.12.7",
+      "playwright": "1.64.1",
+      "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+      "docker": "Docker version 29.7.2, build a7dcaa6",
+      "browser": "156.0.8078.74"
+    },
+    "image_digests": [
+      "sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+      "sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f",
+      "sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+      "sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+      "sha256:78754bd29bee1e1c23108cfacc0d9278ea8a0aea5f44a0cd5422ae4b9af981ac",
+      "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+      "sha256:a19cbf68f0d35d2e05ce4dd47696d1ce3a1f66e1fcd92e455af4403f80fee03d",
+      "sha256:cb699422f8a2d430218d6810fc2b0eaffdce7fa9e93c26f31c576debb6bf2791",
+      "sha256:ccec5e3ecd1dcf6b48903268f4fe415fd17914e8bf30fc21263fd05cc7045f29"
+    ]
+  },
+  "pooled_stats_ms": {
+    "http": {
+      "count": 325,
+      "avg_ms": 4.435190461538461,
+      "p50_ms": 4.0814,
+      "p95_ms": 6.85746,
+      "p99_ms": 9.631443999999997,
+      "max_ms": 12.3254
+    },
+    "log_ingest": {
+      "count": 361,
+      "avg_ms": 257.9580964804356,
+      "p50_ms": 247.88689613342285,
+      "p95_ms": 484.6320152282715,
+      "p99_ms": 497.6450443267822,
+      "max_ms": 522.9239463806152
+    },
+    "ai_segment": {
+      "count": 361,
+      "avg_ms": 297.62690087104437,
+      "p50_ms": 294.6009635925293,
+      "p95_ms": 515.0549411773682,
+      "p99_ms": 548.6017704010009,
+      "max_ms": 719.649076461792
+    },
+    "ai_server": {
+      "count": 361,
+      "avg_ms": 555.58499735148,
+      "p50_ms": 554.4650554656982,
+      "p95_ms": 893.3019638061523,
+      "p99_ms": 993.9721107482908,
+      "max_ms": 1019.7529792785645
+    },
+    "waf_server": {
+      "count": 36,
+      "avg_ms": 185.15556388431125,
+      "p50_ms": 186.34891510009766,
+      "p95_ms": 262.6262903213501,
+      "p99_ms": 270.1245188713074,
+      "max_ms": 272.80306816101074
+    },
+    "AI_receive": {
+      "count": 36,
+      "avg_ms": 862.381602777532,
+      "p50_ms": 790.7505999992281,
+      "p95_ms": 1555.2686750006615,
+      "p99_ms": 1607.8744050009846,
+      "max_ms": 1613.0893000008655
+    },
+    "WAF_receive": {
+      "count": 36,
+      "avg_ms": 638.6807972218472,
+      "p50_ms": 591.6786499983573,
+      "p95_ms": 890.117799998734,
+      "p99_ms": 906.5099900004498,
+      "max_ms": 908.3190000019385
+    },
+    "AI_dom": {
+      "count": 36,
+      "avg_ms": 890.3192583334708,
+      "p50_ms": 796.9394000010652,
+      "p95_ms": 1657.6010750013666,
+      "p99_ms": 1714.43200000067,
+      "max_ms": 1719.6960000001127
+    },
+    "WAF_dom": {
+      "count": 36,
+      "avg_ms": 642.1980472222357,
+      "p50_ms": 595.1877000006789,
+      "p95_ms": 892.8171749994362,
+      "p99_ms": 909.2624249999062,
+      "max_ms": 911.1435000013444
+    }
+  },
+  "limits": [
+    "p99는 참고값",
+    "DB 증가·캐시·CPU 크레딧·동시 트래픽은 보고서에서 추가 대조 필요"
+  ]
+}

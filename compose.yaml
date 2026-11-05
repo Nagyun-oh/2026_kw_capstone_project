@@ -105,6 +105,8 @@ services:
       WAF_SYNC_TOKEN: ${WAF_SYNC_TOKEN:-}
       WAF_ID: ${WAF_ID:-local-waf-1}
       WAF_SYNC_STALE_AFTER_SECONDS: ${WAF_SYNC_STALE_AFTER_SECONDS:-60}
+      PIPELINE_TRACE_ENABLED: ${PIPELINE_TRACE_ENABLED:-false}
+      AI_OUTBOX_ENABLED: ${AI_OUTBOX_ENABLED:-true}
   # ────────────────── React + Nginx ──────────────────────
   frontend:
     build:

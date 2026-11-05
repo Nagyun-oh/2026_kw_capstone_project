@@ -1,0 +1,13 @@
+{
+  "method": "POST",
+  "path": "/rest/user/login",
+  "body": {"email": "' OR 1=1--", "password": "1234"},
+  "headers": {
+    "Content-Type": "application/json",
+    "Accept": "application/json, text/plain, */*",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"
+  },
+  "expectedStatus": 200,
+  "expectedSources": ["AI", "WAF"],
+  "provenance": "사용자가 2026/11/01 제공한 로컬 JuiceShop 탐지 재현 요청. 테스트용 문자열이며 관리자 인증과 무관함."
+}
