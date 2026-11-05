@@ -1,0 +1,27 @@
+{
+  "version": "local-load-v1",
+  "confirmed_on": "2026/11/01",
+  "scope": "local-http-waf-log-kafka-db-ai-result",
+  "rates": [1, 3, 5],
+  "seconds": 120,
+  "repetitions_per_rate": 3,
+  "drain_seconds": 60,
+  "targets": {
+    "http_p95_ms": 200,
+    "http_p99_ms": 500,
+    "ai_handled_p95_ms": 2000,
+    "ai_handled_p99_ms": 5000
+  },
+  "stop": {
+    "http_window_seconds": 10,
+    "http_min_samples": 10,
+    "http_error_rate": 0.1,
+    "min_available_memory_bytes": 1073741824,
+    "low_memory_seconds": 15,
+    "consecutive_collection_failures": 2,
+    "resource_interval_seconds": 5,
+    "http_poll_seconds": 0.25,
+    "http_startup_grace_seconds": 10
+  },
+  "required_services": ["waf", "juiceshop", "fluent-bit", "kafka", "zookeeper", "db", "backend", "ai"]
+}

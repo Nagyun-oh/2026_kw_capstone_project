@@ -41,7 +41,7 @@ public class LogServiceTest {
     private BlacklistService blacklistService;
 
     @Mock
-    private AiRequestProducer aiRequestProducer;
+    private AiRequestOutboxService aiRequestOutboxService;
 
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -52,8 +52,11 @@ public class LogServiceTest {
     @Mock
     private RequestCorrelationService requestCorrelationService;
 
+    @Mock
+    private PipelineTrace pipelineTrace;
+
     @Test
-    @DisplayName("유효한 Nginx 로그 수신 시 로그를 파싱하여 저장하고 AI 분석 요청을 전송한다")
+    @DisplayName("유효한 Nginx 로그를 저장하고 AI 분석 요청을 outbox에 기록한다")
     void validNginxLogMessage_thenParseAndSaveLogEntry(){
         // given
         String message = "{\"log\":\"127.0.0.1 - - [07/May/2026:16:00:00 +0900] \\\"GET /admin HTTP/1.1\\\" 403\"}";
@@ -82,7 +85,8 @@ public class LogServiceTest {
         assertThat(savedLog.getRequestUrl()).isEqualTo("/admin");
         assertThat(savedLog.getStatusCode()).isEqualTo(403);
 
-        verify(aiRequestProducer).sendAnalysisRequest(aiCaptor.capture());
+        verify(aiRequestOutboxService)
+                .enqueue(aiCaptor.capture());
 
         AiRequestDto aiRequestDto = aiCaptor.getValue();
         assertThat(aiRequestDto.getLogId()).isEqualTo(1L);
@@ -103,7 +107,8 @@ public class LogServiceTest {
 
         // then
         verify(logRepository,never()).save(any());
-        verify(aiRequestProducer,never()).sendAnalysisRequest(any());
+        verify(aiRequestOutboxService, never())
+                .enqueue(any());
     }
 
    @Test

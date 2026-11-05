@@ -35,6 +35,8 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 app:
+  testing:
+      trace-enabled: ${PIPELINE_TRACE_ENABLED:false}
   kafka:
     waf:
       enabled: ${WAF_CONSUMER_ENABLED:false}
@@ -43,6 +45,10 @@ app:
     token: ${WAF_SYNC_TOKEN:}
     expected-waf-id: ${WAF_ID:local-waf-1}
     stale-after-seconds: ${WAF_SYNC_STALE_AFTER_SECONDS:60}
+  ai-outbox:
+    enabled: ${AI_OUTBOX_ENABLED:true}
+    poll-delay-ms: 500
+    initial-delay-ms: 5000
 
 
 management:

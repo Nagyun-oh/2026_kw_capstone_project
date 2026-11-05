@@ -4,7 +4,6 @@ import com.example.security_log_system.dto.AiRequestDto;
 import com.example.security_log_system.dto.LogResponseDto;
 import com.example.security_log_system.dto.LogSearchCondition;
 import com.example.security_log_system.entity.LogEntry;
-import com.example.security_log_system.kafka.AiRequestProducer;
 import com.example.security_log_system.repository.LogRepository;
 import com.example.security_log_system.repository.LogSpecification;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,9 +30,10 @@ public class LogService {
 
     private final LogRepository logRepository;
     private final BlacklistService blacklistService;
-    private final AiRequestProducer aiRequestProducer;
-    private  final RequestCorrelationService requestCorrelationService;
+    private final AiRequestOutboxService aiRequestOutboxService;
+    private final RequestCorrelationService requestCorrelationService;
     private final ObjectMapper objectMapper;
+    private final PipelineTrace pipelineTrace;
 
     // GET
     @Transactional(readOnly = true)
@@ -126,7 +126,7 @@ public class LogService {
                     .timestamp(LocalDateTime.now().toString())
                     .build();
 
-            aiRequestProducer.sendAnalysisRequest(aiRequest);
+           aiRequestOutboxService.enqueue(aiRequest);
         }
     }
 
@@ -189,7 +189,15 @@ public class LogService {
                 .timestamp(LocalDateTime.now().toString())
                 .build();
 
-        aiRequestProducer.sendAnalysisRequest(aiRequest);
+        aiRequestOutboxService.enqueue(aiRequest);
+
+        pipelineTrace.afterCommit(
+                "LOG_COMMITTED",
+                "CREATED",
+                entry.getRequestId(),
+                entry.getId(),
+                null
+        );
     }
 
     private void processAiInputJson(JsonNode jsonNode) {
@@ -225,7 +233,7 @@ public class LogService {
                 .timestamp(timestamp)
                 .build();
 
-        aiRequestProducer.sendAnalysisRequest(aiRequest);
+        aiRequestOutboxService.enqueue(aiRequest);
     }
 
     private String readRequestId(JsonNode jsonNode){

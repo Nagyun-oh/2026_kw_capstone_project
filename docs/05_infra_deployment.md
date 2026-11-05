@@ -322,7 +322,7 @@ docker compose --env-file .env -f compose.yaml up -d backend
 
 ### AI `KeyError: 'url_path'`, `'url_len'`
 
-> 이전 `AI/`(단일 모델) 기준 사례다. 현재 배포 대상인 `AI_new/`에는 해당하지 않는다.
+> 저장소에서 제거된 이전 `AI/`(단일 모델) 기준 사례다. 현재 배포 대상인 `AI_new/`에는 해당하지 않는다. 당시 모델 기록은 [docs/archive/ai-v1](archive/ai-v1/)에 있다.
 
 모델 로딩 성공 이후 피처 생성 단계에서 실패한 사례다. 현재 번들의 `features`는 23개이며 인코더는 `method`, `user_agent`, `url_path`, `file_extension`이다. `build_feature_row()`에서 일부 항목이 주석 처리돼 후속 인코딩·피처 선택 과정에서 키를 찾지 못했다.
 

@@ -44,6 +44,7 @@ public class WafDetectionWriter {
     private final RequestCorrelationService requestCorrelationService;
     private final RequestAlertService requestAlertService;
     private final AutoBlacklistPolicyService autoBlacklistPolicyService;
+    private final PipelineTrace pipelineTrace;
 
     public WafDetectionWriter(
             ThreatRepository threatRepository,
@@ -52,6 +53,7 @@ public class WafDetectionWriter {
             RequestCorrelationService requestCorrelationService,
             RequestAlertService requestAlertService,
             AutoBlacklistPolicyService autoBlacklistPolicyService,
+            PipelineTrace pipelineTrace,
             @Value("${app.kafka.waf.event-zone:UTC}") String eventZone
     ){
         this.threatRepository = threatRepository;
@@ -60,6 +62,7 @@ public class WafDetectionWriter {
         this.requestCorrelationService = requestCorrelationService;
         this.requestAlertService = requestAlertService;
         this.autoBlacklistPolicyService = autoBlacklistPolicyService;
+        this.pipelineTrace = pipelineTrace;
         this.eventZone = ZoneId.of(eventZone);
     }
 
@@ -121,6 +124,16 @@ public class WafDetectionWriter {
         if(linkedLog != null){
             autoBlacklistPolicyService.evaluate(linkedLog);
         }
+
+        pipelineTrace.afterCommit(
+                "WAF_COMMITTED",
+                "CREATED",
+                event.getRequestId(),
+                linkedLog != null ? linkedLog.getId() : null,
+                savedThreat.getId()
+        );
+
+
     }
 
 
@@ -207,6 +220,4 @@ public class WafDetectionWriter {
         };
 
     }
-
-
 }

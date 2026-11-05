@@ -1,63 +1,84 @@
 package com.example.security_log_system.kafka;
 
-import com.example.security_log_system.dto.AiRequestDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.stereotype.Component;
 
-// TODO: DLQ 처리 고민
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AiRequestProducer {
 
-    private static final String AI_REQUEST_TOPIC = "ai-request-topic";
+    private static final String AI_REQUEST_TOPIC =
+            "ai-request-topic";
 
-    private final KafkaTemplate<String,String> kafkaTemplate;   // Kafka 전송 역할
-    private final ObjectMapper objectMapper;                    // AiRequestDto를 JSON 문자열로 변환하는 역할
+    private final KafkaTemplate<String, String> kafkaTemplate;
     private final MeterRegistry meterRegistry;
 
-    public void sendAnalysisRequest(AiRequestDto request){
+    // 아웃박스에 저장된 AI 요청을 logId를 키로 ai-request-topic에 비동기 전송하고, 전송 결과(성공/실패)를 메트릭·로그로 기록
+    public CompletableFuture<SendResult<String, String>> sendStored(
+            long logId,
+            String payload
+    ) {
         Timer.Sample sample = Timer.start(meterRegistry);
-        String result = "success";
 
         try {
-            String message = objectMapper.writeValueAsString(request);
-            kafkaTemplate.send(
-                    AI_REQUEST_TOPIC,
-                    String.valueOf(request.getLogId()),
-                    message);
+            CompletableFuture<SendResult<String, String>> future =
+                    kafkaTemplate.send(
+                            AI_REQUEST_TOPIC,
+                            String.valueOf(logId),
+                            payload
+                    );
 
-            Counter.builder("security.ai.request.produced")
-                            .description("Number of AI analysis request messages produced to Kafka")
-                            .register(meterRegistry)
-                            .increment();
+            future.whenComplete((result, exception) ->
+                    recordOutcome(logId, sample, exception)
+            );
 
-            log.info("AI analysis request sent. logId={}",request.getLogId());
-        } catch (JsonProcessingException e){
-            result = "failure";
+            return future;
+        } catch (RuntimeException exception) {
+            recordOutcome(logId, sample, exception);
+            throw exception;
+        }
+    }
 
-            Counter.builder("security.ai.request.produce.failures")
-                    .description("Number of AI analysis request message produce failures")
-                    .register(meterRegistry)
-                    .increment();
+    // 전송 결과에 따라 성공/실패 카운터 증가, 전송 소요 시간 기록, 결과 로그 출력
+    private void recordOutcome(
+            long logId,
+            Timer.Sample sample,
+            Throwable exception
+    ) {
+        boolean success = exception == null;
 
-            throw new RuntimeException("AI analysis request serialization failed.",e);
-        } finally {
-            sample.stop(
-                    Timer.builder("security.ai.request.produce.duration")
-                            .description("Time taken to produce one AI analysis request message")
-                            .tag("result",result)
-                            .register(meterRegistry)
+        Counter.builder(success
+                        ? "security.ai.request.produced"
+                        : "security.ai.request.produce.failures")
+                .register(meterRegistry)
+                .increment();
+
+        sample.stop(
+                Timer.builder("security.ai.request.produce.duration")
+                        .tag("result", success ? "success" : "failure")
+                        .register(meterRegistry)
+        );
+
+        if (success) {
+            log.info(
+                    "AI request acknowledged by Kafka. logId={}",
+                    logId
+            );
+        } else {
+            log.warn(
+                    "AI request Kafka send failed. logId={}, code={}",
+                    logId,
+                    exception.getClass().getSimpleName()
             );
         }
-
     }
 }

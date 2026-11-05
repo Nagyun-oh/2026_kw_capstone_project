@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.security_log_system.util.UtcDateTime;
 import com.example.security_log_system.dto.GroupedThreatResponseDto;
+import com.example.security_log_system.exception.AiLogNotReadyException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ public class ThreatService {
     private final MeterRegistry meterRegistry;
     private final RequestCorrelationService requestCorrelationService;
     private final RequestAlertService requestAlertService;
+    private final PipelineTrace pipelineTrace;
 
     @Transactional(readOnly = true)
     public Page<ThreatResponseDto> getThreats(ThreatSearchCondition condition, Pageable pageable){
@@ -73,23 +75,44 @@ public class ThreatService {
     // Kafka AI 분석 결과를 기반으로 위협 저장
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void saveAiDetectedThreat(AiResponseDto aiResponse) {
+
+        // 롤백 → 커밋 성공 기록 없음
         if (aiResponse.getLogId() ==null){
             throw new IllegalArgumentException("AI response logId is null");
         }
 
         LogEntry entry = logRepository.findById(aiResponse.getLogId())
-                .orElseThrow(() -> new IllegalArgumentException(
-            "LogEntry not found"
-        ));
+                .orElseThrow(() -> new AiLogNotReadyException(
+                        aiResponse.getLogId()
+                ));
 
-        if("0.0.0.0".equals(aiResponse.getIpAddress())){
+        // 정상 결과 → AI_RESULT_COMMITTED / NORMAL
+        if ("0.0.0.0".equals(aiResponse.getIpAddress())) {
+            pipelineTrace.afterCommit(
+                    "AI_RESULT_COMMITTED",
+                    "NORMAL",
+                    entry.getRequestId(),
+                    entry.getId(),
+                    null
+            );
             return;
         }
 
         requestCorrelationService.lockForAiResult(entry);
 
-        // 같은 로그의 AI 위협이 이미 저장되었다면 재처리하지 않는다.
-        if(threatRepository.existsByLogEntry_IdAndThreatType(entry.getId(),"AI Detection")){
+        // 중복 결과 → AI_RESULT_DUPLICATE / SKIPPED
+        if(threatRepository.existsByLogEntry_IdAndThreatType(
+                entry.getId(),
+                "AI Detection"
+        ))
+        {
+            pipelineTrace.afterCommit(
+                    "AI_RESULT_DUPLICATE",
+                    "SKIPPED",
+                    entry.getRequestId(),
+                    entry.getId(),
+                    null
+            );
             return;
         }
 
@@ -117,6 +140,15 @@ public class ThreatService {
         );
 
         autoBlacklistPolicyService.evaluate(entry);
+
+        // 위협 결과 → AI_RESULT_COMMITTED / DETECTED
+        pipelineTrace.afterCommit(
+                "AI_RESULT_COMMITTED",
+                "DETECTED",
+                entry.getRequestId(),
+                entry.getId(),
+                savedThreat.getId()
+        );
 
     }
 

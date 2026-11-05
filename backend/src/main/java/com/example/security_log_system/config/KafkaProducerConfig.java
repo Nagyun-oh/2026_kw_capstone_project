@@ -38,6 +38,21 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 
+        /* Kafka Producer 대기 시간 설정 */
+        props.put(ProducerConfig.ACKS_CONFIG, "all");
+        props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+
+        // send() 자체가 버퍼·메타데이터를 기다리는 시간을 제한한다.
+        props.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 5_000L);
+
+        // Kafka 내부 전송 재시도의 전체 유효시간
+        props.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 15_000);
+
+        // 개별 브로커 요청 제한 시간
+        props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 10_000);
+
+        props.put(ProducerConfig.LINGER_MS_CONFIG, 0);
+
         return new DefaultKafkaProducerFactory<>(props);
     }
 

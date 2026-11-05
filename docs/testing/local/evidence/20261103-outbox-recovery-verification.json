@@ -1,0 +1,149 @@
+{
+  "recorded_at": "2026-11-03T09:19:26.651445+00:00",
+  "experiment_id": "20261103T181230+0900-local-recovery-r02",
+  "scope": "isolated actual MySQL/JPA/JDBC + embedded Kafka + owned JVM halt/restart; frontend hook unit mocks",
+  "result": "PASS",
+  "app_sha": "39de94d8b2a1615a7113af16b4346835b4545a8c",
+  "branch": "test/experiment",
+  "app_worktree_dirty": true,
+  "app_source_unchanged_during_verification": true,
+  "execution_test_sha256": "836537629bf5fd4c2e8de4209f22ffca791864de3b720672bf60651e0848e37d",
+  "execution_runner_sha256": "8d1fabb51f0482abf484e4eb59e1c12d71b227aefc70b4c113b4223826de2415",
+  "backend_tests": {
+    "total": 35,
+    "integration": 7,
+    "unit": 28,
+    "failures": 0,
+    "skips": 0
+  },
+  "frontend_tests": {
+    "passed": 3,
+    "transport": "mock STOMP + toast; actual hook"
+  },
+  "runner_guard_tests": {
+    "passed": 3,
+    "exit_code": 0
+  },
+  "observations": [
+    {
+      "observations": {
+        "uncommitted_claim_visible": false,
+        "logs": 0,
+        "outbox": 0
+      },
+      "case": "atomic_rollback",
+      "at": "2026-11-03T09:12:59.525062Z"
+    },
+    {
+      "observations": {
+        "state": "SENT",
+        "logId": 5058,
+        "broker_records": 1
+      },
+      "case": "committed_publish",
+      "at": "2026-11-03T09:13:00.851507800Z"
+    },
+    {
+      "observations": {
+        "failure_state": "PENDING",
+        "logId": 5059,
+        "attempts": 2,
+        "recovery_seconds": 5.5459403,
+        "final_state": "SENT",
+        "fault": "isolated producer closed TCP port; real broker unchanged"
+      },
+      "case": "network_recovery",
+      "at": "2026-11-03T09:13:11.663844400Z"
+    },
+    {
+      "observations": {
+        "second_exit": 0,
+        "first_exit": 23,
+        "broker_records": 1,
+        "final_state": "SENT",
+        "logId": 5060
+      },
+      "case": "pending_restart",
+      "at": "2026-11-03T09:13:25.872973Z"
+    },
+    {
+      "observations": {
+        "stale_owner_rejected": true,
+        "recovery_seconds": 61.384888,
+        "lease_seconds": 60,
+        "attempts": 2,
+        "logId": 5061
+      },
+      "case": "lease_restart",
+      "at": "2026-11-03T09:14:33.517690500Z"
+    },
+    {
+      "observations": {
+        "server_send_calls": 1,
+        "logId": 5062,
+        "alert_revision": 1,
+        "transport": "SimpMessagingTemplate mocked; live browser not verified",
+        "threat_rows": 1,
+        "broker_records": 2
+      },
+      "case": "ack_gap_duplicates",
+      "at": "2026-11-03T09:15:41.866020Z"
+    },
+    {
+      "observations": {
+        "committed_before_recovery": 0,
+        "committed_after_recovery": 1,
+        "delivery_failures": 6,
+        "source_offset": 0,
+        "dlt_present": true
+      },
+      "case": "dlt_offset_recovery",
+      "at": "2026-11-03T09:15:52.779628200Z"
+    }
+  ],
+  "minimum_available_memory_bytes": 2065055744,
+  "live_container_ids_unchanged": true,
+  "live_counts_before": "network_logs\t5056\ndetected_threats\t425\nip_blacklist\t2\n",
+  "live_counts_after": "network_logs\t5056\ndetected_threats\t425\nip_blacklist\t2\n",
+  "isolated_database_retained": "dg_recovery_20261103_181230",
+  "limits": [
+    "one trial per case; no concurrency stress",
+    "isolated producer TCP failure, not broker-container outage",
+    "owned test JVM restart, not running backend container restart",
+    "fixed synthetic AI result; no actual inference",
+    "blacklist policy and WebSocket transport mocked",
+    "no actual browser popup/Dom recovery run",
+    "no EC2 run or same-load E2E remeasurement"
+  ],
+  "initial_attempt": {
+    "id": "20261103T181102+0900-local-recovery-r01",
+    "result": "FAIL",
+    "cause": "manual test EntityManagerFactory omitted Boot physical naming strategy; missing createdAt vs created_at; no fault case ran; application code unchanged"
+  },
+  "frontend_setup_issues": [
+    "sandbox Jest cache EPERM: cache disabled in retry",
+    "CRA resetMocks cleared test doubles; reinstalled per test; application hook unchanged"
+  ],
+  "raw_directory": "build\\test-runs\\20261103T181230+0900-local-recovery-r02",
+  "raw_sha256": {
+    "environment.json": "0c949f78a1a5950a46a8523d4524e4b3f89b6cc04cab855bf67b5b1760031b49",
+    "result.json": "23054929a8835287aac7c96edbe14f102b82e97d58008599f7b21e6fc1519a9a",
+    "events.jsonl": "a1afc8bc48f05c3c0889862879ff32dfc69c08b15ed29f2121f648a927cda850",
+    "observations.jsonl": "8ee23ca5ca50eb136f05aafb95fbd529629b1d72a156b4c514f865061f8d1847",
+    "frontend-tests-r02.json": "56d87fd1a04b214ae2a93e2e3cc4227719cb367ee038813301eb2e89c64b58fe",
+    "runner-unit.log": "9feaddae1415264f7940db8b4ba92a943cb72977ec61129d23ee5d34e90b324f",
+    "junit\\TEST-com.example.security_log_system.config.PipelineKafkaErrorConfigTest.xml": "cf9ffd2ed637f1d2d5044cf19dad0176c6f2deac7e065f374d0fe04b462741a3",
+    "junit\\TEST-com.example.security_log_system.consumer.AiResultConsumerTest.xml": "4abae472c3f381edd864867a327c502dc2a7652954420dbad8508edff512dc44",
+    "junit\\TEST-com.example.security_log_system.consumer.LogConsumerTest.xml": "7946830088fab4ecd020e3e2f35488ef33f65f89e721a002a282d1dc71cdefad",
+    "junit\\TEST-com.example.security_log_system.recovery.RecoveryVerificationTest.xml": "e254d2495a53a9be746e1362a7c18ddd9205ea2766bf642ed7d9329b9718a9f0",
+    "junit\\TEST-com.example.security_log_system.service.AiRequestOutboxPublisherTest.xml": "16bd935bf2a3742a18643b4525cd7f224f3d695b1fa20d90de557481ae854cbe",
+    "junit\\TEST-com.example.security_log_system.service.LogServiceTest.xml": "0a3a75d4ff5669e2119e4422f5974f76d7894cc3865eec9e9f4cae5db2c43c1c",
+    "junit\\TEST-com.example.security_log_system.service.ThreatServiceTest.xml": "5793c19d8cbb049c663506423d6ea148128ca7f50e1504b6f41a5fc0283a89d4"
+  },
+  "test_files": {
+    "backend\\src\\test\\java\\com\\example\\security_log_system\\recovery\\RecoveryVerificationTest.java": "836537629bf5fd4c2e8de4209f22ffca791864de3b720672bf60651e0848e37d",
+    "frontend\\src\\hooks\\useWebSocket.test.js": "ac78a1e19d03cb870ca8dc580a08e9d889c92480d775cb55f6e228e617f32830",
+    "scripts\\testing\\run_recovery_verification.py": "b1d93d2f492ea1f4e9a776e03f6d156bddb55175df0b41a625ab56010be51806",
+    "scripts\\testing\\test_recovery_verification.py": "3cf69da6b0f845a81aa8a2b4a1f22cc778be3b68a532131d4082ee96ed245eab"
+  }
+}
