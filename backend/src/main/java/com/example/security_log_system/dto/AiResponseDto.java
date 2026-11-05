@@ -14,7 +14,7 @@ public class AiResponseDto {
     private Long logId;
 
     @JsonProperty("threat_score")
-    private float threatScore;
+    private Float threatScore;
 
     @JsonProperty("ip_address")
     private String ipAddress;

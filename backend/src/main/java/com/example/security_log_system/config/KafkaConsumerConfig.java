@@ -9,6 +9,9 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,11 +59,29 @@ public class KafkaConsumerConfig {
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
-    // Consumer 설정을 기반으로 Factory 생성.
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
+    public ConcurrentKafkaListenerContainerFactory<String, String>
+    kafkaListenerContainerFactory(
+            ConsumerFactory<String, String> consumerFactory,
+            @Qualifier("pipelineErrorHandler")
+            DefaultErrorHandler errorHandler
+    ) {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+
+        factory.setConsumerFactory(consumerFactory);
+        factory.setCommonErrorHandler(errorHandler);
+
+        factory.getContainerProperties()
+                .getKafkaConsumerProperties()
+                .setProperty(
+                        ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
+                        "false"
+                );
+
+        factory.getContainerProperties()
+                .setAckMode(ContainerProperties.AckMode.RECORD);
+
         return factory;
     }
 }

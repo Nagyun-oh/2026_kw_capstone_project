@@ -19,6 +19,7 @@ public class RequestAlertPublisher {
 
     private final RequestAlertRepository requestAlertRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final PipelineTrace pipelineTrace;
 
     @Transactional
     public void publish(String alertKey){
@@ -56,7 +57,25 @@ public class RequestAlertPublisher {
                 List.copyOf(sources)
         );
 
+        // 전송 메서드 호출 직전
+        pipelineTrace.alertSend(
+                "ALERT_SEND_BEGIN",
+                state.alertKey(),
+                state.alertId(),
+                state.revision(),
+                sources
+        );
+
         messagingTemplate.convertAndSend("/topic/threats",message);
+
+        // 전송 메서드가 예외 없이 반환됨
+        pipelineTrace.alertSend(
+                "ALERT_SEND_RETURNED",
+                state.alertKey(),
+                state.alertId(),
+                state.revision(),
+                sources
+        );
 
         // 전송 호출이 예외 없이 끝난 뒤에만 처리 완료로 기록한다.
         requestAlertRepository.markPublished(

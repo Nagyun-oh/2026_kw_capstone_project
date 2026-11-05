@@ -68,9 +68,8 @@ public class LogConsumerTest {
     }
 
     @Test
-    @DisplayName("로그 처리 중 예외가 발생하면 실패 Counter와 실패 처리 시간 Timer가 기록된다.")
-    void consume_whenLogServiceFails_thenDoNotPropagateException(){
-
+    @DisplayName("로그 처리 실패를 전파하고 실패 Counter와 Timer를 기록한다")
+    void consume_whenLogServiceFails_thenPropagateException() {
         // given
         String message = "invalid-log-message";
 
@@ -78,22 +77,31 @@ public class LogConsumerTest {
                 .when(logService)
                 .processRawLog(message);
 
-        // when
-        logConsumer.consume(message);
+        // when & then: 호출과 예외 검증을 함께 수행한다.
+        assertThatThrownBy(() -> logConsumer.consume(message))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Kafka log processing failed");
 
-        // then
         verify(logService).processRawLog(message);
 
-        assertThat(meterRegistry.counter("security.kafka.consumer.failures").count())
-                .isEqualTo(1.0);
-        assertThat(meterRegistry.find("security.logs.processed").counter())
-                .isNull();
+        assertThat(
+                meterRegistry.counter(
+                        "security.kafka.consumer.failures"
+                ).count()
+        ).isEqualTo(1.0);
 
-        assertThat(meterRegistry.timer(
-                "security.log.processing.duration",
-                "result",
-                "failure"
-        ).count()).isEqualTo(1);
+        assertThat(
+                meterRegistry.find("security.logs.processed")
+                        .counter()
+        ).isNull();
+
+        assertThat(
+                meterRegistry.timer(
+                        "security.log.processing.duration",
+                        "result",
+                        "failure"
+                ).count()
+        ).isEqualTo(1);
     }
 }
 /*

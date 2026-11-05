@@ -349,3 +349,7 @@ docker exec security-ai-local python -c "import urllib.request; print(urllib.req
 - [x] 백엔드 블랙리스트 자동 동기화 (`/internal/waf/blacklist` -> `CUSTOM-003`)
 - [ ] 차단 만료(`expiredAt`) 반영과 삭제 직후 재등록 방지 (백엔드 정책)
 - [ ] AI 모델 분석 결과와 WAF 정책 자동 연계
+
+## E2E 측정 메타데이터
+
+WAF가 생성한 `X-Request-ID`와 `X-DualGuard-Request-Start`를 응답에 제공한다. 시작 시각은 `$msec - $request_time`의 밀리초 단위 UTC epoch 관측값이다. access JSON에는 같은 시각과 `test_run/phase/kind/seq`를 추가한다. 실험 표식은 관측 필터이며 인증·IP 신뢰·차단 근거로 사용하지 않는다. 기존 민감 헤더 마스킹·보안 정책은 유지한다. 실제 헤더/로그 대조와 Nginx 검증은 [v2 실행 가이드](../docs/testing/local/e2e-runner.md)를 따른다.

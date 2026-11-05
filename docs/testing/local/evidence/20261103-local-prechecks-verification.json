@@ -1,0 +1,475 @@
+{
+  "at": "2026-11-03T11:49:35.971831+00:00",
+  "purpose": "local preliminary checks, one run per rate; no 3-repetition stage verdict",
+  "verdict": "PASS",
+  "initial_attempt": "20261103T203223+0900-local-e2e-rps3-r19",
+  "initial_result": "INCONCLUSIVE during warmup: host memory <1GiB for15s; preserved",
+  "retry_group": "20261103T204004+0900-local-e2e-prechecks-r21",
+  "auth_mode": "user-authorized local browser form, hidden stdin, memory only; no credentials or session files preserved",
+  "auth_tests_passed": 4,
+  "backend_sources_match_previous_1rps_reference": true,
+  "runs": [
+    {
+      "id": "20261103T204036+0900-local-e2e-rps3-r21",
+      "rate": 3,
+      "repetitions": 1,
+      "verdict": "PASS",
+      "counts": {
+        "http": 361,
+        "db": 361,
+        "probes": 12
+      },
+      "ai_completed": 361,
+      "outbox": {
+        "jobs": 361,
+        "logs": 361,
+        "sent": 361,
+        "phase": "measurement",
+        "pending": 0,
+        "inFlight": 0,
+        "missingJobs": 0,
+        "retriedJobs": 0
+      },
+      "probe_alerts": 12,
+      "browser_counts": {
+        "received_AI": 12,
+        "received_WAF": 12,
+        "dom_AI": 12,
+        "dom_WAF": 12
+      },
+      "max_observed_popup_nodes": 1,
+      "duplicate_probe_rows": 0,
+      "stats_ms": {
+        "http": {
+          "count": 349,
+          "avg_ms": 4.119336676217765,
+          "p50_ms": 4.0085,
+          "p95_ms": 5.303879999999999,
+          "p99_ms": 7.422492,
+          "max_ms": 9.0681
+        },
+        "log_ingest": {
+          "count": 361,
+          "avg_ms": 273.0906967311024,
+          "p50_ms": 281.1088562011719,
+          "p95_ms": 489.67504501342773,
+          "p99_ms": 508.1942558288574,
+          "max_ms": 512.9878520965576
+        },
+        "ai_segment": {
+          "count": 361,
+          "avg_ms": 287.671874434664,
+          "p50_ms": 285.20703315734863,
+          "p95_ms": 514.6329402923584,
+          "p99_ms": 537.6171112060547,
+          "max_ms": 574.0959644317627
+        },
+        "ai_server": {
+          "count": 361,
+          "avg_ms": 560.7625711657664,
+          "p50_ms": 592.2210216522217,
+          "p95_ms": 918.8010692596436,
+          "p99_ms": 960.9256267547607,
+          "max_ms": 1026.0069370269775
+        },
+        "waf_server": {
+          "count": 12,
+          "avg_ms": 374.54861402511597,
+          "p50_ms": 375.13136863708496,
+          "p95_ms": 396.7182755470276,
+          "p99_ms": 401.11470460891724,
+          "max_ms": 402.21381187438965
+        },
+        "AI_receive": {
+          "count": 12,
+          "avg_ms": 1315.229400000021,
+          "p50_ms": 1324.2647499998839,
+          "p95_ms": 1383.2930300001863,
+          "p99_ms": 1383.6746860002131,
+          "max_ms": 1383.7701000002198
+        },
+        "WAF_receive": {
+          "count": 12,
+          "avg_ms": 1233.1245333333527,
+          "p50_ms": 1304.0562999999565,
+          "p95_ms": 1376.3109450002503,
+          "p99_ms": 1382.278269000226,
+          "max_ms": 1383.7701000002198
+        },
+        "AI_dom": {
+          "count": 12,
+          "avg_ms": 1330.8788833333363,
+          "p50_ms": 1330.5094499999086,
+          "p95_ms": 1440.9634050000932,
+          "p99_ms": 1488.0605209999521,
+          "max_ms": 1499.8347999999169
+        },
+        "WAF_dom": {
+          "count": 12,
+          "avg_ms": 1236.5758166666865,
+          "p50_ms": 1306.6588500000762,
+          "p95_ms": 1380.4742350002016,
+          "p99_ms": 1387.3506870000529,
+          "max_ms": 1389.0698000000157
+        }
+      },
+      "missing": {
+        "http": 0,
+        "log_ingest": 0,
+        "ai_segment": 0,
+        "ai_server": 0,
+        "waf_server": 0,
+        "AI_receive": 0,
+        "WAF_receive": 0,
+        "AI_dom": 0,
+        "WAF_dom": 0
+      },
+      "lag_maxima": [
+        {
+          "group": "ai-result-group",
+          "topic": "ai-result-topic",
+          "partition": 0,
+          "observed_max_lag": 0,
+          "known_samples": 16,
+          "unknown_samples": 0
+        },
+        {
+          "group": "ai-service-group",
+          "topic": "ai-request-topic",
+          "partition": 0,
+          "observed_max_lag": 14,
+          "known_samples": 16,
+          "unknown_samples": 0
+        },
+        {
+          "group": "log-group",
+          "topic": "log-topic",
+          "partition": 0,
+          "observed_max_lag": 0,
+          "known_samples": 16,
+          "unknown_samples": 0
+        },
+        {
+          "group": "waf-detection-group",
+          "topic": "waf-detection-topic",
+          "partition": 0,
+          "observed_max_lag": 0,
+          "known_samples": 16,
+          "unknown_samples": 0
+        }
+      ],
+      "final_zero_lag_times": [
+        "2026-11-03T11:43:43.437214+00:00",
+        "2026-11-03T11:43:56.027476+00:00"
+      ],
+      "memory_min_bytes": 1343324160,
+      "guard_abort": null,
+      "resource_peaks": {
+        "juiceshop": {
+          "cpu_percent_max": 3.46,
+          "memory_percent_max": 1.77
+        },
+        "kafka": {
+          "cpu_percent_max": 183.46,
+          "memory_percent_max": 6.87
+        },
+        "security-ai-local": {
+          "cpu_percent_max": 73.99,
+          "memory_percent_max": 8.32
+        },
+        "security-backend-local": {
+          "cpu_percent_max": 18.74,
+          "memory_percent_max": 6.94
+        },
+        "security-frontend-local": {
+          "cpu_percent_max": 0.63,
+          "memory_percent_max": 0.17
+        },
+        "security-mysql": {
+          "cpu_percent_max": 12.16,
+          "memory_percent_max": 5.47
+        },
+        "waf": {
+          "cpu_percent_max": 8.38,
+          "memory_percent_max": 1.1
+        },
+        "waf-fluent-bit": {
+          "cpu_percent_max": 0.61,
+          "memory_percent_max": 0.08
+        },
+        "zookeeper": {
+          "cpu_percent_max": 74.23,
+          "memory_percent_max": 3.05
+        }
+      },
+      "db_start_counts": "5536\t521",
+      "clock_check": {
+        "rtt_ms": 12.193115234375,
+        "ingress": 1793706043.747,
+        "sent_ms": 1793706043741.8606,
+        "ended_ms": 1793706043754.0537,
+        "resolution_ms": 1,
+        "method": "nginx_msec_minus_request_time",
+        "accepted_error_bound_ms": 100
+      },
+      "images": [
+        "e340fe6ead05c7463ce5c6d9a0cab5c63c114c02713872ecde964373f5da73d1 bkimminich/juice-shop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+        "e63b2d83e046fb753e88d6d471c5daf97b3b324e9de8fd37613ebb63fc797f33 confluentinc/cp-kafka:7.3.0 sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+        "3008956d10ea4a4ea0258a1d87d5e31a718d4c04037cc4a592e77fdf52b3df4a security-ai:local sha256:a19cbf68f0d35d2e05ce4dd47696d1ce3a1f66e1fcd92e455af4403f80fee03d",
+        "cf9d9dffa300aea448794821a13b9534db90be720a1e6b2c8d37164c4c425c82 security-backend:local sha256:cb699422f8a2d430218d6810fc2b0eaffdce7fa9e93c26f31c576debb6bf2791",
+        "45b4642da7143d83efe3224b9b75a06b8e0e95d4e830e73c5af89ff3f75c9d56 security-frontend:local sha256:78754bd29bee1e1c23108cfacc0d9278ea8a0aea5f44a0cd5422ae4b9af981ac",
+        "78fd0a0ad83886091b0b573a7bcdb67f2d5668cea74a397d599f867e17dfd787 mysql:8.0 sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+        "410115e5acdbb2f7be79e0680c920ad0c8db8dc0450411c427351593fcf48075 owasp/modsecurity-crs:nginx sha256:ccec5e3ecd1dcf6b48903268f4fe415fd17914e8bf30fc21263fd05cc7045f29",
+        "76d36284572e523548ac6ed6fdf870c64e187a463b043e9754f03f8c2beb059e fluent/fluent-bit:2.2 sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+        "5fa317c3c440875bbb5f49de56464b8f9e4aeeb9756b0b055a59a5480006ed3c confluentinc/cp-zookeeper:7.3.0 sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+      ],
+      "original_hashes_verified": true,
+      "artifacts_sha256": {
+        "manifest.json": "5f17326f71ff4869a24f9c2962a6aa5d08f2ceace5725da007a1aaac4cb94af1",
+        "metrics.json": "4206914a6dea689a6f78a6ba15869203988e03aa3c679ff7690f44202117b284",
+        "outbox-verification.json": "9d95ea3975d558c5dbca255096f5bd4c0cfef8dc4304604c1fb39c7ae9897b94",
+        "pipeline-events.jsonl": "8b8d02c90070b053578c050ac2d17e391a45a03d57208213d39064998e06145d",
+        "browser-events.jsonl": "e0f82315fe0a025d0c5bbfdc5753cc8f527b3fb63dff9b64675105b9e426d2d2",
+        "progress.jsonl": "4fab4b86056a31f5760ace0ef4163fcc53b221d584d302a044ee1d5d94a1e60d"
+      }
+    },
+    {
+      "id": "20261103T204357+0900-local-e2e-rps5-r22",
+      "rate": 5,
+      "repetitions": 1,
+      "verdict": "PASS",
+      "counts": {
+        "http": 600,
+        "db": 600,
+        "probes": 12
+      },
+      "ai_completed": 600,
+      "outbox": {
+        "jobs": 600,
+        "logs": 600,
+        "sent": 600,
+        "phase": "measurement",
+        "pending": 0,
+        "inFlight": 0,
+        "missingJobs": 0,
+        "retriedJobs": 0
+      },
+      "probe_alerts": 12,
+      "browser_counts": {
+        "received_AI": 12,
+        "received_WAF": 12,
+        "dom_AI": 12,
+        "dom_WAF": 12
+      },
+      "max_observed_popup_nodes": 1,
+      "duplicate_probe_rows": 0,
+      "stats_ms": {
+        "http": {
+          "count": 588,
+          "avg_ms": 4.131579421768707,
+          "p50_ms": 3.871,
+          "p95_ms": 5.563809999999999,
+          "p99_ms": 8.122281999999998,
+          "max_ms": 13.1543
+        },
+        "log_ingest": {
+          "count": 600,
+          "avg_ms": 277.32130726178485,
+          "p50_ms": 273.6485004425049,
+          "p95_ms": 498.0115890502929,
+          "p99_ms": 516.6647291183472,
+          "max_ms": 519.5350646972656
+        },
+        "ai_segment": {
+          "count": 600,
+          "avg_ms": 305.3846712907155,
+          "p50_ms": 298.661470413208,
+          "p95_ms": 534.7998976707458,
+          "p99_ms": 570.504138469696,
+          "max_ms": 589.3681049346924
+        },
+        "ai_server": {
+          "count": 600,
+          "avg_ms": 582.7059785525004,
+          "p50_ms": 579.2919397354126,
+          "p95_ms": 891.9399619102477,
+          "p99_ms": 1005.6741333007812,
+          "max_ms": 1044.0778732299805
+        },
+        "waf_server": {
+          "count": 12,
+          "avg_ms": 248.43406677246094,
+          "p50_ms": 247.82896041870117,
+          "p95_ms": 260.8456015586853,
+          "p99_ms": 261.0066294670105,
+          "max_ms": 261.0468864440918
+        },
+        "AI_receive": {
+          "count": 12,
+          "avg_ms": 979.3597500001093,
+          "p50_ms": 976.7479000001913,
+          "p95_ms": 1063.4294800002863,
+          "p99_ms": 1080.3494159998263,
+          "max_ms": 1084.5793999997113
+        },
+        "WAF_receive": {
+          "count": 12,
+          "avg_ms": 979.3597500001093,
+          "p50_ms": 976.7479000001913,
+          "p95_ms": 1063.4294800002863,
+          "p99_ms": 1080.3494159998263,
+          "max_ms": 1084.5793999997113
+        },
+        "AI_dom": {
+          "count": 12,
+          "avg_ms": 985.0543916666842,
+          "p50_ms": 981.7790000001878,
+          "p95_ms": 1068.155145000037,
+          "p99_ms": 1084.2935089997445,
+          "max_ms": 1088.3280999996714
+        },
+        "WAF_dom": {
+          "count": 12,
+          "avg_ms": 982.2277166665572,
+          "p50_ms": 979.0478999998413,
+          "p95_ms": 1065.9356100000423,
+          "p99_ms": 1082.4302419997457,
+          "max_ms": 1086.5538999996716
+        }
+      },
+      "missing": {
+        "http": 0,
+        "log_ingest": 0,
+        "ai_segment": 0,
+        "ai_server": 0,
+        "waf_server": 0,
+        "AI_receive": 0,
+        "WAF_receive": 0,
+        "AI_dom": 0,
+        "WAF_dom": 0
+      },
+      "lag_maxima": [
+        {
+          "group": "ai-result-group",
+          "topic": "ai-result-topic",
+          "partition": 0,
+          "observed_max_lag": 0,
+          "known_samples": 17,
+          "unknown_samples": 0
+        },
+        {
+          "group": "ai-service-group",
+          "topic": "ai-request-topic",
+          "partition": 0,
+          "observed_max_lag": 22,
+          "known_samples": 17,
+          "unknown_samples": 0
+        },
+        {
+          "group": "log-group",
+          "topic": "log-topic",
+          "partition": 0,
+          "observed_max_lag": 3,
+          "known_samples": 17,
+          "unknown_samples": 0
+        },
+        {
+          "group": "waf-detection-group",
+          "topic": "waf-detection-topic",
+          "partition": 0,
+          "observed_max_lag": 0,
+          "known_samples": 17,
+          "unknown_samples": 0
+        }
+      ],
+      "final_zero_lag_times": [
+        "2026-11-03T11:47:17.217992+00:00",
+        "2026-11-03T11:47:29.887516+00:00"
+      ],
+      "memory_min_bytes": 1898733568,
+      "guard_abort": null,
+      "resource_peaks": {
+        "juiceshop": {
+          "cpu_percent_max": 4.18,
+          "memory_percent_max": 1.78
+        },
+        "kafka": {
+          "cpu_percent_max": 248.32,
+          "memory_percent_max": 7.1
+        },
+        "security-ai-local": {
+          "cpu_percent_max": 163.88,
+          "memory_percent_max": 8.36
+        },
+        "security-backend-local": {
+          "cpu_percent_max": 24.83,
+          "memory_percent_max": 7.09
+        },
+        "security-frontend-local": {
+          "cpu_percent_max": 0.35,
+          "memory_percent_max": 0.17
+        },
+        "security-mysql": {
+          "cpu_percent_max": 16.75,
+          "memory_percent_max": 5.47
+        },
+        "waf": {
+          "cpu_percent_max": 9.27,
+          "memory_percent_max": 1.09
+        },
+        "waf-fluent-bit": {
+          "cpu_percent_max": 0.65,
+          "memory_percent_max": 0.08
+        },
+        "zookeeper": {
+          "cpu_percent_max": 78.21,
+          "memory_percent_max": 2.95
+        }
+      },
+      "db_start_counts": "5929\t551",
+      "clock_check": {
+        "rtt_ms": 23.73828125,
+        "ingress": 1793706245.017,
+        "sent_ms": 1793706244998.6047,
+        "ended_ms": 1793706245022.343,
+        "resolution_ms": 1,
+        "method": "nginx_msec_minus_request_time",
+        "accepted_error_bound_ms": 100
+      },
+      "images": [
+        "e340fe6ead05c7463ce5c6d9a0cab5c63c114c02713872ecde964373f5da73d1 bkimminich/juice-shop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+        "e63b2d83e046fb753e88d6d471c5daf97b3b324e9de8fd37613ebb63fc797f33 confluentinc/cp-kafka:7.3.0 sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+        "3008956d10ea4a4ea0258a1d87d5e31a718d4c04037cc4a592e77fdf52b3df4a security-ai:local sha256:a19cbf68f0d35d2e05ce4dd47696d1ce3a1f66e1fcd92e455af4403f80fee03d",
+        "cf9d9dffa300aea448794821a13b9534db90be720a1e6b2c8d37164c4c425c82 security-backend:local sha256:cb699422f8a2d430218d6810fc2b0eaffdce7fa9e93c26f31c576debb6bf2791",
+        "45b4642da7143d83efe3224b9b75a06b8e0e95d4e830e73c5af89ff3f75c9d56 security-frontend:local sha256:78754bd29bee1e1c23108cfacc0d9278ea8a0aea5f44a0cd5422ae4b9af981ac",
+        "78fd0a0ad83886091b0b573a7bcdb67f2d5668cea74a397d599f867e17dfd787 mysql:8.0 sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+        "410115e5acdbb2f7be79e0680c920ad0c8db8dc0450411c427351593fcf48075 owasp/modsecurity-crs:nginx sha256:ccec5e3ecd1dcf6b48903268f4fe415fd17914e8bf30fc21263fd05cc7045f29",
+        "76d36284572e523548ac6ed6fdf870c64e187a463b043e9754f03f8c2beb059e fluent/fluent-bit:2.2 sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+        "5fa317c3c440875bbb5f49de56464b8f9e4aeeb9756b0b055a59a5480006ed3c confluentinc/cp-zookeeper:7.3.0 sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+      ],
+      "original_hashes_verified": true,
+      "artifacts_sha256": {
+        "manifest.json": "e4217def21246c5d75de83615a848c26d3c1d1eb40fd975c91a49bc2fd838794",
+        "metrics.json": "3cc3d3266a2b73421d97679427065e56cf1a90408c691921063496f2ee55e471",
+        "outbox-verification.json": "196a28638b897074620885a8998842c93ecd9ce0222bc29bb3d17941fc78c172",
+        "pipeline-events.jsonl": "29d29906c0d2bd72ec1f2a92f135d1d45cfafd7be879afc1cea6851a94def956",
+        "browser-events.jsonl": "610f716feadd6de37f6b693e11a9eb74d4609c13ddfc3e82a7669e392fd0a072",
+        "progress.jsonl": "3a2ed9852b449463af52a0a846afc5f83b3679182709c7a4f897a5ceacbf8681"
+      }
+    }
+  ],
+  "postcheck": {
+    "at": "2026-11-03T11:49:35.143739+00:00",
+    "state": "network_logs\t6561\ndetected_threats\t581\nip_blacklist\t2\nSENT\t1506\n",
+    "services": "juiceshop running \nkafka running healthy\nai running healthy\nbackend running \nfrontend running \ndb running healthy\nwaf running healthy\nfluent-bit running \nzookeeper running healthy\n"
+  },
+  "limits": [
+    "different rates are not pooled",
+    "only one repetition per rate; no capacity limit or production reliability claim",
+    "Docker engine and existing services restarted before these checks; cache, host memory and DB scale differ from earlier 1RPS",
+    "all original memory/SLO/data guards unchanged",
+    "initial attempt preserved; no user apps closed or resource limits changed",
+    "EC2 measurement still pending"
+  ],
+  "next": "finish local preliminary checks, prepare separate EC2 execution and observability; measure DB before optimization"
+}

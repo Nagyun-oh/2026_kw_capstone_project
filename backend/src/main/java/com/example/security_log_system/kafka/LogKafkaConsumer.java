@@ -41,6 +41,13 @@ public class LogKafkaConsumer {
                     .description("Number of Kafka log consumer processing failures")
                     .register(meterRegistry)
                     .increment();
+
+            // 실패를 컨테이너에 전달
+            throw new IllegalStateException(
+                    "Kafka log processing failed",
+                    exception
+            );
+
         } finally {
             sample.stop(
                     Timer.builder("security.log.processing.duration")

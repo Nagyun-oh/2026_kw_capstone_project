@@ -1,0 +1,733 @@
+{
+  "recorded_at": "2026-11-03T09:42:54.133313+00:00",
+  "stage_verdict": "PASS",
+  "schema": "local-e2e-v2-remeasurement-evidence-v1",
+  "setup_evidence": "docs\\testing\\evidence\\20261103-e2e-remeasurement-setup.json",
+  "setup_sha256": "e1e3b591915912f607b65f7015c36878b2cdfffd23dea1ac33232bfe71b20496",
+  "stage_file": "docs\\testing\\runs\\20261103-local-e2e-rps1-after-outbox-stage.json",
+  "stage_sha256": "828ca882e72a44485149a32ac261dbbd7d9d1f9f4f2a30698d744a4b254520d0",
+  "backend_main_matches_setup": true,
+  "measurement_requests_total": 361,
+  "measurement_seconds_total": 360,
+  "background_http_samples_total": 325,
+  "probe_requests_total": 36,
+  "ai_complete_total": 361,
+  "runs": [
+    {
+      "id": "20261103T182623+0900-local-e2e-rps1-r16",
+      "round": 16,
+      "verdict": "PASS",
+      "counts": {
+        "http": 120,
+        "db": 120,
+        "probes": 12
+      },
+      "ai_completed": 120,
+      "outbox": {
+        "jobs": 120,
+        "logs": 120,
+        "sent": 120,
+        "phase": "measurement",
+        "pending": 0,
+        "inFlight": 0,
+        "missingJobs": 0,
+        "retriedJobs": 0
+      },
+      "probe_alert_ids": 12,
+      "source_counts": {
+        "received_AI": 12,
+        "received_WAF": 12,
+        "dom_AI": 12,
+        "dom_WAF": 12
+      },
+      "duplicate_probe_db_results": 0,
+      "observed_max_popup_nodes": 1,
+      "missing": {
+        "http": 0,
+        "log_ingest": 0,
+        "ai_segment": 0,
+        "ai_server": 0,
+        "waf_server": 0,
+        "AI_receive": 0,
+        "WAF_receive": 0,
+        "AI_dom": 0,
+        "WAF_dom": 0
+      },
+      "stats_ms": {
+        "http": {
+          "count": 108,
+          "avg_ms": 4.799592592592592,
+          "p50_ms": 4.1833,
+          "p95_ms": 8.05172,
+          "p99_ms": 10.288307999999999,
+          "max_ms": 12.3254
+        },
+        "log_ingest": {
+          "count": 120,
+          "avg_ms": 248.59670996665955,
+          "p50_ms": 247.031569480896,
+          "p95_ms": 472.60634899139404,
+          "p99_ms": 520.246090888977,
+          "max_ms": 522.9239463806152
+        },
+        "ai_segment": {
+          "count": 120,
+          "avg_ms": 296.9756881395976,
+          "p50_ms": 293.5950756072998,
+          "p95_ms": 525.0903487205505,
+          "p99_ms": 678.974339962006,
+          "max_ms": 719.649076461792
+        },
+        "ai_server": {
+          "count": 120,
+          "avg_ms": 545.5723981062571,
+          "p50_ms": 547.4840402603149,
+          "p95_ms": 874.3462443351746,
+          "p99_ms": 983.9858865737916,
+          "max_ms": 1010.0100040435791
+        },
+        "waf_server": {
+          "count": 12,
+          "avg_ms": 127.41273641586304,
+          "p50_ms": 122.01857566833496,
+          "p95_ms": 150.5484700202942,
+          "p99_ms": 151.65300607681274,
+          "max_ms": 151.92914009094238
+        },
+        "AI_receive": {
+          "count": 12,
+          "avg_ms": 782.447033333483,
+          "p50_ms": 583.7181499991857,
+          "p95_ms": 1504.1281499999968,
+          "p99_ms": 1518.8773900005253,
+          "max_ms": 1522.5647000006575
+        },
+        "WAF_receive": {
+          "count": 12,
+          "avg_ms": 531.3448000000184,
+          "p50_ms": 529.3623500001559,
+          "p95_ms": 618.1853250016502,
+          "p99_ms": 627.0709050004007,
+          "max_ms": 629.2923000000883
+        },
+        "AI_dom": {
+          "count": 12,
+          "avg_ms": 813.2981083332803,
+          "p50_ms": 590.18499999911,
+          "p95_ms": 1607.968579999033,
+          "p99_ms": 1623.5121960008473,
+          "max_ms": 1627.398100001301
+        },
+        "WAF_dom": {
+          "count": 12,
+          "avg_ms": 535.4621416663576,
+          "p50_ms": 534.696000000622,
+          "p95_ms": 621.6425150012583,
+          "p99_ms": 630.5273030003809,
+          "max_ms": 632.7485000001616
+        }
+      },
+      "lag_maxima": [
+        {
+          "group": "ai-result-group",
+          "topic": "ai-result-topic",
+          "partition": 0,
+          "observed_max_lag": 1,
+          "known_samples": 15,
+          "unknown_samples": 0
+        },
+        {
+          "group": "ai-service-group",
+          "topic": "ai-request-topic",
+          "partition": 0,
+          "observed_max_lag": 4,
+          "known_samples": 15,
+          "unknown_samples": 0
+        },
+        {
+          "group": "log-group",
+          "topic": "log-topic",
+          "partition": 0,
+          "observed_max_lag": 0,
+          "known_samples": 15,
+          "unknown_samples": 0
+        },
+        {
+          "group": "waf-detection-group",
+          "topic": "waf-detection-topic",
+          "partition": 0,
+          "observed_max_lag": 0,
+          "known_samples": 15,
+          "unknown_samples": 0
+        }
+      ],
+      "final_zero_lag_times": [
+        "2026-11-03T09:29:23.473112+00:00",
+        "2026-11-03T09:29:35.990596+00:00"
+      ],
+      "guard_abort": null,
+      "memory_min_bytes": 1219297280,
+      "resource_peaks": {
+        "juiceshop": {
+          "cpu_percent_max": 4.38,
+          "memory_percent_max": 2.1
+        },
+        "kafka": {
+          "cpu_percent_max": 156.75,
+          "memory_percent_max": 14.42
+        },
+        "security-ai-local": {
+          "cpu_percent_max": 198.12,
+          "memory_percent_max": 8.98
+        },
+        "security-backend-local": {
+          "cpu_percent_max": 103.53,
+          "memory_percent_max": 6.73
+        },
+        "security-frontend-local": {
+          "cpu_percent_max": 0.84,
+          "memory_percent_max": 0.16
+        },
+        "security-mysql": {
+          "cpu_percent_max": 12.66,
+          "memory_percent_max": 5.77
+        },
+        "waf": {
+          "cpu_percent_max": 12.16,
+          "memory_percent_max": 1.25
+        },
+        "waf-fluent-bit": {
+          "cpu_percent_max": 0.63,
+          "memory_percent_max": 0.12
+        },
+        "zookeeper": {
+          "cpu_percent_max": 84.04,
+          "memory_percent_max": 2.52
+        }
+      },
+      "db_start_counts": "5056\t425",
+      "original_evidence_hashes_verified": true
+    },
+    {
+      "id": "20261103T183007+0900-local-e2e-rps1-r17",
+      "round": 17,
+      "verdict": "PASS",
+      "counts": {
+        "http": 121,
+        "db": 121,
+        "probes": 12
+      },
+      "ai_completed": 121,
+      "outbox": {
+        "jobs": 121,
+        "logs": 121,
+        "sent": 121,
+        "phase": "measurement",
+        "pending": 0,
+        "inFlight": 0,
+        "missingJobs": 0,
+        "retriedJobs": 0
+      },
+      "probe_alert_ids": 12,
+      "source_counts": {
+        "received_AI": 12,
+        "received_WAF": 12,
+        "dom_AI": 12,
+        "dom_WAF": 12
+      },
+      "duplicate_probe_db_results": 0,
+      "observed_max_popup_nodes": 1,
+      "missing": {
+        "http": 0,
+        "log_ingest": 0,
+        "ai_segment": 0,
+        "ai_server": 0,
+        "waf_server": 0,
+        "AI_receive": 0,
+        "WAF_receive": 0,
+        "AI_dom": 0,
+        "WAF_dom": 0
+      },
+      "stats_ms": {
+        "http": {
+          "count": 109,
+          "avg_ms": 4.318485321100917,
+          "p50_ms": 4.1029,
+          "p95_ms": 5.932719999999999,
+          "p99_ms": 6.880356,
+          "max_ms": 7.2519
+        },
+        "log_ingest": {
+          "count": 121,
+          "avg_ms": 261.08821561513855,
+          "p50_ms": 255.2170753479004,
+          "p95_ms": 483.86502265930176,
+          "p99_ms": 486.1471176147461,
+          "max_ms": 494.66800689697266
+        },
+        "ai_segment": {
+          "count": 121,
+          "avg_ms": 300.552419394501,
+          "p50_ms": 301.7888069152832,
+          "p95_ms": 510.7450485229492,
+          "p99_ms": 543.9983367919922,
+          "max_ms": 551.0270595550537
+        },
+        "ai_server": {
+          "count": 121,
+          "avg_ms": 561.6406350096395,
+          "p50_ms": 563.6348724365234,
+          "p95_ms": 870.743989944458,
+          "p99_ms": 938.5412693023682,
+          "max_ms": 987.3499870300293
+        },
+        "waf_server": {
+          "count": 12,
+          "avg_ms": 249.97619787851968,
+          "p50_ms": 250.59843063354492,
+          "p95_ms": 268.59391927719116,
+          "p99_ms": 271.9612383842468,
+          "max_ms": 272.80306816101074
+        },
+        "AI_receive": {
+          "count": 12,
+          "avg_ms": 966.858249999556,
+          "p50_ms": 614.6255499988911,
+          "p95_ms": 1604.8944650010526,
+          "p99_ms": 1611.450333000903,
+          "max_ms": 1613.0893000008655
+        },
+        "WAF_receive": {
+          "count": 12,
+          "avg_ms": 546.8580666659667,
+          "p50_ms": 545.2912999990076,
+          "p95_ms": 617.0338400004766,
+          "p99_ms": 626.2550079998255,
+          "max_ms": 628.5602999996627
+        },
+        "AI_dom": {
+          "count": 12,
+          "avg_ms": 1013.6019250000269,
+          "p50_ms": 621.4870999992854,
+          "p95_ms": 1711.4240000009886,
+          "p99_ms": 1718.0416000002879,
+          "max_ms": 1719.6960000001127
+        },
+        "WAF_dom": {
+          "count": 12,
+          "avg_ms": 550.0929916667397,
+          "p50_ms": 548.1983999998192,
+          "p95_ms": 620.504345000154,
+          "p99_ms": 629.3615889992361,
+          "max_ms": 631.5758999990067
+        }
+      },
+      "lag_maxima": [
+        {
+          "group": "ai-result-group",
+          "topic": "ai-result-topic",
+          "partition": 0,
+          "observed_max_lag": 0,
+          "known_samples": 17,
+          "unknown_samples": 0
+        },
+        {
+          "group": "ai-service-group",
+          "topic": "ai-request-topic",
+          "partition": 0,
+          "observed_max_lag": 5,
+          "known_samples": 17,
+          "unknown_samples": 0
+        },
+        {
+          "group": "log-group",
+          "topic": "log-topic",
+          "partition": 0,
+          "observed_max_lag": 1,
+          "known_samples": 17,
+          "unknown_samples": 0
+        },
+        {
+          "group": "waf-detection-group",
+          "topic": "waf-detection-topic",
+          "partition": 0,
+          "observed_max_lag": 0,
+          "known_samples": 17,
+          "unknown_samples": 0
+        }
+      ],
+      "final_zero_lag_times": [
+        "2026-11-03T09:34:51.446696+00:00",
+        "2026-11-03T09:35:04.164399+00:00"
+      ],
+      "guard_abort": null,
+      "memory_min_bytes": 1587466240,
+      "resource_peaks": {
+        "juiceshop": {
+          "cpu_percent_max": 3.47,
+          "memory_percent_max": 2.1
+        },
+        "kafka": {
+          "cpu_percent_max": 297.73,
+          "memory_percent_max": 14.78
+        },
+        "security-ai-local": {
+          "cpu_percent_max": 59.74,
+          "memory_percent_max": 8.98
+        },
+        "security-backend-local": {
+          "cpu_percent_max": 34.45,
+          "memory_percent_max": 6.79
+        },
+        "security-frontend-local": {
+          "cpu_percent_max": 0.42,
+          "memory_percent_max": 0.16
+        },
+        "security-mysql": {
+          "cpu_percent_max": 9.39,
+          "memory_percent_max": 5.81
+        },
+        "waf": {
+          "cpu_percent_max": 10.05,
+          "memory_percent_max": 1.27
+        },
+        "waf-fluent-bit": {
+          "cpu_percent_max": 0.43,
+          "memory_percent_max": 0.12
+        },
+        "zookeeper": {
+          "cpu_percent_max": 91.65,
+          "memory_percent_max": 3.3
+        }
+      },
+      "db_start_counts": "5207\t455",
+      "original_evidence_hashes_verified": true
+    },
+    {
+      "id": "20261103T183545+0900-local-e2e-rps1-r18",
+      "round": 18,
+      "verdict": "PASS",
+      "counts": {
+        "http": 120,
+        "db": 120,
+        "probes": 12
+      },
+      "ai_completed": 120,
+      "outbox": {
+        "jobs": 120,
+        "logs": 120,
+        "sent": 120,
+        "phase": "measurement",
+        "pending": 0,
+        "inFlight": 0,
+        "missingJobs": 0,
+        "retriedJobs": 0
+      },
+      "probe_alert_ids": 12,
+      "source_counts": {
+        "received_AI": 12,
+        "received_WAF": 12,
+        "dom_AI": 12,
+        "dom_WAF": 12
+      },
+      "duplicate_probe_db_results": 0,
+      "observed_max_popup_nodes": 1,
+      "missing": {
+        "http": 0,
+        "log_ingest": 0,
+        "ai_segment": 0,
+        "ai_server": 0,
+        "waf_server": 0,
+        "AI_receive": 0,
+        "WAF_receive": 0,
+        "AI_dom": 0,
+        "WAF_dom": 0
+      },
+      "stats_ms": {
+        "http": {
+          "count": 108,
+          "avg_ms": 4.188574074074074,
+          "p50_ms": 3.95055,
+          "p95_ms": 6.641565,
+          "p99_ms": 7.133537999999999,
+          "max_ms": 8.4665
+        },
+        "log_ingest": {
+          "count": 120,
+          "avg_ms": 264.16327953338623,
+          "p50_ms": 245.99599838256836,
+          "p95_ms": 495.88528871536255,
+          "p99_ms": 497.30480194091797,
+          "max_ms": 498.121976852417
+        },
+        "ai_segment": {
+          "count": 120,
+          "avg_ms": 295.3282157580058,
+          "p50_ms": 294.4014072418213,
+          "p95_ms": 508.86714458465576,
+          "p99_ms": 524.9121165275574,
+          "max_ms": 528.3927917480469
+        },
+        "ai_server": {
+          "count": 120,
+          "avg_ms": 559.491495291392,
+          "p50_ms": 561.0145330429077,
+          "p95_ms": 903.713846206665,
+          "p99_ms": 1001.379406452179,
+          "max_ms": 1019.7529792785645
+        },
+        "waf_server": {
+          "count": 12,
+          "avg_ms": 178.07775735855103,
+          "p50_ms": 186.34891510009766,
+          "p95_ms": 197.84003496170044,
+          "p99_ms": 202.596914768219,
+          "max_ms": 203.78613471984863
+        },
+        "AI_receive": {
+          "count": 12,
+          "avg_ms": 837.8395249995568,
+          "p50_ms": 842.2386000002007,
+          "p95_ms": 905.476269999599,
+          "p99_ms": 907.7504540014706,
+          "max_ms": 908.3190000019385
+        },
+        "WAF_receive": {
+          "count": 12,
+          "avg_ms": 837.8395249995568,
+          "p50_ms": 842.2386000002007,
+          "p95_ms": 905.476269999599,
+          "p99_ms": 907.7504540014706,
+          "max_ms": 908.3190000019385
+        },
+        "AI_dom": {
+          "count": 12,
+          "avg_ms": 844.0577416671052,
+          "p50_ms": 849.2362000015419,
+          "p95_ms": 911.5074050005205,
+          "p99_ms": 913.8582810021035,
+          "max_ms": 914.4460000024992
+        },
+        "WAF_dom": {
+          "count": 12,
+          "avg_ms": 841.0390083336097,
+          "p50_ms": 845.8479000018997,
+          "p95_ms": 908.1875249990844,
+          "p99_ms": 910.5523050008924,
+          "max_ms": 911.1435000013444
+        }
+      },
+      "lag_maxima": [
+        {
+          "group": "ai-result-group",
+          "topic": "ai-result-topic",
+          "partition": 0,
+          "observed_max_lag": 0,
+          "known_samples": 17,
+          "unknown_samples": 0
+        },
+        {
+          "group": "ai-service-group",
+          "topic": "ai-request-topic",
+          "partition": 0,
+          "observed_max_lag": 4,
+          "known_samples": 17,
+          "unknown_samples": 0
+        },
+        {
+          "group": "log-group",
+          "topic": "log-topic",
+          "partition": 0,
+          "observed_max_lag": 1,
+          "known_samples": 17,
+          "unknown_samples": 0
+        },
+        {
+          "group": "waf-detection-group",
+          "topic": "waf-detection-topic",
+          "partition": 0,
+          "observed_max_lag": 0,
+          "known_samples": 17,
+          "unknown_samples": 0
+        }
+      ],
+      "final_zero_lag_times": [
+        "2026-11-03T09:39:39.236492+00:00",
+        "2026-11-03T09:39:51.822956+00:00"
+      ],
+      "guard_abort": null,
+      "memory_min_bytes": 1879310336,
+      "resource_peaks": {
+        "juiceshop": {
+          "cpu_percent_max": 2.93,
+          "memory_percent_max": 2.11
+        },
+        "kafka": {
+          "cpu_percent_max": 153.34,
+          "memory_percent_max": 14.57
+        },
+        "security-ai-local": {
+          "cpu_percent_max": 52.99,
+          "memory_percent_max": 8.98
+        },
+        "security-backend-local": {
+          "cpu_percent_max": 10.84,
+          "memory_percent_max": 7.19
+        },
+        "security-frontend-local": {
+          "cpu_percent_max": 0.35,
+          "memory_percent_max": 0.16
+        },
+        "security-mysql": {
+          "cpu_percent_max": 11.36,
+          "memory_percent_max": 5.83
+        },
+        "waf": {
+          "cpu_percent_max": 8.52,
+          "memory_percent_max": 1.25
+        },
+        "waf-fluent-bit": {
+          "cpu_percent_max": 0.43,
+          "memory_percent_max": 0.12
+        },
+        "zookeeper": {
+          "cpu_percent_max": 78.71,
+          "memory_percent_max": 3.34
+        }
+      },
+      "db_start_counts": "5360\t485",
+      "original_evidence_hashes_verified": true
+    }
+  ],
+  "pooled_stats_ms": {
+    "http": {
+      "count": 325,
+      "avg_ms": 4.435190461538461,
+      "p50_ms": 4.0814,
+      "p95_ms": 6.85746,
+      "p99_ms": 9.631443999999997,
+      "max_ms": 12.3254
+    },
+    "log_ingest": {
+      "count": 361,
+      "avg_ms": 257.9580964804356,
+      "p50_ms": 247.88689613342285,
+      "p95_ms": 484.6320152282715,
+      "p99_ms": 497.6450443267822,
+      "max_ms": 522.9239463806152
+    },
+    "ai_segment": {
+      "count": 361,
+      "avg_ms": 297.62690087104437,
+      "p50_ms": 294.6009635925293,
+      "p95_ms": 515.0549411773682,
+      "p99_ms": 548.6017704010009,
+      "max_ms": 719.649076461792
+    },
+    "ai_server": {
+      "count": 361,
+      "avg_ms": 555.58499735148,
+      "p50_ms": 554.4650554656982,
+      "p95_ms": 893.3019638061523,
+      "p99_ms": 993.9721107482908,
+      "max_ms": 1019.7529792785645
+    },
+    "waf_server": {
+      "count": 36,
+      "avg_ms": 185.15556388431125,
+      "p50_ms": 186.34891510009766,
+      "p95_ms": 262.6262903213501,
+      "p99_ms": 270.1245188713074,
+      "max_ms": 272.80306816101074
+    },
+    "AI_receive": {
+      "count": 36,
+      "avg_ms": 862.381602777532,
+      "p50_ms": 790.7505999992281,
+      "p95_ms": 1555.2686750006615,
+      "p99_ms": 1607.8744050009846,
+      "max_ms": 1613.0893000008655
+    },
+    "WAF_receive": {
+      "count": 36,
+      "avg_ms": 638.6807972218472,
+      "p50_ms": 591.6786499983573,
+      "p95_ms": 890.117799998734,
+      "p99_ms": 906.5099900004498,
+      "max_ms": 908.3190000019385
+    },
+    "AI_dom": {
+      "count": 36,
+      "avg_ms": 890.3192583334708,
+      "p50_ms": 796.9394000010652,
+      "p95_ms": 1657.6010750013666,
+      "p99_ms": 1714.43200000067,
+      "max_ms": 1719.6960000001127
+    },
+    "WAF_dom": {
+      "count": 36,
+      "avg_ms": 642.1980472222357,
+      "p50_ms": 595.1877000006789,
+      "p95_ms": 892.8171749994362,
+      "p99_ms": 909.2624249999062,
+      "max_ms": 911.1435000013444
+    }
+  },
+  "comparison": {
+    "before_runs": [
+      "20261103T141850+0900-local-e2e-rps1-r14",
+      "20261103T142249+0900-local-e2e-rps1-r15"
+    ],
+    "same_fixture": true,
+    "same_contract": true,
+    "measurement_runtime_files_unchanged": true,
+    "changed_runtime_images": {
+      "security-backend:local": {
+        "before": "sha256:71ef1a09050fcedeaee065d8a5791e14eec00f925cf2a1461c6dde301cebe757",
+        "after": "sha256:cb699422f8a2d430218d6810fc2b0eaffdce7fa9e93c26f31c576debb6bf2791"
+      }
+    },
+    "limits": [
+      "original run r15 remains INCONCLUSIVE; manual recovery is separate",
+      "DB size naturally increased; no reset",
+      "new independent recovery tools and tests change whole runner-directory hash but not measured E2E algorithm",
+      "backend image intentionally changed to outbox/Consumer correction",
+      "1 request/s proves neither maximum throughput nor production reliability; 36 probe percentiles are reference only"
+    ]
+  },
+  "postcheck": {
+    "at": "2026-11-03T09:42:53.303036+00:00",
+    "counts_and_outbox": "network_logs\t5512\ndetected_threats\t515\nip_blacklist\t2\nSENT\t457\n",
+    "services": "juiceshop running \nkafka running healthy\nai running healthy\nbackend running \nfrontend running \ndb running healthy\nwaf running healthy\nfluent-bit running \nzookeeper running healthy\n",
+    "available_memory_bytes": 2617647104
+  },
+  "artifacts_sha256": {
+    "build\\test-runs\\20261103T182623+0900-local-e2e-rps1-r16\\manifest.json": "46137ae109a399026d7b84f544b34cdd1418e310f44e649dbce4581e82a055ee",
+    "build\\test-runs\\20261103T182623+0900-local-e2e-rps1-r16\\metrics.json": "d12b3c591beaaed48d0886421665203d77efe59c94fc6836bc61debef93bdef6",
+    "build\\test-runs\\20261103T182623+0900-local-e2e-rps1-r16\\outbox-verification.json": "deeae840a411c57f397b648282ed0bee4178996e8054c526e91920afa12978b0",
+    "build\\test-runs\\20261103T182623+0900-local-e2e-rps1-r16\\database.json": "5bb04fabbf0c53b0c3f71e6cc19852f465c982b65a0ef17f25916958ca25a2fd",
+    "build\\test-runs\\20261103T182623+0900-local-e2e-rps1-r16\\pipeline-events.jsonl": "f0722b2f7bc7dabe99e5a085ee2601ccc1a4aaa59efcf0930e280c5f4ed78082",
+    "build\\test-runs\\20261103T182623+0900-local-e2e-rps1-r16\\browser-events.jsonl": "5ec660f89a06ced4721a086d9c968b718e1953698343fb3d5ef25566a1e334ae",
+    "build\\test-runs\\20261103T182623+0900-local-e2e-rps1-r16\\progress.jsonl": "ba42d51dbb1c603196449da07675c413b91d5c8d22efb617a8bada2c4d28fece",
+    "build\\test-runs\\20261103T183007+0900-local-e2e-rps1-r17\\manifest.json": "e5a26c9bda24eb9d9e36cb2f1691fda6e2af39546434e2ea4bb0a50ba7eb6675",
+    "build\\test-runs\\20261103T183007+0900-local-e2e-rps1-r17\\metrics.json": "6e5850f51e94c47246a63bd86508fec5ef636cbd8aeb58a5a1f2aac4bc0442e2",
+    "build\\test-runs\\20261103T183007+0900-local-e2e-rps1-r17\\outbox-verification.json": "c07f555c6b6bb8f432dfff8a572fce0731db2d1a8b5efe38776f83ac0f2bc299",
+    "build\\test-runs\\20261103T183007+0900-local-e2e-rps1-r17\\database.json": "36c628efcd8edb35b3a41ed88d855dc5f4474c57ca06228ecb068fdf0b2d438a",
+    "build\\test-runs\\20261103T183007+0900-local-e2e-rps1-r17\\pipeline-events.jsonl": "65298a78abd71a2c02aef047c2a407fcc2049fbb67449f17ba148cfe9a660a9f",
+    "build\\test-runs\\20261103T183007+0900-local-e2e-rps1-r17\\browser-events.jsonl": "01730a446053995fbf50ac8d4fee660fb6b45fd10bdedf10cdcb8ac6b9ffb701",
+    "build\\test-runs\\20261103T183007+0900-local-e2e-rps1-r17\\progress.jsonl": "bcb118d526fab1690d31714a99aa67697dd6667935bfb319ba68cc3bc4509b25",
+    "build\\test-runs\\20261103T183545+0900-local-e2e-rps1-r18\\manifest.json": "196a69bfe97e20d20e303f47a10ee9540d816f0eea05ff6a2fb333cf1d8b64e3",
+    "build\\test-runs\\20261103T183545+0900-local-e2e-rps1-r18\\metrics.json": "e0a2c55340c6eb4eee95f76f0a433ccd3e380b4b3ed93b8bed570bab1be36072",
+    "build\\test-runs\\20261103T183545+0900-local-e2e-rps1-r18\\outbox-verification.json": "35a76317f367027efbba268dbe5ad62bd3631daebfc9a06b55ca63af28e4e7f1",
+    "build\\test-runs\\20261103T183545+0900-local-e2e-rps1-r18\\database.json": "b2bb7340e9d5d532d2a6c4d90412106d1f235aeaa2147391b7d14a40c3a7161b",
+    "build\\test-runs\\20261103T183545+0900-local-e2e-rps1-r18\\pipeline-events.jsonl": "f26275925fe110bd370595117f9c48da32ea1a8ed32c3144a4f972d8227a8a5b",
+    "build\\test-runs\\20261103T183545+0900-local-e2e-rps1-r18\\browser-events.jsonl": "3c1c059420704003c8fbbcf44ad6ee292910bacaf7276b8468ea75f4184e2736",
+    "build\\test-runs\\20261103T183545+0900-local-e2e-rps1-r18\\progress.jsonl": "0519f3e8b05129cafd867eb30742a1c929eea6aa834198c98646236b4055f192"
+  },
+  "analysis_notes": [
+    "A supplementary read-only aggregate query initially hit MySQL ONLY_FULL_GROUP_BY; used constant phase filters, without changing original measurement or verdict",
+    "Docker/host time configuration unchanged; latency uses UTC trace and WAF epoch",
+    "no application source or pipeline settings edited during the three runs",
+    "no service stop, DB reset, offset reset, or policy relaxation for measurement"
+  ]
+}

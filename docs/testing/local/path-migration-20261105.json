@@ -1,0 +1,297 @@
+{
+  "checked_date": "2026/11/05",
+  "workspace": "C:/Projects/2026_kw_capstone_project",
+  "raw_results": "build/test-runs/<ID>/ (unchanged)",
+  "files": [
+    {
+      "source": "docs/testing/runs/20261031T154807+0900-local-normal-smoke-r01.md",
+      "target": "docs/testing/local/runs/20261031T154807+0900-local-normal-smoke-r01.md",
+      "sha256_before": "59478d798ba2e7ffa9d283e5b070ecacdbb019e922755c5fab41dbd0c79356d4",
+      "sha256_after": "59478d798ba2e7ffa9d283e5b070ecacdbb019e922755c5fab41dbd0c79356d4",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261031T155458+0900-local-normal-smoke-r02.md",
+      "target": "docs/testing/local/runs/20261031T155458+0900-local-normal-smoke-r02.md",
+      "sha256_before": "0180f45e1c8e8eec3d6793dc8cd0894a3c11f56c7ab708b24403ee21f71524cd",
+      "sha256_after": "0180f45e1c8e8eec3d6793dc8cd0894a3c11f56c7ab708b24403ee21f71524cd",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261031T164718+0900-local-normal-smoke-r03.md",
+      "target": "docs/testing/local/runs/20261031T164718+0900-local-normal-smoke-r03.md",
+      "sha256_before": "3ac5bd4e56e6bc74a55451e6354d819346c48a4a237c9cdeb119bc493e1fd991",
+      "sha256_after": "3ac5bd4e56e6bc74a55451e6354d819346c48a4a237c9cdeb119bc493e1fd991",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261031T170720+0900-local-normal-smoke-r04.md",
+      "target": "docs/testing/local/runs/20261031T170720+0900-local-normal-smoke-r04.md",
+      "sha256_before": "9d969142e59b98047070c1e19ec584dc298dcf3e16e92bc72395dc7385cbfd11",
+      "sha256_after": "9d969142e59b98047070c1e19ec584dc298dcf3e16e92bc72395dc7385cbfd11",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261031T175050+0900-local-normal-smoke-r05.md",
+      "target": "docs/testing/local/runs/20261031T175050+0900-local-normal-smoke-r05.md",
+      "sha256_before": "64a4e2da87cbeb054859587b8b63c28687a0450e0579fa3d566fb7632093de11",
+      "sha256_after": "64a4e2da87cbeb054859587b8b63c28687a0450e0579fa3d566fb7632093de11",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261101T123129+0900-local-normal-smoke-r06.md",
+      "target": "docs/testing/local/runs/20261101T123129+0900-local-normal-smoke-r06.md",
+      "sha256_before": "5a58b2319ff6bad79bd465ec8fdff99b19ef50f9a5e653acec295096801813fa",
+      "sha256_after": "5a58b2319ff6bad79bd465ec8fdff99b19ef50f9a5e653acec295096801813fa",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261101T123225+0900-local-normal-smoke-r07.md",
+      "target": "docs/testing/local/runs/20261101T123225+0900-local-normal-smoke-r07.md",
+      "sha256_before": "f341a23c2e73eca80017d17ed8e71ba540df06548ee4911b1b89f42e07807d68",
+      "sha256_after": "f341a23c2e73eca80017d17ed8e71ba540df06548ee4911b1b89f42e07807d68",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261101T131829+0900-local-normal-smoke-r08.md",
+      "target": "docs/testing/local/runs/20261101T131829+0900-local-normal-smoke-r08.md",
+      "sha256_before": "daff09ed7d8c352ba4d5df19debd245fa44c5d010f26c07d29f2a005994b2034",
+      "sha256_after": "daff09ed7d8c352ba4d5df19debd245fa44c5d010f26c07d29f2a005994b2034",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261101T132341+0900-local-normal-smoke-r09.md",
+      "target": "docs/testing/local/runs/20261101T132341+0900-local-normal-smoke-r09.md",
+      "sha256_before": "9930810d7ab936b36acdb306f966a40442e965680f560839849d55d9595c40d6",
+      "sha256_after": "9930810d7ab936b36acdb306f966a40442e965680f560839849d55d9595c40d6",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103-local-e2e-rps1-after-outbox-stage.json",
+      "target": "docs/testing/local/runs/20261103-local-e2e-rps1-after-outbox-stage.json",
+      "sha256_before": "828ca882e72a44485149a32ac261dbbd7d9d1f9f4f2a30698d744a4b254520d0",
+      "sha256_after": "828ca882e72a44485149a32ac261dbbd7d9d1f9f4f2a30698d744a4b254520d0",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103-local-e2e-rps1-after-outbox-stage.md",
+      "target": "docs/testing/local/runs/20261103-local-e2e-rps1-after-outbox-stage.md",
+      "sha256_before": "f4180d3cb314b5f52196ea29da71f89c06d29e05daa2f114d0cfe01c1c1ebd76",
+      "sha256_after": "f4180d3cb314b5f52196ea29da71f89c06d29e05daa2f114d0cfe01c1c1ebd76",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T140731+0900-local-e2e-check-r10.md",
+      "target": "docs/testing/local/runs/20261103T140731+0900-local-e2e-check-r10.md",
+      "sha256_before": "739b9d9b3c008ab1c5033b790e1de5b22f6e57d4164b4a5058a8e2357b7af27e",
+      "sha256_after": "739b9d9b3c008ab1c5033b790e1de5b22f6e57d4164b4a5058a8e2357b7af27e",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T140907+0900-local-e2e-check-r11.md",
+      "target": "docs/testing/local/runs/20261103T140907+0900-local-e2e-check-r11.md",
+      "sha256_before": "441f57c12c0cebd1dfae9f48249625c80ba02305c3d959dd2ca8796d031d2aa1",
+      "sha256_after": "441f57c12c0cebd1dfae9f48249625c80ba02305c3d959dd2ca8796d031d2aa1",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T141016+0900-local-e2e-check-r12.md",
+      "target": "docs/testing/local/runs/20261103T141016+0900-local-e2e-check-r12.md",
+      "sha256_before": "4c289ce8c8aa7db023c16de1d257c403a37572c182c221619a5dfb8248a7bdaf",
+      "sha256_after": "4c289ce8c8aa7db023c16de1d257c403a37572c182c221619a5dfb8248a7bdaf",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T141207+0900-local-e2e-check-r13.md",
+      "target": "docs/testing/local/runs/20261103T141207+0900-local-e2e-check-r13.md",
+      "sha256_before": "7b9a6a825e3b3a1d1b5869b9c8d26d5cddf7383172f58222d49bdbc82bf54539",
+      "sha256_after": "7b9a6a825e3b3a1d1b5869b9c8d26d5cddf7383172f58222d49bdbc82bf54539",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T141850+0900-local-e2e-rps1-r14.md",
+      "target": "docs/testing/local/runs/20261103T141850+0900-local-e2e-rps1-r14.md",
+      "sha256_before": "41203f4bb8d10dae589aa41a298aa4363400c5a6fad443acfdb2dd46de67cb93",
+      "sha256_after": "41203f4bb8d10dae589aa41a298aa4363400c5a6fad443acfdb2dd46de67cb93",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T142249+0900-local-e2e-rps1-r15.md",
+      "target": "docs/testing/local/runs/20261103T142249+0900-local-e2e-rps1-r15.md",
+      "sha256_before": "4fe207d7ad84006b0558a8ed8af3403625a84a1cbc5020439fd6ce65d37195fd",
+      "sha256_after": "4fe207d7ad84006b0558a8ed8af3403625a84a1cbc5020439fd6ce65d37195fd",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T181102+0900-local-recovery-r01.md",
+      "target": "docs/testing/local/runs/20261103T181102+0900-local-recovery-r01.md",
+      "sha256_before": "2012f1a7d4144d5e605cebc2d91d5100f9b51a927310c009094fd879029e7044",
+      "sha256_after": "2012f1a7d4144d5e605cebc2d91d5100f9b51a927310c009094fd879029e7044",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T181230+0900-local-recovery-r02.md",
+      "target": "docs/testing/local/runs/20261103T181230+0900-local-recovery-r02.md",
+      "sha256_before": "7004e7bc21cd13572290502cd730f9ae43920e0ffce9a5e0c77799365891016e",
+      "sha256_after": "b86af74c070f4f348aac6443bde550c50e9d718ee13b5fccceaaa5047675818f",
+      "content_preserved": false
+    },
+    {
+      "source": "docs/testing/runs/20261103T182623+0900-local-e2e-rps1-r16.md",
+      "target": "docs/testing/local/runs/20261103T182623+0900-local-e2e-rps1-r16.md",
+      "sha256_before": "1d2c5e2105521177a823b9fd436d34b782dfa10a21ea9fddf606db96d1ca2182",
+      "sha256_after": "1d2c5e2105521177a823b9fd436d34b782dfa10a21ea9fddf606db96d1ca2182",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T183007+0900-local-e2e-rps1-r17.md",
+      "target": "docs/testing/local/runs/20261103T183007+0900-local-e2e-rps1-r17.md",
+      "sha256_before": "ecb7ecd507d5150c7d715388d5e613cca0ecc8b9b4cd61fc54381bd74bd3dc02",
+      "sha256_after": "ecb7ecd507d5150c7d715388d5e613cca0ecc8b9b4cd61fc54381bd74bd3dc02",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T183545+0900-local-e2e-rps1-r18.md",
+      "target": "docs/testing/local/runs/20261103T183545+0900-local-e2e-rps1-r18.md",
+      "sha256_before": "0de3f4fdf3ebcf6d2cf82fad55ff985539e3a160cf98e199e5c6d7de044861c7",
+      "sha256_after": "0de3f4fdf3ebcf6d2cf82fad55ff985539e3a160cf98e199e5c6d7de044861c7",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T203156+0900-local-e2e-prechecks-r19.md",
+      "target": "docs/testing/local/runs/20261103T203156+0900-local-e2e-prechecks-r19.md",
+      "sha256_before": "e706c7ff65a07339a31da338e7c89d18a7c3dcb2d3f356cc95997f41a6d3f2d5",
+      "sha256_after": "e706c7ff65a07339a31da338e7c89d18a7c3dcb2d3f356cc95997f41a6d3f2d5",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T203223+0900-local-e2e-rps3-r19.md",
+      "target": "docs/testing/local/runs/20261103T203223+0900-local-e2e-rps3-r19.md",
+      "sha256_before": "cfdf9081d1e20a11f590c754b3fd2449b49c76864bf6d9b581fb1b95c70ba398",
+      "sha256_after": "cfdf9081d1e20a11f590c754b3fd2449b49c76864bf6d9b581fb1b95c70ba398",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T204004+0900-local-e2e-prechecks-r21.md",
+      "target": "docs/testing/local/runs/20261103T204004+0900-local-e2e-prechecks-r21.md",
+      "sha256_before": "a611df0d086b841888d9c8700930f6efddb850561a16f0b801c7467f24687462",
+      "sha256_after": "8ace587440cfda38875c657d5afa63927a988b5c9efbe9b2ed73e85b71befe04",
+      "content_preserved": false
+    },
+    {
+      "source": "docs/testing/runs/20261103T204036+0900-local-e2e-rps3-r21.md",
+      "target": "docs/testing/local/runs/20261103T204036+0900-local-e2e-rps3-r21.md",
+      "sha256_before": "cb8723809dd566db0df9809cee53417f4db995c244fd8631e9c3dc1ac6740c78",
+      "sha256_after": "cb8723809dd566db0df9809cee53417f4db995c244fd8631e9c3dc1ac6740c78",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/runs/20261103T204357+0900-local-e2e-rps5-r22.md",
+      "target": "docs/testing/local/runs/20261103T204357+0900-local-e2e-rps5-r22.md",
+      "sha256_before": "5b6feb1200a2d5d796c409cfc17f453cfce38445d9fbe1e6d97c5de8b4ba5ce4",
+      "sha256_after": "5b6feb1200a2d5d796c409cfc17f453cfce38445d9fbe1e6d97c5de8b4ba5ce4",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/evidence/20261031-local-preliminary-verification.json",
+      "target": "docs/testing/local/evidence/20261031-local-preliminary-verification.json",
+      "sha256_before": "3552dd15313f678e78320225589d67678eca6e4feeb70b9ce75fef31fdfd8691",
+      "sha256_after": "3552dd15313f678e78320225589d67678eca6e4feeb70b9ce75fef31fdfd8691",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/evidence/20261101-e2e-v2-implementation.json",
+      "target": "docs/testing/local/evidence/20261101-e2e-v2-implementation.json",
+      "sha256_before": "d567bdfc1a29f9e6b623d3ac75c786a1c9ac912c4dc61f9b15a029373fb166f4",
+      "sha256_after": "d567bdfc1a29f9e6b623d3ac75c786a1c9ac912c4dc61f9b15a029373fb166f4",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/evidence/20261101-local-db-time-basis.json",
+      "target": "docs/testing/local/evidence/20261101-local-db-time-basis.json",
+      "sha256_before": "261c6bff04219f8c15bf28544846d43f2b0f2cd93821ffdc2732072a4aae44fb",
+      "sha256_after": "261c6bff04219f8c15bf28544846d43f2b0f2cd93821ffdc2732072a4aae44fb",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/evidence/20261103-ai-result-commit-race.json",
+      "target": "docs/testing/local/evidence/20261103-ai-result-commit-race.json",
+      "sha256_before": "3c989e5ee084f8b675e8e8521748a7177d5bd0366dcef0f0850f6f3c29efd4ec",
+      "sha256_after": "3c989e5ee084f8b675e8e8521748a7177d5bd0366dcef0f0850f6f3c29efd4ec",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/evidence/20261103-e2e-remeasurement-setup.json",
+      "target": "docs/testing/local/evidence/20261103-e2e-remeasurement-setup.json",
+      "sha256_before": "e1e3b591915912f607b65f7015c36878b2cdfffd23dea1ac33232bfe71b20496",
+      "sha256_after": "e1e3b591915912f607b65f7015c36878b2cdfffd23dea1ac33232bfe71b20496",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/evidence/20261103-e2e-rps1-remeasurement.json",
+      "target": "docs/testing/local/evidence/20261103-e2e-rps1-remeasurement.json",
+      "sha256_before": "04c2384cf28ecea820c41de380f547343e3451b69e6f3fc8904c891872a4ddd9",
+      "sha256_after": "04c2384cf28ecea820c41de380f547343e3451b69e6f3fc8904c891872a4ddd9",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/evidence/20261103-local-prechecks-memory-stop.json",
+      "target": "docs/testing/local/evidence/20261103-local-prechecks-memory-stop.json",
+      "sha256_before": "c72d1d9cb226b8a53be1578dc4213e159430f5025a01068ef1b2ff25427049ca",
+      "sha256_after": "c72d1d9cb226b8a53be1578dc4213e159430f5025a01068ef1b2ff25427049ca",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/evidence/20261103-local-prechecks-verification.json",
+      "target": "docs/testing/local/evidence/20261103-local-prechecks-verification.json",
+      "sha256_before": "53008ea4b807a71e9073f82103158a7755f5cb1743a857d40029c1e942fcf65b",
+      "sha256_after": "53008ea4b807a71e9073f82103158a7755f5cb1743a857d40029c1e942fcf65b",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/evidence/20261103-local-transport.json",
+      "target": "docs/testing/local/evidence/20261103-local-transport.json",
+      "sha256_before": "529b2594a4ba785b7fe4e12f4086eb7e68e804fdf26f13775a4cd2d7e8a903ee",
+      "sha256_after": "529b2594a4ba785b7fe4e12f4086eb7e68e804fdf26f13775a4cd2d7e8a903ee",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/evidence/20261103-outbox-recovery-verification.json",
+      "target": "docs/testing/local/evidence/20261103-outbox-recovery-verification.json",
+      "sha256_before": "c59a3a3905c8d511de75943be82e9a66b5f1460830e0d73f788fa49f27143ce3",
+      "sha256_after": "c59a3a3905c8d511de75943be82e9a66b5f1460830e0d73f788fa49f27143ce3",
+      "content_preserved": true
+    },
+    {
+      "source": "docs/testing/local-preliminary-summary.md",
+      "target": "docs/testing/local/preliminary-summary.md",
+      "sha256_before": "dcc5b6b819e8e3f054b029740380758eaa72ccd6cce6c51fc6b5c92ed486539f",
+      "sha256_after": "d6d76636afa0951a4bf4bee98a52f03fed31cc3713d783edc63ef01e3b6e1c9e",
+      "content_preserved": false
+    }
+  ],
+  "schema": "dualguard-doc-path-migration-v1",
+  "reason": "User-requested local documentation grouping",
+  "historical_json_paths": "Resolve through this mapping; original JSON content and hashes preserved",
+  "report_generators": [
+    "scripts/testing/run_experiment.py",
+    "scripts/testing/run_recovery_verification.py"
+  ],
+  "local_reports_and_summary_files": 27,
+  "local_evidence_files": 10,
+  "initial_summary_files": 1,
+  "created_local_guide": "docs/testing/local/runner-v1.md",
+  "validation": {
+    "mock_tests_passed": 114,
+    "markdown_files_checked": 41,
+    "missing_markdown_links": 0,
+    "unexpected_kana": 0,
+    "trailing_whitespace_in_checked_docs": 0,
+    "preserved_json_files": 11,
+    "verified_existing_raw_artifacts": 12,
+    "raw_results_moved": false,
+    "app_source_changed": false,
+    "new_load_executed": false,
+    "note": "Default sandbox asyncio socketpair stalled; identical mocked suite passed outside sandbox. No live service commands were used."
+  }
+}
