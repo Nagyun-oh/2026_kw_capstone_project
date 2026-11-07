@@ -85,7 +85,8 @@ CREATE TABLE `network_logs` (
   `raw_log` text,
   `request_method` varchar(255) DEFAULT NULL,
   `request_url` text,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_network_logs_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
