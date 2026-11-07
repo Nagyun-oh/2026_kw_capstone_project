@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RequestAlertService {
 
     private final RequestAlertRepository requestAlertRepository;
+    private final RequestAlertWakeup wakeup;
 
     public void recordWaf(String requestId,String clientIp,String severity){
         record(
@@ -63,6 +64,9 @@ public class RequestAlertService {
                 alertLevel
         );
 
+        // 새 revision이 발행 대기(pending)가 됐으므로 탐지 저장 트랜잭션 커밋 뒤 알림 발행기를 바로 깨운다.
+        // 변경이 없으면(unchanged) 발행할 내용이 없으므로 깨우지 않는다.
+        wakeup.requestAfterCommit();
     }
 
     private String createKey(String requestId, Long logId){
