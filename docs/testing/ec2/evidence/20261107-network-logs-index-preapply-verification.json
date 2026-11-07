@@ -1,0 +1,80 @@
+{
+  "schema": "dualguard-network-logs-index-preapply-v1",
+  "scope": "격리된 임시 MySQL 컨테이너 검증. EC2 운영 DB 결과가 아니며 개선 효과 수치로 사용하지 않는다.",
+  "environment": {
+    "image": "mysql:8.0",
+    "server_version": "8.0.46",
+    "ports_published": false,
+    "compose_or_user_db_touched": false,
+    "removed_after_run": true
+  },
+  "data": {
+    "rows": 18000,
+    "data_mb": 31.6,
+    "index_mb_before": 1.5,
+    "generator": "합성 행. created_at은 0.2초 간격과 결정적 지터, raw_log 1,500자"
+  },
+  "new_db_path": {
+    "order": [
+      "security-db-schema.sql",
+      "add-waf-detections.sql",
+      "add-request-correlation.sql",
+      "add-request-alerts.sql"
+    ],
+    "result": "모두 적용 성공",
+    "network_logs_indexes": [
+      "idx_network_logs_created_at(created_at)",
+      "PRIMARY(id)",
+      "uk_network_logs_request_id(request_id)"
+    ]
+  },
+  "existing_db_path": {
+    "before_plan": "Table scan 18,000 rows → Sort created_at DESC (top 10) → Limit 10",
+    "before_actual_ms": [
+      34.0,
+      17.6,
+      18.6
+    ],
+    "after_plan": "Index scan using idx_network_logs_created_at (reverse) 10 rows → Limit 10",
+    "after_actual_ms": [
+      0.0761,
+      0.0763,
+      0.0611
+    ],
+    "count_actual_ms": {
+      "before": 2.01,
+      "after": 1.6
+    },
+    "ip_filter_after_plan": "Index scan (reverse) + Filter ip_address, 10 rows",
+    "same_top10_ids": true,
+    "reapply": "ERROR 1061 Duplicate key name — 적용 전 존재 확인 필요"
+  },
+  "apply_script_dry_run": {
+    "target": "EC2 적용 스크립트의 원격 로직을 같은 임시 컨테이너 방식으로 실행",
+    "first_run": {
+      "outcome": "APPLIED",
+      "ddl_elapsed_ms": 235.0,
+      "index_present": true,
+      "same_top_ids_same_snapshot": true,
+      "plan_uses_index": true
+    },
+    "second_run": {
+      "outcome": "ALREADY_PRESENT",
+      "ddl_executed": false
+    },
+    "local_harness_note": "Windows 텍스트 모드 표준 입력의 CRLF 변환으로 첫 로컬 시험이 1045. 로컬 시험 도구에서만 바이트 전달로 보정"
+  },
+  "backend_checks": {
+    "compile": "compileJava compileTestJava 성공",
+    "tests": {
+      "LogConsumerTest": 2,
+      "LogControllerTest": 2,
+      "LogServiceTest": 3,
+      "failures": 0
+    }
+  },
+  "sources": [
+    "build/testing-validation/local-network-logs-index-20261107/verify.sh",
+    "build/testing-validation/ec2-network-logs-index-20261107/local_dry_run.py"
+  ]
+}

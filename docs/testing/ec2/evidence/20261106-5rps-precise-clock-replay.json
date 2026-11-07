@@ -1,0 +1,29 @@
+{
+  "replay_only": true,
+  "tests_total": 262,
+  "tests_passed": 262,
+  "checks": [
+    {
+      "id": "20261106T102055+0900-ec2-e2e-rps5-r01",
+      "raw_http_points_validated": 450,
+      "original_verdict": "INCONCLUSIVE",
+      "source_resolution_ms": {
+        "nginx": 1,
+        "k6": 1
+      },
+      "http_resent": 0,
+      "age_normalized_for_offline_replay": true
+    },
+    {
+      "id": "20261106T105144+0900-ec2-e2e-rps5-r04",
+      "raw_http_points_validated": 425,
+      "original_verdict": "INCONCLUSIVE",
+      "source_resolution_ms": {
+        "nginx": 1,
+        "k6": 1
+      },
+      "http_resent": 0,
+      "age_normalized_for_offline_replay": true
+    }
+  ]
+}

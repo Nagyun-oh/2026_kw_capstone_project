@@ -1,0 +1,803 @@
+{
+  "schema": "dualguard-preparation-evidence-v1",
+  "phase": "P6_database_observation",
+  "recorded_at": "2026-11-05T10:37:17.629078+00:00",
+  "display_date": "2026/11/05",
+  "status": "IMPLEMENTATION_REGRESSION_AND_LIVE_READ_ONLY_VERIFIED",
+  "performance_verdict": "NOT_EVALUATED",
+  "load_generated": false,
+  "server_changes": false,
+  "latest_run_id": "20261105T192941+0900-ec2-db-observation-r03",
+  "raw_directory": "build/test-runs/20261105T192941+0900-ec2-db-observation-r03",
+  "execution": "User ran local hidden-password prompt command; generated artifacts reviewed",
+  "authentication": "Existing application credentials and user-entered existing root password in memory only; no account or grant changes",
+  "runner_head": "d6ec7c4b324c755e3c0391eba7ce6da9363fbbad",
+  "runner_working_tree_dirty": true,
+  "python_tests": {
+    "recorded_at": "2026-11-05T10:33:19.814796+00:00",
+    "scope": "Python regression; P6 live read-only results recorded separately",
+    "tests_run": 210,
+    "failures": 0,
+    "errors": 0,
+    "successful": true,
+    "warning_categories": []
+  },
+  "prior_runs": [
+    {
+      "id": "20261105T192232+0900-ec2-db-observation-r01",
+      "state": "COMPLETED",
+      "collection_status": "INCOMPLETE",
+      "raw_sha256": {
+        "comparison.json": "8edae8a2bb788bcf502a3aca6b610771cc80146fa6fa4d023e020d9d2ff16e46",
+        "manifest.json": "7a0d14e67989991d572bb49e4b1e1f9f703a1b316b6a825b67fd76e1cef0e3f7",
+        "snapshot-01.json": "fb1080426900e6dcf62899294f6314f47196e9c895090918651ef75a2f5965b3",
+        "snapshot-02.json": "332055434073f5edae78c76f20fb75420edf4f5de10d51ff5ae938e3ac9c0a65"
+      }
+    },
+    {
+      "id": "20261105T192413+0900-ec2-db-observation-r02",
+      "state": "COMPLETED",
+      "collection_status": "INCOMPLETE",
+      "raw_sha256": {
+        "comparison.json": "46b7df4d1951ee280cc1f7cde1e624a3dc3418aaec9739225ab68dbc49519c08",
+        "manifest.json": "72eec799517972c5f49436c198048e02e7fdf4368a426b7a942e4bc73801fe88",
+        "snapshot-01.json": "9564f3dfce84e521628bd8d5ba3299cbc81f61b69a4fe5e8f21a37d0d128fe3c",
+        "snapshot-02.json": "8632a28bd9dc547f2f644e39d5de4ca5eee395726a79fb315894e834f5afba50"
+      }
+    }
+  ],
+  "samples": [
+    {
+      "collection_status": "COLLECTED",
+      "app_sha": "e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+      "section_status": {
+        "metadata": {
+          "status": "OK",
+          "authentication": "app_container_environment",
+          "error_codes": [],
+          "row_count": 1
+        },
+        "status": {
+          "status": "OK",
+          "authentication": "app_container_environment",
+          "error_codes": [],
+          "row_count": 22
+        },
+        "instrumentation": {
+          "status": "OK",
+          "authentication": "root_prompt_memory",
+          "error_codes": [
+            {
+              "authentication": "app",
+              "code": 1142,
+              "sqlstate": "42000"
+            }
+          ],
+          "row_count": 1
+        },
+        "digests": {
+          "status": "OK",
+          "authentication": "root_prompt_memory",
+          "error_codes": [
+            {
+              "authentication": "app",
+              "code": 1142,
+              "sqlstate": "42000"
+            }
+          ],
+          "row_count": 70
+        },
+        "locks": {
+          "status": "OK",
+          "authentication": "root_prompt_memory",
+          "error_codes": [
+            {
+              "authentication": "app",
+              "code": 1142,
+              "sqlstate": "42000"
+            }
+          ],
+          "row_count": 1
+        },
+        "transactions": {
+          "status": "OK",
+          "authentication": "root_prompt_memory",
+          "error_codes": [
+            {
+              "authentication": "app",
+              "code": 1227,
+              "sqlstate": "42000"
+            }
+          ],
+          "row_count": 1
+        },
+        "outbox": {
+          "status": "OK",
+          "authentication": "app_container_environment",
+          "error_codes": [],
+          "row_count": 1
+        },
+        "tables": {
+          "status": "OK",
+          "authentication": "app_container_environment",
+          "error_codes": [],
+          "row_count": 8
+        }
+      },
+      "instrumentation": [
+        {
+          "digest_consumer": "YES",
+          "statement_consumer": "YES",
+          "enabled_statement_instruments": 198,
+          "timed_statement_instruments": 198
+        }
+      ],
+      "locks": [
+        {
+          "data_lock_waits": 0,
+          "pending_metadata_locks": 0
+        }
+      ],
+      "transactions": [
+        {
+          "active": 0,
+          "lock_wait": 0,
+          "oldest_ms": null,
+          "rows_locked": 0,
+          "rows_modified": 0
+        }
+      ],
+      "outbox": [
+        {
+          "state": "SENT",
+          "count": 1,
+          "max_attempts": 1,
+          "ready_count": 0,
+          "oldest_pending_ms": null,
+          "published_count": 1,
+          "publish_sum_us": 467531,
+          "publish_max_us": 467531,
+          "invalid_time_count": 0
+        }
+      ],
+      "tables": [
+        {
+          "table": "ai_request_outbox",
+          "estimated_rows": 1,
+          "data_bytes": 16384,
+          "index_bytes": 16384
+        },
+        {
+          "table": "detected_threats",
+          "estimated_rows": 210,
+          "data_bytes": 49152,
+          "index_bytes": 16384
+        },
+        {
+          "table": "ip_blacklist",
+          "estimated_rows": 0,
+          "data_bytes": 16384,
+          "index_bytes": 16384
+        },
+        {
+          "table": "network_logs",
+          "estimated_rows": 5782,
+          "data_bytes": 9977856,
+          "index_bytes": 163840
+        },
+        {
+          "table": "request_alerts",
+          "estimated_rows": 97,
+          "data_bytes": 16384,
+          "index_bytes": 32768
+        },
+        {
+          "table": "request_correlations",
+          "estimated_rows": 1696,
+          "data_bytes": 196608,
+          "index_bytes": 0
+        },
+        {
+          "table": "waf_detections",
+          "estimated_rows": 90,
+          "data_bytes": 65536,
+          "index_bytes": 49152
+        },
+        {
+          "table": "waf_sync_status",
+          "estimated_rows": 0,
+          "data_bytes": 16384,
+          "index_bytes": 0
+        }
+      ],
+      "collection_elapsed_ms": 2203.624799993122,
+      "commands": [
+        {
+          "check": "containers_discover",
+          "started_at": "2026-11-05T10:29:45.298907+00:00",
+          "ended_at": "2026-11-05T10:29:45.422260+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 123.369,
+          "bytes_read": 838,
+          "lines_read": 9
+        },
+        {
+          "check": "app_sha",
+          "started_at": "2026-11-05T10:29:45.422496+00:00",
+          "ended_at": "2026-11-05T10:29:45.424920+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 2.466,
+          "bytes_read": 41,
+          "lines_read": 1
+        },
+        {
+          "check": "db_metadata_app",
+          "started_at": "2026-11-05T10:29:45.425034+00:00",
+          "ended_at": "2026-11-05T10:29:45.525670+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 100.647,
+          "bytes_read": 273,
+          "lines_read": 1
+        },
+        {
+          "check": "db_status_app",
+          "started_at": "2026-11-05T10:29:45.525743+00:00",
+          "ended_at": "2026-11-05T10:29:45.630412+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 104.682,
+          "bytes_read": 1022,
+          "lines_read": 22
+        },
+        {
+          "check": "db_instrumentation_app",
+          "started_at": "2026-11-05T10:29:45.630533+00:00",
+          "ended_at": "2026-11-05T10:29:45.738874+00:00",
+          "status": "COMMAND_FAILED",
+          "exit_code": 1,
+          "elapsed_ms": 108.353,
+          "bytes_read": 115,
+          "lines_read": 1
+        },
+        {
+          "check": "db_instrumentation_root",
+          "started_at": "2026-11-05T10:29:45.738949+00:00",
+          "ended_at": "2026-11-05T10:29:45.853210+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 114.269,
+          "bytes_read": 130,
+          "lines_read": 1
+        },
+        {
+          "check": "db_digests_app",
+          "started_at": "2026-11-05T10:29:45.853283+00:00",
+          "ended_at": "2026-11-05T10:29:45.966524+00:00",
+          "status": "COMMAND_FAILED",
+          "exit_code": 1,
+          "elapsed_ms": 113.254,
+          "bytes_read": 135,
+          "lines_read": 1
+        },
+        {
+          "check": "db_digests_root",
+          "started_at": "2026-11-05T10:29:45.966580+00:00",
+          "ended_at": "2026-11-05T10:29:46.083387+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 116.819,
+          "bytes_read": 28122,
+          "lines_read": 70
+        },
+        {
+          "check": "db_locks_app",
+          "started_at": "2026-11-05T10:29:46.083901+00:00",
+          "ended_at": "2026-11-05T10:29:46.193810+00:00",
+          "status": "COMMAND_FAILED",
+          "exit_code": 1,
+          "elapsed_ms": 109.921,
+          "bytes_read": 115,
+          "lines_read": 1
+        },
+        {
+          "check": "db_locks_root",
+          "started_at": "2026-11-05T10:29:46.193859+00:00",
+          "ended_at": "2026-11-05T10:29:46.304150+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 110.304,
+          "bytes_read": 52,
+          "lines_read": 1
+        },
+        {
+          "check": "db_transactions_app",
+          "started_at": "2026-11-05T10:29:46.304221+00:00",
+          "ended_at": "2026-11-05T10:29:46.405976+00:00",
+          "status": "COMMAND_FAILED",
+          "exit_code": 1,
+          "elapsed_ms": 101.772,
+          "bytes_read": 116,
+          "lines_read": 1
+        },
+        {
+          "check": "db_transactions_root",
+          "started_at": "2026-11-05T10:29:46.406045+00:00",
+          "ended_at": "2026-11-05T10:29:46.511223+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 105.192,
+          "bytes_read": 87,
+          "lines_read": 1
+        },
+        {
+          "check": "db_outbox_app",
+          "started_at": "2026-11-05T10:29:46.511301+00:00",
+          "ended_at": "2026-11-05T10:29:46.616864+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 105.575,
+          "bytes_read": 193,
+          "lines_read": 1
+        },
+        {
+          "check": "db_tables_app",
+          "started_at": "2026-11-05T10:29:46.616977+00:00",
+          "ended_at": "2026-11-05T10:29:46.741252+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 124.283,
+          "bytes_read": 750,
+          "lines_read": 8
+        }
+      ]
+    },
+    {
+      "collection_status": "COLLECTED",
+      "app_sha": "e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+      "section_status": {
+        "metadata": {
+          "status": "OK",
+          "authentication": "app_container_environment",
+          "error_codes": [],
+          "row_count": 1
+        },
+        "status": {
+          "status": "OK",
+          "authentication": "app_container_environment",
+          "error_codes": [],
+          "row_count": 22
+        },
+        "instrumentation": {
+          "status": "OK",
+          "authentication": "root_prompt_memory",
+          "error_codes": [
+            {
+              "authentication": "app",
+              "code": 1142,
+              "sqlstate": "42000"
+            }
+          ],
+          "row_count": 1
+        },
+        "digests": {
+          "status": "OK",
+          "authentication": "root_prompt_memory",
+          "error_codes": [
+            {
+              "authentication": "app",
+              "code": 1142,
+              "sqlstate": "42000"
+            }
+          ],
+          "row_count": 70
+        },
+        "locks": {
+          "status": "OK",
+          "authentication": "root_prompt_memory",
+          "error_codes": [
+            {
+              "authentication": "app",
+              "code": 1142,
+              "sqlstate": "42000"
+            }
+          ],
+          "row_count": 1
+        },
+        "transactions": {
+          "status": "OK",
+          "authentication": "root_prompt_memory",
+          "error_codes": [
+            {
+              "authentication": "app",
+              "code": 1227,
+              "sqlstate": "42000"
+            }
+          ],
+          "row_count": 1
+        },
+        "outbox": {
+          "status": "OK",
+          "authentication": "app_container_environment",
+          "error_codes": [],
+          "row_count": 1
+        },
+        "tables": {
+          "status": "OK",
+          "authentication": "app_container_environment",
+          "error_codes": [],
+          "row_count": 8
+        }
+      },
+      "instrumentation": [
+        {
+          "digest_consumer": "YES",
+          "statement_consumer": "YES",
+          "enabled_statement_instruments": 198,
+          "timed_statement_instruments": 198
+        }
+      ],
+      "locks": [
+        {
+          "data_lock_waits": 0,
+          "pending_metadata_locks": 0
+        }
+      ],
+      "transactions": [
+        {
+          "active": 0,
+          "lock_wait": 0,
+          "oldest_ms": null,
+          "rows_locked": 0,
+          "rows_modified": 0
+        }
+      ],
+      "outbox": [
+        {
+          "state": "SENT",
+          "count": 1,
+          "max_attempts": 1,
+          "ready_count": 0,
+          "oldest_pending_ms": null,
+          "published_count": 1,
+          "publish_sum_us": 467531,
+          "publish_max_us": 467531,
+          "invalid_time_count": 0
+        }
+      ],
+      "tables": [
+        {
+          "table": "ai_request_outbox",
+          "estimated_rows": 1,
+          "data_bytes": 16384,
+          "index_bytes": 16384
+        },
+        {
+          "table": "detected_threats",
+          "estimated_rows": 210,
+          "data_bytes": 49152,
+          "index_bytes": 16384
+        },
+        {
+          "table": "ip_blacklist",
+          "estimated_rows": 0,
+          "data_bytes": 16384,
+          "index_bytes": 16384
+        },
+        {
+          "table": "network_logs",
+          "estimated_rows": 5782,
+          "data_bytes": 9977856,
+          "index_bytes": 163840
+        },
+        {
+          "table": "request_alerts",
+          "estimated_rows": 97,
+          "data_bytes": 16384,
+          "index_bytes": 32768
+        },
+        {
+          "table": "request_correlations",
+          "estimated_rows": 1696,
+          "data_bytes": 196608,
+          "index_bytes": 0
+        },
+        {
+          "table": "waf_detections",
+          "estimated_rows": 90,
+          "data_bytes": 65536,
+          "index_bytes": 49152
+        },
+        {
+          "table": "waf_sync_status",
+          "estimated_rows": 0,
+          "data_bytes": 16384,
+          "index_bytes": 0
+        }
+      ],
+      "collection_elapsed_ms": 1791.1664999846835,
+      "commands": [
+        {
+          "check": "containers_discover",
+          "started_at": "2026-11-05T10:29:52.073675+00:00",
+          "ended_at": "2026-11-05T10:29:52.181117+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 107.454,
+          "bytes_read": 838,
+          "lines_read": 9
+        },
+        {
+          "check": "app_sha",
+          "started_at": "2026-11-05T10:29:52.181348+00:00",
+          "ended_at": "2026-11-05T10:29:52.183569+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 2.23,
+          "bytes_read": 41,
+          "lines_read": 1
+        },
+        {
+          "check": "db_metadata_app",
+          "started_at": "2026-11-05T10:29:52.183639+00:00",
+          "ended_at": "2026-11-05T10:29:52.293776+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 110.153,
+          "bytes_read": 273,
+          "lines_read": 1
+        },
+        {
+          "check": "db_status_app",
+          "started_at": "2026-11-05T10:29:52.293857+00:00",
+          "ended_at": "2026-11-05T10:29:52.395593+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 101.748,
+          "bytes_read": 1022,
+          "lines_read": 22
+        },
+        {
+          "check": "db_instrumentation_app",
+          "started_at": "2026-11-05T10:29:52.395712+00:00",
+          "ended_at": "2026-11-05T10:29:52.501997+00:00",
+          "status": "COMMAND_FAILED",
+          "exit_code": 1,
+          "elapsed_ms": 106.304,
+          "bytes_read": 115,
+          "lines_read": 1
+        },
+        {
+          "check": "db_instrumentation_root",
+          "started_at": "2026-11-05T10:29:52.502057+00:00",
+          "ended_at": "2026-11-05T10:29:52.607265+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 105.218,
+          "bytes_read": 130,
+          "lines_read": 1
+        },
+        {
+          "check": "db_digests_app",
+          "started_at": "2026-11-05T10:29:52.607331+00:00",
+          "ended_at": "2026-11-05T10:29:52.718118+00:00",
+          "status": "COMMAND_FAILED",
+          "exit_code": 1,
+          "elapsed_ms": 110.8,
+          "bytes_read": 135,
+          "lines_read": 1
+        },
+        {
+          "check": "db_digests_root",
+          "started_at": "2026-11-05T10:29:52.718170+00:00",
+          "ended_at": "2026-11-05T10:29:52.828515+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 110.358,
+          "bytes_read": 28140,
+          "lines_read": 70
+        },
+        {
+          "check": "db_locks_app",
+          "started_at": "2026-11-05T10:29:52.829095+00:00",
+          "ended_at": "2026-11-05T10:29:52.930730+00:00",
+          "status": "COMMAND_FAILED",
+          "exit_code": 1,
+          "elapsed_ms": 101.642,
+          "bytes_read": 115,
+          "lines_read": 1
+        },
+        {
+          "check": "db_locks_root",
+          "started_at": "2026-11-05T10:29:52.930780+00:00",
+          "ended_at": "2026-11-05T10:29:53.044343+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 113.575,
+          "bytes_read": 52,
+          "lines_read": 1
+        },
+        {
+          "check": "db_transactions_app",
+          "started_at": "2026-11-05T10:29:53.044415+00:00",
+          "ended_at": "2026-11-05T10:29:53.149227+00:00",
+          "status": "COMMAND_FAILED",
+          "exit_code": 1,
+          "elapsed_ms": 104.823,
+          "bytes_read": 116,
+          "lines_read": 1
+        },
+        {
+          "check": "db_transactions_root",
+          "started_at": "2026-11-05T10:29:53.149277+00:00",
+          "ended_at": "2026-11-05T10:29:53.252279+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 103.013,
+          "bytes_read": 87,
+          "lines_read": 1
+        },
+        {
+          "check": "db_outbox_app",
+          "started_at": "2026-11-05T10:29:53.252351+00:00",
+          "ended_at": "2026-11-05T10:29:53.395272+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 142.943,
+          "bytes_read": 193,
+          "lines_read": 1
+        },
+        {
+          "check": "db_tables_app",
+          "started_at": "2026-11-05T10:29:53.395397+00:00",
+          "ended_at": "2026-11-05T10:29:53.537404+00:00",
+          "status": "OK",
+          "exit_code": 0,
+          "elapsed_ms": 142.023,
+          "bytes_read": 750,
+          "lines_read": 8
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "status": "COMPARABLE",
+    "errors": [],
+    "outbox_publication": {
+      "count": 0,
+      "mean_ms": null,
+      "status": "NO_NEW_PUBLICATIONS"
+    },
+    "global_status_delta": {
+      "Bytes_received": {
+        "delta": 20027,
+        "kind": "counter"
+      },
+      "Bytes_sent": {
+        "delta": 44166,
+        "kind": "counter"
+      },
+      "Com_commit": {
+        "delta": null,
+        "kind": "counter",
+        "reason": "unavailable"
+      },
+      "Com_rollback": {
+        "delta": null,
+        "kind": "counter",
+        "reason": "unavailable"
+      },
+      "Connections": {
+        "delta": 13,
+        "kind": "counter"
+      },
+      "Created_tmp_disk_tables": {
+        "delta": 0,
+        "kind": "counter"
+      },
+      "Created_tmp_tables": {
+        "delta": 2,
+        "kind": "counter"
+      },
+      "Innodb_buffer_pool_read_requests": {
+        "delta": 735,
+        "kind": "counter"
+      },
+      "Innodb_buffer_pool_reads": {
+        "delta": 4,
+        "kind": "counter"
+      },
+      "Innodb_row_lock_current_waits": {
+        "before": 0,
+        "after": 0,
+        "kind": "gauge"
+      },
+      "Innodb_row_lock_time": {
+        "delta": 0,
+        "kind": "counter"
+      },
+      "Innodb_row_lock_waits": {
+        "delta": 0,
+        "kind": "counter"
+      },
+      "Max_used_connections": {
+        "before": 12,
+        "after": 12,
+        "kind": "gauge"
+      },
+      "Performance_schema_digest_lost": {
+        "delta": 0,
+        "kind": "counter"
+      },
+      "Queries": {
+        "delta": 195,
+        "kind": "counter"
+      },
+      "Questions": {
+        "delta": 188,
+        "kind": "counter"
+      },
+      "Select_scan": {
+        "delta": 9,
+        "kind": "counter"
+      },
+      "Slow_queries": {
+        "delta": 0,
+        "kind": "counter"
+      },
+      "Sort_merge_passes": {
+        "delta": 0,
+        "kind": "counter"
+      },
+      "Table_locks_waited": {
+        "delta": 0,
+        "kind": "counter"
+      },
+      "Threads_connected": {
+        "before": 12,
+        "after": 12,
+        "kind": "gauge"
+      },
+      "Threads_created": {
+        "delta": 0,
+        "kind": "counter"
+      },
+      "Threads_running": {
+        "before": 2,
+        "after": 2,
+        "kind": "gauge"
+      },
+      "Uptime": {
+        "delta": 7,
+        "kind": "counter"
+      }
+    },
+    "digest_count": 70
+  },
+  "source_sha256_current": {
+    "scripts/testing/ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+    "scripts/testing/ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+    "scripts/testing/ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+    "scripts/testing/run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+    "scripts/testing/test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+    "scripts/testing/run_e2e.py": "4b2b8a9c0bce32117348150b28ead3eb9a0014198e3b2a1d92322f55611b7a16",
+    "scripts/testing/e2e_environment.py": "2a5166aa97c8b22e28c299f974e6ff8828a581568a4c260da22b9011fd82752b",
+    "scripts/testing/profiles/ec2-e2e-v1.json": "497f978a46296250f4ece66e5d07c06b46945eaa88a26364d71ffb7ca3eebec7"
+  },
+  "raw_sha256": {
+    "comparison.json": "da26fb7692d333c1b04becc67f7a3bd3ae8c679dae7a8c8257163fc0038178b2",
+    "manifest.json": "97aa016b3dbbd1c6ebd644569f58014059fdee303558fdceeebe6d77afc64608",
+    "snapshot-01.json": "9210ecd01cce662d1e36265975db578f91bd51b02bbd8840701727d678c2f158",
+    "snapshot-02.json": "09129b4b4bb60af20ec3c17e394fdc9d89ed86d9a8e320804d4e118c4e42ecbe"
+  },
+  "limitations": [
+    "전체 통계를 실험 요청의 앱 부하만으로 발생한 값으로 해석하지 않는다.",
+    "digest·전역 상태에는 관측기와 앱 배경 조회·다른 트래픽도 포함된다.",
+    "테이블 행 수는 추정치다. 순간의 락·트랜잭션 0은 전체 구간 무경합을 증명하지 않는다.",
+    "신규 outbox 발행이 없어 이번 구간의 발행 지연 평균은 null이다.",
+    "Com_commit·Com_rollback은 해당 전역 상태 조회에서 미제공되어 null로 보존했다.",
+    "실제 부하의 관측 제공자 구성·소량 연결·목표 확정은 P7~P8에서 확인한다."
+  ]
+}

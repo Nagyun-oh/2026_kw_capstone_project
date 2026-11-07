@@ -1,0 +1,40 @@
+{
+  "schema": "dualguard-deployment-smoke-user-provided-v1",
+  "recorded_date_kst": "2026/11/05",
+  "source": "사용자가 이 대화에 제공한 EC2 CLI·SQL 출력. 에이전트의 신규 원격 실측이 아님.",
+  "target_alias": "ec2-a",
+  "request": {
+    "routing": "EC2 내부에서 HTTPS 도메인을 127.0.0.1로 resolve하여 호스트 Nginx → WAF → JuiceShop 호출",
+    "http_status": 200,
+    "request_id": "bdf9ec381a10ddc313a09c4dcc1a8715",
+    "request_start_epoch_s": "1793861316.209",
+    "log_id": 8261
+  },
+  "runtime_flags_reported": {
+    "AI_OUTBOX_ENABLED": true,
+    "PIPELINE_TRACE_ENABLED": true
+  },
+  "backend_health_reported": "UP",
+  "pipeline_observations": [
+    {"stage": "LOG_COMMITTED", "outcome": "CREATED", "at": "2026-11-05T06:48:36.882349852Z"},
+    {"stage": "KAFKA_ACK_LOG", "at": "2026-11-05T06:48:37.336Z"},
+    {"stage": "AI_RESULT_COMMITTED", "outcome": "NORMAL", "at": "2026-11-05T06:48:37.591199753Z"}
+  ],
+  "outbox_sql_observation": {
+    "log_id": 8261,
+    "state": "SENT",
+    "attempts": 1,
+    "last_error_code": null,
+    "published_at_raw": "2026-11-05 06:48:37.338492",
+    "db_datetime_interpretation": "이번 SQL에서는 미확인. 지연 계산에 사용하지 않는다."
+  },
+  "not_confirmed": [
+    "실제 EC2 체크아웃 SHA·실행 중인 앱 이미지 태그와 digest",
+    "공개 DNS·외부 발생기에서 HTTPS 접근 가능 여부",
+    "전체 테이블·UNIQUE·외래 키·데이터 규모·초기 lag·자원·시계·CPU 크레딧",
+    "WAF 탐지·통합 알림·브라우저 DOM까지의 신규 EC2 E2E 검증",
+    "최근 변경한 .env.aws 계정 값과 실제 DB·관리자 자격 증명의 일치 여부",
+    "EC2 성능·부하·장애·재시작 복구 검증"
+  ],
+  "interpretation": "정상 요청 1건의 배포 후 처리 확인. P0 전체 완료나 성능·정합성 실험 PASS를 뜻하지 않는다."
+}

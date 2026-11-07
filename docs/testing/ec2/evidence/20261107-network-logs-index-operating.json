@@ -1,0 +1,93 @@
+{
+  "schema": "dualguard-ec2-network-logs-index-v1",
+  "app_sha": "e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+  "index": "idx_network_logs_created_at",
+  "load_generated": false,
+  "migration_sha256": "097ab88b81f6f2a627d6ada821b5395f88ca65a39cdb12d83c51853365f2df9e",
+  "before": {
+    "label": "before",
+    "at": "2026-11-07T07:26:00.724594+00:00",
+    "index": {
+      "ok": true,
+      "output": "0\n",
+      "errors": [],
+      "elapsed_ms": 161.2
+    },
+    "indexes": {
+      "ok": true,
+      "output": "{\"seq\": 1, \"index\": \"PRIMARY\", \"column\": \"id\", \"non_unique\": 0}\n{\"seq\": 1, \"index\": \"uk_network_logs_request_id\", \"column\": \"request_id\", \"non_unique\": 0}\n",
+      "errors": [],
+      "elapsed_ms": 155.2
+    },
+    "size": {
+      "ok": true,
+      "output": "{\"rows\": 18562, \"data_bytes\": 27852800, \"index_bytes\": 1589248}\n",
+      "errors": [],
+      "elapsed_ms": 156.7
+    },
+    "explain": {
+      "ok": true,
+      "output": "-> Limit: 10 row(s)  (cost=2070 rows=10) (actual time=45.7..45.7 rows=10 loops=1)\n    -> Sort: network_logs.created_at DESC, limit input to 10 row(s) per chunk  (cost=2070 rows=16454) (actual time=45.7..45.7 rows=10 loops=1)\n        -> Table scan on network_logs  (cost=2070 rows=16454) (actual time=0.0386..29.8 rows=18562 loops=1)\n\n",
+      "errors": [],
+      "elapsed_ms": 341.6
+    },
+    "long_trx": {
+      "ok": true,
+      "output": "0\n",
+      "errors": [],
+      "elapsed_ms": 224.8
+    }
+  },
+  "ddl": {
+    "started_at": "2026-11-07T07:26:01.764306+00:00",
+    "ended_at": "2026-11-07T07:26:02.317023+00:00",
+    "ok": true,
+    "elapsed_ms": 552.7,
+    "errors": []
+  },
+  "after": {
+    "label": "after",
+    "at": "2026-11-07T07:26:02.317035+00:00",
+    "index": {
+      "ok": true,
+      "output": "1\n",
+      "errors": [],
+      "elapsed_ms": 162.9
+    },
+    "indexes": {
+      "ok": true,
+      "output": "{\"seq\": 1, \"index\": \"idx_network_logs_created_at\", \"column\": \"created_at\", \"non_unique\": 1}\n{\"seq\": 1, \"index\": \"PRIMARY\", \"column\": \"id\", \"non_unique\": 0}\n{\"seq\": 1, \"index\": \"uk_network_logs_request_id\", \"column\": \"request_id\", \"non_unique\": 0}\n",
+      "errors": [],
+      "elapsed_ms": 149.5
+    },
+    "size": {
+      "ok": true,
+      "output": "{\"rows\": 18562, \"data_bytes\": 27852800, \"index_bytes\": 1589248}\n",
+      "errors": [],
+      "elapsed_ms": 129.6
+    },
+    "explain": {
+      "ok": true,
+      "output": "-> Limit: 10 row(s)  (cost=0.259 rows=10) (actual time=0.0674..0.0953 rows=10 loops=1)\n    -> Index scan on network_logs using idx_network_logs_created_at (reverse)  (cost=0.259 rows=10) (actual time=0.0664..0.0937 rows=10 loops=1)\n\n",
+      "errors": [],
+      "elapsed_ms": 133.9
+    },
+    "long_trx": {
+      "ok": true,
+      "output": "0\n",
+      "errors": [],
+      "elapsed_ms": 113.9
+    }
+  },
+  "top_ids_same_snapshot": {
+    "ok": true,
+    "with_index": "19237,19236,19235,19234,19233,19232,19231,19230,19229,19228",
+    "without_index": "19237,19236,19235,19234,19233,19232,19231,19230,19229,19228"
+  },
+  "checks": {
+    "index_present": true,
+    "same_top_ids": true,
+    "plan_uses_index": true
+  },
+  "outcome": "APPLIED"
+}

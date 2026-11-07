@@ -1,0 +1,58 @@
+{
+  "schema": "dualguard-ec2-dashboard-explain-v1",
+  "at": "2026-11-07T06:57:08.442146+00:00",
+  "app_sha": "e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+  "load_generated": false,
+  "read_only_transaction": true,
+  "results": {
+    "indexes": {
+      "status": "OK",
+      "exit_code": 0,
+      "elapsed_ms": 113.2,
+      "output": "{\"seq\": 1, \"index\": \"FKp5y1cn4hp7qs4ng46dmdb8aj1\", \"table\": \"detected_threats\", \"column\": \"log_id\", \"non_unique\": 1}\n{\"seq\": 1, \"index\": \"PRIMARY\", \"table\": \"detected_threats\", \"column\": \"id\", \"non_unique\": 0}\n{\"seq\": 1, \"index\": \"PRIMARY\", \"table\": \"network_logs\", \"column\": \"id\", \"non_unique\": 0}\n{\"seq\": 1, \"index\": \"uk_network_logs_request_id\", \"table\": \"network_logs\", \"column\": \"request_id\", \"non_unique\": 0}\n{\"seq\": 1, \"index\": \"idx_request_alerts_pending\", \"table\": \"request_alerts\", \"column\": \"pending\", \"non_unique\": 1}\n{\"seq\": 2, \"index\": \"idx_request_alerts_pending\", \"table\": \"request_alerts\", \"column\": \"updated_at\", \"non_unique\": 1}\n{\"seq\": 1, \"index\": \"PRIMARY\", \"table\": \"request_alerts\", \"column\": \"alert_key\", \"non_unique\": 0}\n{\"seq\": 1, \"index\": \"uk_request_alerts_alert_id\", \"table\": \"request_alerts\", \"column\": \"alert_id\", \"non_unique\": 0}\n{\"seq\": 1, \"index\": \"PRIMARY\", \"table\": \"request_correlations\", \"column\": \"request_id\", \"non_unique\": 0}\n{\"seq\": 1, \"index\": \"idx_waf_detections_occurred_at\", \"table\": \"waf_detections\", \"column\": \"occurred_at\", \"non_unique\": 1}\n{\"seq\": 1, \"index\": \"PRIMARY\", \"table\": \"waf_detections\", \"column\": \"id\", \"non_unique\": 0}\n{\"seq\": 1, \"index\": \"uk_waf_detections_request_id\", \"table\": \"waf_detections\", \"column\": \"request_id\", \"non_unique\": 0}\n{\"seq\": 1, \"index\": \"uk_waf_detections_threat_id\", \"table\": \"waf_detections\", \"column\": \"threat_id\", \"non_unique\": 0}\n",
+      "errors": []
+    },
+    "digest_texts": {
+      "status": "OK",
+      "exit_code": 0,
+      "elapsed_ms": 114.1,
+      "output": "{\"text\": \"SET `autocommit` = ?\", \"count\": 98465, \"avg_ms\": 0.167, \"digest\": \"158bfe3d4b4b0a372a4acdb38affe2cb4f6b3cb21a9af0ea9fad9a9a083ac18a\", \"schema\": \"security_db\", \"sort_rows\": 0, \"tmp_tables\": 0, \"no_index_used\": 0, \"rows_examined\": 0, \"tmp_disk_tables\": 0}\n{\"text\": \"COMMIT\", \"count\": 49179, \"avg_ms\": 3.076, \"digest\": \"f2b9be5f0f32ca7507e4ddf133cd2fad0993a1c26fde9caa6f067b1af2b7603c\", \"schema\": \"security_db\", \"sort_rows\": 0, \"tmp_tables\": 0, \"no_index_used\": 0, \"rows_examined\": 0, \"tmp_disk_tables\": 0}\n{\"text\": \"WITH `grouped` AS ( SELECT MIN ( `t` . `id` ) AS `id` , MAX ( `t` . `id` ) AS `lastThreatId` , MAX ( `n` . `id` ) AS `logId` , MAX ( CASE WHEN `t` . `threat_type` = ? THEN `t` . `id` END ) AS `wafThreatId` , MAX ( CASE WHEN `t` . `threat_type` = ? THEN `t` . `id` END ) AS `aiThreatId` , MAX ( CASE `UPPER` ( `t` . `severity` ) WHEN ? THEN ? WHEN ? THEN ? WHEN ? THEN ? WHEN ? THEN ? ELSE ? END ) AS `severityRank` , MAX ( CASE WHEN `t` . `threat_type` = ? THEN `t` . `description` END ) AS `wafDescription` , MAX ( CASE WHEN `t` . `threat_type` = ? THEN `t` . `description` END ) AS `aiDescription` , MAX ( `t` . `threat_type` ) AS `fallbackType` , MAX ( `t` . `description` ) AS `fallbackDescription` , MAX ( CASE WHEN `LOWER` ( `t` . `threat_type` ) LIKE `CONCAT` ( ? , `LOWER` (?) , ? ) THEN ? ELSE ? END ) AS `matchesType` , MAX ( CASE WHEN `t` . `id` = ? THEN ? ELSE ? END ) AS `matchesThreatId` FROM `detected_threats` `t` LEFT JOIN `network_logs` `n` ON `n` . `id` = `t` . `log_id` LEFT JOIN `waf_detections` `w` ON `w` . `threat_id` = `t` . `id` GROUP BY CASE WHEN `t` . `threat_type` IN (...) THEN COALESCE ( `CONCAT` ( ? , CAST ( `NULLIF` ( `n` .\", \"count\": 2386, \"avg_ms\": 41.634, \"digest\": \"558a34e5b3b8ae92c3432e15ac50e43fb7c9559738adfe3a97cb48e30b7e7572\", \"schema\": \"security_db\", \"sort_rows\": 38598, \"tmp_tables\": 4774, \"no_index_used\": 2387, \"rows_examined\": 1223932, \"tmp_disk_tables\": 0}\n{\"text\": \"SELECT `le1_0` . `id` , `le1_0` . `created_at` , `le1_0` . `ip_address` , `le1_0` . `raw_log` , `le1_0` . `request_id` , `le1_0` . `request_method` , `le1_0` . `request_url` , `le1_0` . `status_code` FROM `network_logs` `le1_0` WHERE ? = ? ORDER BY `le1_0` . `created_at` DESC LIMIT ?, ...\", \"count\": 1091, \"avg_ms\": 108.319, \"digest\": \"e2a411ba38116cc7aa5e4b587a94047316509301812f802ef5e8e381eddd2b47\", \"schema\": \"security_db\", \"sort_rows\": 5996, \"tmp_tables\": 0, \"no_index_used\": 1091, \"rows_examined\": 17806430, \"tmp_disk_tables\": 0}\n{\"text\": \"SELECT COUNT ( `le1_0` . `id` ) FROM `network_logs` `le1_0` WHERE ? = ?\", \"count\": 1090, \"avg_ms\": 15.04, \"digest\": \"00b2f8d1ab914ccd6375016158f462d1572fea69126a1c0c7bdf3d12cbbb1349\", \"schema\": \"security_db\", \"sort_rows\": 0, \"tmp_tables\": 0, \"no_index_used\": 0, \"rows_examined\": 0, \"tmp_disk_tables\": 0}\n",
+      "errors": []
+    },
+    "variables": {
+      "status": "OK",
+      "exit_code": 0,
+      "elapsed_ms": 114.7,
+      "output": "{\"log_bin\": 1, \"version\": \"8.0.46\", \"sync_binlog\": 1, \"sort_buffer_size\": 262144, \"max_digest_length\": 1024, \"innodb_buffer_pool_size\": 134217728, \"innodb_flush_log_at_trx_commit\": 1}\n",
+      "errors": []
+    },
+    "log_list_analyze": {
+      "status": "OK",
+      "exit_code": 0,
+      "elapsed_ms": 152.7,
+      "output": "-> Limit: 10 row(s)  (cost=2034 rows=10) (actual time=30.1..30.1 rows=10 loops=1)\n    -> Sort: network_logs.created_at DESC, limit input to 10 row(s) per chunk  (cost=2034 rows=16091) (actual time=30.1..30.1 rows=10 loops=1)\n        -> Table scan on network_logs  (cost=2034 rows=16091) (actual time=0.029..21.9 rows=18199 loops=1)\n\n",
+      "errors": []
+    },
+    "log_count_analyze": {
+      "status": "OK",
+      "exit_code": 0,
+      "elapsed_ms": 120.8,
+      "output": "-> Count rows in network_logs  (actual time=3.54..3.54 rows=1 loops=1)\n\n",
+      "errors": []
+    },
+    "grouped_list_analyze": {
+      "status": "OK",
+      "exit_code": 0,
+      "elapsed_ms": 119.6,
+      "output": "-> Limit: 10 row(s)  (cost=2.6..2.6 rows=0) (actual time=7.82..7.82 rows=10 loops=1)\n    -> Sort row IDs: grouped.lastThreatId DESC, limit input to 10 row(s) per chunk  (cost=2.6..2.6 rows=0) (actual time=7.82..7.82 rows=10 loops=1)\n        -> Table scan on grouped  (cost=2.5..2.5 rows=0) (actual time=7.6..7.73 rows=562 loops=1)\n            -> Materialize CTE grouped  (cost=0..0 rows=0) (actual time=7.6..7.6 rows=562 loops=1)\n                -> Table scan on <temporary>  (actual time=7..7.16 rows=562 loops=1)\n                    -> Aggregate using temporary table  (actual time=7..7 rows=562 loops=1)\n                        -> Nested loop left join  (cost=719 rows=896) (actual time=0.0516..3.96 rows=896 loops=1)\n                            -> Nested loop left join  (cost=405 rows=896) (actual time=0.0422..2.1 rows=896 loops=1)\n                                -> Table scan on t  (cost=91.4 rows=896) (actual time=0.028..0.763 rows=896 loops=1)\n                                -> Single-row index lookup on n using PRIMARY (id=t.log_id)  (cost=0.25 rows=1) (actual time=0.0013..0.00132 rows=0.997 loops=896)\n                            -> Single-row index lookup on w using uk_waf_detections_threat_id (threat_id=t.id)  (cost=0.25 rows=1) (actual time=0.00189..0.00191 rows=0.496 loops=896)\n\n",
+      "errors": []
+    },
+    "grouped_count_analyze": {
+      "status": "OK",
+      "exit_code": 0,
+      "elapsed_ms": 123.2,
+      "output": "-> Aggregate: count(0)  (cost=2.5..2.5 rows=1) (actual time=7.33..7.33 rows=1 loops=1)\n    -> Table scan on grouped  (cost=2.5..2.5 rows=0) (actual time=7.14..7.27 rows=562 loops=1)\n        -> Materialize CTE grouped  (cost=0..0 rows=0) (actual time=7.13..7.13 rows=562 loops=1)\n            -> Table scan on <temporary>  (actual time=6.62..6.74 rows=562 loops=1)\n                -> Aggregate using temporary table  (actual time=6.62..6.62 rows=562 loops=1)\n                    -> Nested loop left join  (cost=719 rows=896) (actual time=0.0473..3.82 rows=896 loops=1)\n                        -> Nested loop left join  (cost=405 rows=896) (actual time=0.0386..2.03 rows=896 loops=1)\n                            -> Table scan on t  (cost=91.4 rows=896) (actual time=0.0255..0.7 rows=896 loops=1)\n                            -> Single-row index lookup on n using PRIMARY (id=t.log_id)  (cost=0.25 rows=1) (actual time=0.00127..0.0013 rows=0.997 loops=896)\n                        -> Single-row index lookup on w using uk_waf_detections_threat_id (threat_id=t.id)  (cost=0.25 rows=1) (actual time=0.00181..0.00182 rows=0.496 loops=896)\n\n",
+      "errors": []
+    }
+  }
+}
