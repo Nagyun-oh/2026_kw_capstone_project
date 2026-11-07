@@ -294,6 +294,9 @@ nano .env.aws
 | APP_BOOTSTRAP_ADMIN_PASSWORD | 최초 발급할 관리자 비밀번호. 발급 완료 후 제거 |
 | WAF_SYNC_TOKEN | backend와 waf가 함께 쓰는 블랙리스트 동기화 토큰(32자 이상, `openssl rand -hex 32`). 비어 있으면 WAF 차단 동기화가 동작하지 않는다 |
 | WAF_SYNC_EXCLUDE_IPS | 선택. 절대 차단하지 않을 추가 IP(쉼표 구분). `WAF_TRUSTED_PROXY`와 Docker 게이트웨이는 자동 제외 |
+| APP_ALERTS_POLLDELAYMS | 요청 알림 발행기의 DB 조회 대기 간격. AWS 기본값은 250ms이며, 값 변경 시 backend 컨테이너를 재생성한다 |
+| APP_AIOUTBOX_POLLDELAYMS | AI 요청 outbox 발행기의 DB 조회 대기 간격. AWS 기본값은 250ms(애플리케이션 기본 500ms)이며, 값 변경 시 backend 컨테이너를 재생성한다 |
+| APP_AIOUTBOX_WAKEUPENABLED / APP_ALERTS_WAKEUPENABLED | 선택. 기본 `true`. 저장 트랜잭션 커밋 직후 AI outbox·알림 발행기를 바로 실행한다. `compose.aws.yaml`이 두 값을 backend에 전달하므로, 문제가 있으면 `.env.aws`에서 `false`로 두고 backend 컨테이너를 재생성하면 주기 조회만 사용한다 |
 
 CD가 사용하는 `IMAGE_REGISTRY_PREFIX`와 `IMAGE_TAG`가 이미 있으면 유지한다. JWT 키는 새 인증 구성에서 사용하지 않는다. 환경변수 파일에 비밀번호를 넣을 때는 따옴표로 감싸 Compose의 값 해석을 확인하고, 실제 값을 명령 인자·로그·Git에 남기지 않는다.
 
