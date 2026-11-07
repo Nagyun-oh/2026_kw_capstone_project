@@ -1,10 +1,11 @@
-"""로컬 v2 실행기. 관리자 로그인은 브라우저에서 직접 수행한다."""
+"""AI·WAF E2E 실행기. local 실행과 EC2 계획 확인을 환경별로 분리한다."""
 import argparse
 import asyncio
 from datetime import datetime, timezone
 import hashlib
 import json
 import os
+import ssl
 from pathlib import Path
 import subprocess
 import sys
@@ -12,7 +13,8 @@ import time
 import urllib.error
 import urllib.request
 
-from e2e_core import SPEC, FIXTURE, fixture, client_record, parse_points, parse_traces, browser_record, database_sql, parse_database, evaluate
+from e2e_core import SPEC, FIXTURE, fixture, client_record, parse_points, parse_traces, browser_record, database_sql, parse_database, evaluate, ClockObservationError
+from e2e_environment import select_environment, result_paths
 from guard import AutoStopGuard, PointReader, stop_load
 from load_policy import load_policy
 from metrics import parse_lag, resource_peaks
@@ -28,6 +30,9 @@ class ResponseObservationError(ValueError):
 
 def arguments(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--environment', choices=('local', 'ec2'), default='local')
+    p.add_argument('--target-url', help='환경별 허용 목록의 JuiceShop root URL')
+    p.add_argument('--dashboard-url', help='환경별 허용 목록의 관리자 화면 root URL')
     p.add_argument('--rate', type=int, choices=(1, 3, 5), default=1)
     p.add_argument('--round', type=int, default=1)
     p.add_argument('--channel', choices=('chrome', 'msedge', 'chromium'), default='chrome')
@@ -43,23 +48,44 @@ def arguments(argv=None):
         p.error('회차는 양수, 로그인 대기는 30~600초, 연결 검증은 rate=1이어야 합니다.')
     if a.execute and not a.confirm_ip_policy:
         p.error('실제 실행에는 --confirm-ip-policy가 필요합니다. 실행기가 차단 정책을 변경하지 않습니다.')
+    try:
+        a.runtime_environment = select_environment(a.environment, a.target_url, a.dashboard_url)
+        if a.execute:
+            a.runtime_environment.require_execution_ready()
+    except ValueError as error:
+        p.error(str(error))
     return a
 
 
-def request(phase, sequence, run_id, probe, *, kind='probe'):
+def build_request(phase, sequence, run_id, probe, *, kind='probe', environment=None):
+    environment = environment or select_environment()
     # 응답 본문·Set-Cookie·인증 결과 토큰을 읽거나 보존하지 않는다.
     headers = dict(probe['headers'])
     headers.update({'X-DualGuard-Test-Run': run_id, 'X-DualGuard-Test-Phase': phase,
                     'X-DualGuard-Test-Kind': kind, 'X-DualGuard-Test-Seq': str(sequence)})
     # Windows localhost의 IPv6 연결 재시도 지연을 제외한다. HTTP Host는 유지한다.
-    headers['Host'] = 'localhost'
+    if environment.name == 'local':
+        headers['Host'] = 'localhost'
     data = json.dumps(probe['body']).encode() if kind == 'probe' else None
-    req = urllib.request.Request('http://127.0.0.1' + (probe['path'] if kind == 'probe' else '/'),
-                                 data=data, headers=headers, method='POST' if kind == 'probe' else 'GET')
+    return urllib.request.Request(environment.probe_url(probe['path'] if kind == 'probe' else '/'),
+                                  data=data, headers=headers, method='POST' if kind == 'probe' else 'GET')
+
+
+def request_opener(environment):
     class NoRedirect(urllib.request.HTTPRedirectHandler):
         def redirect_request(self, *args, **kwargs):
             return None
-    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+    handlers = [urllib.request.ProxyHandler({}), NoRedirect()]
+    if environment.name == 'ec2':
+        handlers.append(urllib.request.HTTPSHandler(context=ssl.create_default_context()))
+    return urllib.request.build_opener(*handlers)
+
+
+def request(phase, sequence, run_id, probe, *, kind='probe', environment=None, clock=None):
+    environment = environment or select_environment()
+    environment.require_execution_ready()
+    req = build_request(phase, sequence, run_id, probe, kind=kind, environment=environment)
+    opener = request_opener(environment)
     c0, sent = time.perf_counter(), time.time() * 1000
     try:
         response = opener.open(req, timeout=10)
@@ -72,7 +98,7 @@ def request(phase, sequence, run_id, probe, *, kind='probe'):
         ended = time.time() * 1000
         try:
             return client_record(phase, kind, sequence, dict(response.headers), response.code,
-                                 (time.perf_counter() - c0) * 1000, sent, ended, c0)
+                                 (time.perf_counter() - c0) * 1000, sent, ended, c0,clock=clock)
         except ValueError as error:
             raise ResponseObservationError(response.code) from error
 
@@ -81,6 +107,7 @@ def report(manifest, metrics, output):
     lines = [f"# 실험 기록: {format_record_time(manifest['planned_at']).split()[0]} — AI·WAF E2E v2",
              '', '## 실행 정보', f"- ID: {manifest['id']}", f"- 실행 상태: {manifest['state']}",
              f"- 판정: {metrics.get('verdict', 'NOT_EVALUATED')}",
+             f"- 환경: {manifest.get('environment', 'local')}",
              f"- 구분: {'소량 연결 검증' if manifest['connection_check'] else '기준 측정 한 회차'}",
              f"- 시작 / 종료: {format_record_time(manifest.get('started_at'))} / {format_record_time(manifest.get('ended_at'))}",
              f"- 원본: {output.as_posix()}", '', '## S — Situation',
@@ -104,15 +131,30 @@ def report(manifest, metrics, output):
     lines += ['', '## T — Trouble', '- 사건·중단 근거: events.jsonl, guard-summary.json',
               '- WAF 시작 시각은 msec−request_time으로 산출한 밀리초 단위 관측값이다.',
               '- 커밋 시각은 커밋 후 콜백 시각이다. 브라우저 지연에는 관측기 전달 비용이 포함된다.',
-              '- DB DATETIME은 지연 계산에 사용하지 않는다. 탐지 정확도·EC2 성능은 평가 범위 밖이다.',
+              ('- DB DATETIME은 지연 계산에 사용하지 않는다. 탐지 정확도·EC2 성능은 평가 범위 밖이다.'
+               if manifest.get('environment', 'local') == 'local' else
+               '- DB DATETIME은 지연 계산에 사용하지 않는다. PC HTTP·브라우저 지연과 EC2 서버 내부 지연을 구분한다.'),
               '- 복구: 서비스 중단 없음. 종료 시 소유한 k6·자동화 브라우저만 정리한다.']
     return '\n'.join(lines) + '\n'
 
 
 class Experiment:
-    def __init__(self, args, spec, probe, manifest, output, report_path):
+    def __init__(self, args, spec, probe, manifest, output, report_path, *, ec2_contract=None):
         self.args, self.spec, self.probe, self.manifest = args, spec, probe, manifest
         self.output, self.report_path = output, report_path
+        self.environment = getattr(args, 'runtime_environment', None) or select_environment()
+        if self.environment.name=='ec2' and ec2_contract is not None:
+            from ec2_load_policy import validate_contract
+            validate_contract(ec2_contract)
+        else:
+            self.environment.require_execution_ready()
+        # EC2 실제 실행은 P5~P8 준비 전 계속 차단한다. P4는 수집 전용 CLI로 검증한다.
+        self.remote_collector = getattr(args, 'remote_collector', None)
+        self.clock_calibration = getattr(args, 'clock_calibration', None)
+        self.ec2_guard = getattr(args, 'ec2_guard', None)
+        # 호출자는 자격 증명을 메모리에만 보관한 수집 함수를 제공한다.
+        self.db_observer = getattr(args, 'db_observer', None)
+        self.db_baseline = None
         self.compose = ['docker', 'compose', '--env-file', '.env', '-f', 'compose.yaml']
         self.clients, self.browser_events, self.traces, self.database, self.errors = [], [], [], [], []
         self.trace_keys, self.points_readers, self.seen_clients = set(), [], set()
@@ -148,34 +190,52 @@ class Experiment:
             raise RuntimeError('외부 조회 실패: ' + args[0])
         return result['stdout']
 
-    async def collect(self):
+    def record_remote_collection(self, value):
+        self.append('collection-commands.jsonl', dict(at=now(), transport=value['transport'],
+            commands=value['commands'], status=value['collection_status'], errors=value['errors']))
+        if value['collection_status'] != 'COLLECTED':
+            raise RuntimeError('원격 수집 불완전: ' + ','.join(value['errors']))
+
+    async def pipeline_inputs(self):
+        if self.environment.name == 'ec2':
+            if self.remote_collector is None:
+                raise RuntimeError('원격 수집 어댑터 설정이 필요합니다.')
+            value = await asyncio.to_thread(self.remote_collector.collect, self.manifest['id'],
+                self.manifest['started_at'], {c['requestId'] for c in self.clients},
+                mode='pipeline', expected_keys=self.keys)
+            self.record_remote_collection(value)
+            return value['lag'], value['database'], value['traces']
         started = now()
         lag_text = await self.cmd(self.compose + ['exec', '-T', 'kafka', 'kafka-consumer-groups',
             '--bootstrap-server', 'kafka:29092', '--all-groups', '--describe'])
         snap = dict(at=now(), started_at=started, code=0, rows=parse_lag(lag_text))
+        db_text = await self.cmd(self.compose + ['exec', '-T', 'db', 'sh', '-c',
+            'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -u root -D security_db '
+            '--default-character-set=utf8mb4 --batch --raw --skip-column-names'],
+            input_text=database_sql(self.manifest['id']))
+        text = await self.cmd(self.compose + ['logs', '--no-color', '--since', self.manifest['started_at'],
+                                            '--tail', '20000', 'backend'])
+        if 'DG_TRACE_UNAVAILABLE' in text or 'DG_TRACE_WRITE_FAILED' in text:
+            raise RuntimeError('백엔드 계측 실패 기록 발견')
+        return snap, parse_database(db_text), parse_traces(text)
+
+    async def collect(self):
+        started = now()
+        snap, self.database, traces = await self.pipeline_inputs()
         if not self.keys:
             self.keys = partition_keys(snap)
         if not lag_complete(snap, self.keys):
             raise RuntimeError('필수 Kafka group·partition 표본 누락')
         self.snapshots.append(snap)
         self.guard.collected('kafka_lag', True)
-        db_text = await self.cmd(self.compose + ['exec', '-T', 'db', 'sh', '-c',
-            'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -u root -D security_db '
-            '--default-character-set=utf8mb4 --batch --raw --skip-column-names'],
-            input_text=database_sql(self.manifest['id']))
-        self.database = parse_database(db_text)
         save(self.output / 'database.json', self.database)
         if self.page:
             policies = {r['alertId']: ['AI', 'WAF'] if r['kind'] == 'probe' else
                         [s for s, k in [('AI', 'aiDetected'), ('WAF', 'wafDetected')] if r.get(k)]
                         for r in self.database if r.get('alertId')}
             await self.page.evaluate('(policy) => {window.__dgAlertPolicy = policy;}', policies)
-        text = await self.cmd(self.compose + ['logs', '--no-color', '--since', self.manifest['started_at'],
-                                            '--tail', '20000', 'backend'])
-        if 'DG_TRACE_UNAVAILABLE' in text or 'DG_TRACE_WRITE_FAILED' in text:
-            raise RuntimeError('백엔드 계측 실패 기록 발견')
         known = {c['requestId'] for c in self.clients}
-        for trace in parse_traces(text):
+        for trace in traces:
             if trace['requestId'] not in known:
                 continue
             key = json.dumps(trace, sort_keys=True)
@@ -197,6 +257,9 @@ class Experiment:
                 (counts[phase]['AI_RESULT_COMMITTED'] - old['AI_RESULT_COMMITTED'])
                 / (observed - self.previous_progress_at)
                 if old is not None and observed > self.previous_progress_at else None)
+            counts[phase]['logs_committed_per_second'] = (
+                (counts[phase]['LOG_COMMITTED']-old['LOG_COMMITTED'])/(observed-self.previous_progress_at)
+                if old is not None and observed>self.previous_progress_at else None)
             alerts = {r.get('alertId') for r in self.database if r['phase'] == phase}
             for source in ('AI', 'WAF'):
                 counts[phase]['browser_' + source] = len({b.get('alertId') for b in self.browser_events
@@ -221,12 +284,14 @@ class Experiment:
     async def monitor(self):
         while not self.done:
             try:
-                await asyncio.to_thread(self.guard.resources)
-                text = await self.cmd(['docker', 'stats', '--no-stream', '--format', 'json', *self.ids], timeout=10)
-                containers = [json.loads(line) for line in text.splitlines() if line.strip()]
-                if not containers:
-                    raise ValueError('자원 표본 없음')
-                value = dict(at=now(), containers=[{k: c.get(k) for k in ('Name', 'CPUPerc', 'MemPerc')} for c in containers])
+                if self.environment.name == 'ec2':
+                    if self.ec2_guard is None:
+                        raise RuntimeError('EC2 자원 감시가 필요합니다.')
+                    await asyncio.to_thread(self.ec2_guard.resources)
+                    self.check_abort()
+                else:
+                    await asyncio.to_thread(self.guard.resources)
+                value = await self.resource_input()
                 self.resources.append(value)
                 self.append('docker-stats.jsonl', value)
                 self.guard.collected('docker_stats', True)
@@ -235,6 +300,39 @@ class Experiment:
             except Exception:
                 self.guard.collected('resources', False)
             await asyncio.sleep(5)
+
+    async def resource_input(self):
+        if self.environment.name == 'ec2':
+            if self.remote_collector is None:
+                raise RuntimeError('원격 수집 어댑터 설정이 필요합니다.')
+            value = await asyncio.to_thread(self.remote_collector.collect, self.manifest['id'],
+                self.manifest['started_at'], mode='resources')
+            self.record_remote_collection(value)
+            return value['resources']
+        text = await self.cmd(['docker', 'stats', '--no-stream', '--format', 'json', *self.ids], timeout=10)
+        containers = [json.loads(line) for line in text.splitlines() if line.strip()]
+        if not containers:
+            raise ValueError('자원 표본 없음')
+        return dict(at=now(), containers=[{k: c.get(k) for k in ('Name', 'CPUPerc', 'MemPerc')} for c in containers])
+
+    async def database_observation(self, label):
+        if self.environment.name != 'ec2':
+            return None
+        if self.db_observer is None:
+            raise RuntimeError('EC2 DB 관측 제공자가 필요합니다.')
+        value = await asyncio.to_thread(self.db_observer, self.manifest['id'])
+        save(self.output / ('db-observation-' + label + '.json'), value)
+        if value['collection_status'] != 'COLLECTED':
+            raise RuntimeError('EC2 DB 관측 불완전')
+        if label == 'before':
+            self.db_baseline = value
+        elif label == 'after':
+            from ec2_db import compare
+            comparison = compare(self.db_baseline, value)
+            save(self.output / 'db-observation-comparison.json', comparison)
+            if comparison['comparison_status'] != 'COMPARABLE':
+                raise RuntimeError('EC2 DB 계수 초기화·수집 불완전 확인 필요')
+        return value
 
     def binding(self, source, value):
         # 계측 브라우저의 주 프레임만 받는다. 자격 증명·IP·본문은 화이트리스트에서 제거한다.
@@ -255,8 +353,24 @@ class Experiment:
                 self.guard.collected('browser_event', False)
 
     def check_abort(self):
+        if self.ec2_guard is not None:
+            self.ec2_guard.watchdog()
+            if self.ec2_guard.abort:
+                raise RuntimeError('자동 중단: ' + self.ec2_guard.abort['code'])
         if self.guard.abort:
             raise RuntimeError('자동 중단: ' + self.guard.abort['code'])
+
+    async def refresh_clock_observation(self):
+        # 로컬 실행에서는 기존 검증·중단 동작을 유지한다.
+        return False
+
+    async def read_client_points(self, points, *, partial=False):
+        try:
+            return parse_points(points, partial=partial, clock=self.clock_calibration)
+        except ClockObservationError:
+            if not await self.refresh_clock_observation():
+                raise
+            return parse_points(points, partial=partial, clock=self.clock_calibration)
 
     async def phase(self, phase, seconds, rate):
         self.phase_name = phase
@@ -264,8 +378,11 @@ class Experiment:
         points = directory / (phase + '-points.jsonl')
         summary = directory / (phase + '-summary.json')
         env = dict(os.environ, K6_NO_USAGE_REPORT='true', RUN_RATE=str(rate), RUN_SECONDS=str(seconds),
-            RUN_PHASE=phase, RUN_ID=self.manifest['id'], TARGET_URL='http://localhost/',
+            RUN_PHASE=phase, RUN_ID=self.manifest['id'], TARGET_URL=self.environment.target_url,
+            DG_ENVIRONMENT=self.environment.name, K6_INSECURE_SKIP_TLS_VERIFY='false',
             PROBE_USER_AGENT=self.probe['headers'].get('User-Agent', ''), SUMMARY_PATH=str(summary))
+        if self.environment.name=='ec2':
+            env['DG_EC2_CONTRACT_SHA256']=self.manifest['contract_sha256']
         args = ['k6', 'run', '--no-color', '--out', 'json=' + str(points), str(HERE / 'e2e_background.js')]
         reader = PointReader(points)
         self.points_readers.append(reader)
@@ -276,13 +393,15 @@ class Experiment:
             if os.name == 'nt':
                 options['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
             self.process = subprocess.Popen(args, **options)
+            if self.ec2_guard is not None:
+                self.ec2_guard.attach_owned_load(self.process)
             async def probes():
                 for sequence in range((seconds + 9) // 10):
                     target = clock + sequence * 10
                     await asyncio.sleep(max(0, target - time.perf_counter()))
                     self.check_abort()
                     try:
-                        row = await asyncio.to_thread(request, phase, sequence, self.manifest['id'], self.probe)
+                        row = await self.send_probe(phase,sequence)
                     except ResponseObservationError as error:
                         if error.status != 200:
                             self.guard.rules.trip('probe_http_status', 'probe HTTP 상태 위반', 'FAIL', {'status': error.status})
@@ -302,7 +421,7 @@ class Experiment:
                     if points.exists():
                         for point in reader.read():
                             self.guard.rules.http(point)
-                        for row in parse_points(points, partial=True):
+                        for row in await self.read_client_points(points, partial=True):
                             if (row['phase'], row['kind'], row['sequence']) not in self.seen_clients:
                                 self.add_client(row)
                     if task.done() and task.exception():
@@ -310,12 +429,12 @@ class Experiment:
                     await asyncio.sleep(.1)
                 await task
                 if self.process.returncode:
-                    self.guard.rules.trip('k6_failed', 'k6 임계값·실행 실패', 'FAIL', {})
+                    self.guard.rules.trip('k6_failed', 'k6 임계값·실행 실패', 'INCONCLUSIVE' if self.environment.name=='ec2' else 'FAIL', {})
                 for point in reader.read():
                     self.guard.rules.http(point)
                 if reader.failed or reader.buffer:
                     raise RuntimeError('k6 부분·손상 표본')
-                for row in parse_points(points):
+                for row in await self.read_client_points(points):
                     if (row['phase'], row['kind'], row['sequence']) not in self.seen_clients:
                         self.add_client(row)
                 data = json.loads(summary.read_text(encoding='utf-8'))
@@ -329,7 +448,7 @@ class Experiment:
                 if dropped is None or http_count != actual:
                     raise RuntimeError('k6 summary·개별 요청 표본 대조 실패')
                 if dropped:
-                    self.guard.rules.trip('dropped_iterations', '미전송 반복 발생', 'FAIL', {'count': dropped})
+                    self.guard.rules.trip('dropped_iterations', '미전송 반복 발생', 'INCONCLUSIVE' if self.environment.name=='ec2' else 'FAIL', {'count': dropped})
                 elapsed = time.perf_counter() - clock
                 if elapsed < seconds:
                     raise RuntimeError('실제 부하 기간 미충족')
@@ -338,6 +457,10 @@ class Experiment:
                 task.cancel()
                 await asyncio.gather(task, return_exceptions=True)
                 await asyncio.to_thread(stop_load, self.process)
+
+    async def send_probe(self,phase,sequence):
+        return await asyncio.to_thread(request,phase,sequence,self.manifest['id'],self.probe,
+            environment=self.environment,clock=self.clock_calibration)
 
     async def drain(self):
         deadline, zeros = time.perf_counter() + 60, 0
@@ -410,7 +533,7 @@ AND TABLE_NAME IN ('network_logs','waf_detections','request_alerts') GROUP BY TA
                             self.append('dashboard-api.jsonl', dict(at=now(), phase=self.phase_name,
                                                                   endpoint=path, duration_ms=duration))
                 self.page.on('requestfinished', api_finished)
-                await self.page.goto('http://localhost:3000/', timeout=30000)
+                await self.page.goto(self.environment.dashboard_url, timeout=30000)
                 print('열린 자동화 브라우저에서 관리자 로그인 후 대시보드를 유지해주세요. 비밀번호·쿠키는 저장하지 않습니다.', flush=True)
                 await self.page.wait_for_function('window.__dgReady === true', timeout=self.args.login_timeout*1000)
                 # 최초 ready 이후 binding이 Python에 도착할 시간을 준다.
@@ -420,7 +543,8 @@ AND TABLE_NAME IN ('network_logs','waf_detections','request_alerts') GROUP BY TA
                 before = await self.collect()
                 if not zero_lag(before, self.keys) or self.database:
                     raise RuntimeError('초기 Kafka 적체·실험 ID 중복 확인 필요')
-                calibration = await asyncio.to_thread(request, 'warmup', 999999, self.manifest['id'], self.probe, kind='background')
+                calibration = await asyncio.to_thread(request, 'warmup', 999999, self.manifest['id'], self.probe,
+                                                     kind='background', environment=self.environment)
                 self.add_client(calibration)
                 self.manifest['clock_check'] = dict(rtt_ms=calibration['ended_ms']-calibration['sent_ms'],
                     ingress=calibration['ingress'], sent_ms=calibration['sent_ms'], ended_ms=calibration['ended_ms'],
@@ -436,6 +560,7 @@ AND TABLE_NAME IN ('network_logs','waf_detections','request_alerts') GROUP BY TA
                         raise RuntimeError('워밍업의 저장·AI·브라우저·lag 정리 미확인')
                     # 확인을 마친 알림만 닫아 본 측정 화면 조건을 고정한다.
                     await self.page.locator('[id^="request-alert-"] button[aria-label="close"]').evaluate_all('(nodes) => nodes.forEach(n => n.click())')
+                    await self.database_observation('before')
                     tasks.append(asyncio.create_task(self.sampler()))
                     self.elapsed = await self.phase('measurement', self.manifest['seconds'], self.args.rate)
                     # 수집 경쟁을 피하고 최종 관측은 최소 간격을 둔 단일 루프에서 수행한다.
@@ -443,6 +568,7 @@ AND TABLE_NAME IN ('network_logs','waf_detections','request_alerts') GROUP BY TA
                     await asyncio.gather(tasks.pop(), return_exceptions=True)
                     self.final_lag = await self.drain()
                     self.check_abort()
+                    await self.database_observation('after')
                     await self.table_check()
                     self.manifest['state'] = 'COMPLETED'
                 finally:
@@ -467,23 +593,33 @@ AND TABLE_NAME IN ('network_logs','waf_detections','request_alerts') GROUP BY TA
         field = self.page.locator('input[name="threatId"]')
         await field.fill(str(min(t['threatId'] for t in traces)))
         await field.locator('xpath=ancestor::form').get_by_role('button', name='검색', exact=True).click()
-        await self.page.get_by_role('button', name=f"원본 로그 {row['logId']} 상세 보기", exact=True).wait_for(state='visible', timeout=10000)
+        table = self.page.get_by_role('region', name='위협 탐지 데이터 표', exact=True)
+        await table.get_by_role('button', name=f"원본 로그 {row['logId']} 상세 보기", exact=True).wait_for(state='visible', timeout=10000)
         self.append('browser-events.jsonl', dict(kind='representative_table', requestId=row['requestId'],
                                                logId=row['logId'], observed=time.perf_counter()))
 
 
 def main(argv=None):
     args = arguments(argv)
-    contract_raw = SPEC.read_bytes()
+    environment = args.runtime_environment
+    contract_raw = (SPEC if environment.name == 'local' else environment.contract_path).read_bytes()
     spec = json.loads(contract_raw)
     probe, fixture_hash = fixture(args.fixture)
-    seconds, warmup = (10, 10) if args.connection_check else (120, 30)
-    scenario = 'local-e2e-check' if args.connection_check else f'local-e2e-rps{args.rate}'
+    if args.connection_check:
+        seconds, warmup = 10, 10
+    elif environment.name == 'local':
+        seconds, warmup = 120, 30
+    else:
+        seconds, warmup = spec['proposal']['measurement_seconds'], spec['proposal']['warmup_seconds']
+    scenario = f'{environment.name}-e2e-check' if args.connection_check else f'{environment.name}-e2e-rps{args.rate}'
     run_id = datetime.now(KST).strftime('%Y%m%dT%H%M%S%z') + f'-{scenario}-r{args.round:02d}'
     manifest = dict(id=run_id, planned_at=now(), state='PLANNED', rate=args.rate, seconds=seconds,
-        warmup_seconds=warmup, connection_check=args.connection_check, schema='local-e2e-v2',
+        warmup_seconds=warmup, connection_check=args.connection_check,
         fixture_sha256=fixture_hash, ip_policy_confirmed=args.confirm_ip_policy,
-        contract_sha256=hashlib.sha256(contract_raw).hexdigest())
+        contract_sha256=hashlib.sha256(contract_raw).hexdigest(), **environment.public_plan())
+    output_plan, report_plan = result_paths(ROOT, run_id, environment.name)
+    manifest['planned_output'] = output_plan.relative_to(ROOT).as_posix()
+    manifest['planned_report'] = report_plan.relative_to(ROOT).as_posix()
     if args.dry_run:
         print(json.dumps(manifest, ensure_ascii=False, indent=2))
         return 0

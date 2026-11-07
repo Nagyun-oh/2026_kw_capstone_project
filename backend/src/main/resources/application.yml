@@ -49,6 +49,8 @@ app:
     enabled: ${AI_OUTBOX_ENABLED:true}
     poll-delay-ms: 500
     initial-delay-ms: 5000
+    # 커밋 직후 발행기 깨우기. 주기 조회는 복구용으로 계속 동작한다(APP_AIOUTBOX_WAKEUPENABLED로 끌 수 있음).
+    wakeup-enabled: true
 
 
 management:

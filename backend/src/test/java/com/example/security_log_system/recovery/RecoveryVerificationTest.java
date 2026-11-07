@@ -93,9 +93,10 @@ public class RecoveryVerificationTest {
         @Bean MeterRegistry meterRegistry() { return new SimpleMeterRegistry(); }
         @Bean PipelineTrace trace(ObjectMapper m) { return new PipelineTrace(true,m); }
         @Bean AiRequestOutboxRepository outboxRepository(JdbcTemplate j) { return new AiRequestOutboxRepository(j); }
-        @Bean AiRequestOutboxService outboxService(AiRequestOutboxRepository r,ObjectMapper m) { return new AiRequestOutboxService(r,m); }
+        // 이 검증은 발행기를 직접 호출하므로 커밋 후 깨우기는 동작하지 않는 대역을 쓴다.
+        @Bean AiRequestOutboxService outboxService(AiRequestOutboxRepository r,ObjectMapper m) { return new AiRequestOutboxService(r,m,mock(AiRequestOutboxWakeup.class)); }
         @Bean RequestAlertRepository alertRepository(JdbcTemplate j) { return new RequestAlertRepository(j); }
-        @Bean RequestAlertService alertService(RequestAlertRepository r) { return new RequestAlertService(r); }
+        @Bean RequestAlertService alertService(RequestAlertRepository r) { return new RequestAlertService(r,mock(RequestAlertWakeup.class)); }
         @Bean RequestCorrelationService correlation(JdbcTemplate j,LogRepository l,WafDetectionRepository w) { return new RequestCorrelationService(j,l,w); }
         @Bean SimpMessagingTemplate messaging() { return mock(SimpMessagingTemplate.class); }
         @Bean RequestAlertPublisher alertPublisher(RequestAlertRepository r,SimpMessagingTemplate m,PipelineTrace p) { return new RequestAlertPublisher(r,m,p); }

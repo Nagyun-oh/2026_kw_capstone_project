@@ -10,7 +10,12 @@ import java.time.LocalDateTime;
 
 
 @Entity                             // 이 클래스가 JPA 엔티티임을 선언, 즉 이 클래스는 DB테이블과 1:1로 매핑되는 객체
-@Table(name = "network_logs")       // 이 엔티티가 DB의 어느 테이블에 저장될지 지정
+@Table(                             // 이 엔티티가 DB의 어느 테이블에 저장될지 지정
+        name = "network_logs",
+        // 전체 로그 목록의 created_at 내림차순 페이지 조회가 테이블 전체를 읽고 정렬하지 않도록 한다.
+        // ddl-auto=validate는 인덱스를 만들거나 검사하지 않으므로 기존 DB에는 docs/db SQL로 적용한다.
+        indexes = @Index(name = "idx_network_logs_created_at", columnList = "created_at")
+)
 @Getter                             // 모든 필드에 대한 Getter메서드 자동 생성
 @NoArgsConstructor                  // 파라미터가 없는 기본 생성자를 생성
 @AllArgsConstructor                 // 모든 필드를 파라미터로 받는 생성자를 생성

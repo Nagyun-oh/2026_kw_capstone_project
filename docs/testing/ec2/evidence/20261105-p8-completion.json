@@ -1,0 +1,236 @@
+{
+  "schema": "dualguard-p8-completion-v1",
+  "reviewed_at": "2026-11-05T13:07:10.994959+00:00",
+  "phase_status": "COMPLETE",
+  "contract_revision": 2,
+  "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+  "pilot": {
+    "id": "20261105T215318+0900-ec2-pilot-r03",
+    "verdict": "PASS",
+    "mode": "pilot",
+    "counts": {
+      "http": 60,
+      "db": 60,
+      "probes": 6
+    },
+    "rates": {
+      "target_input_rps": 1,
+      "expected_requests": 60,
+      "http_requests": 60,
+      "http_rps_during_observed_send_window": 0.9984751753077149,
+      "server_ingress_eps_per_planned_seconds": 1.0,
+      "committed_logs": 60,
+      "ai_completed_requests": 60,
+      "note": "유입 EPS는 계획 구간당 고유 요청 수. 부하 중 처리 완료 EPS는 progress.jsonl의 관측 구간별 차이로 판단한다. 최종 drain 건수를 부하 중 처리량으로 사용하지 않는다."
+    },
+    "stats_ms": {
+      "http": {
+        "count": 54,
+        "avg_ms": 62.251442592592596,
+        "p50_ms": 53.07925,
+        "p95_ms": 111.50552499999995,
+        "p99_ms": 230.92378599999978,
+        "max_ms": 335.6061
+      },
+      "log_ingest": {
+        "count": 60,
+        "avg_ms": 306.6828727722168,
+        "p50_ms": 298.198938369751,
+        "p95_ms": 526.020884513855,
+        "p99_ms": 563.2447576522825,
+        "max_ms": 604.2089462280273
+      },
+      "ai_segment": {
+        "count": 60,
+        "avg_ms": 326.98062260945636,
+        "p50_ms": 318.806529045105,
+        "p95_ms": 578.7539124488829,
+        "p99_ms": 608.6725449562073,
+        "max_ms": 610.8260154724121
+      },
+      "ai_server": {
+        "count": 60,
+        "avg_ms": 633.6634953816732,
+        "p50_ms": 639.1034126281738,
+        "p95_ms": 996.6026544570923,
+        "p99_ms": 1059.655427932739,
+        "max_ms": 1111.8710041046143
+      },
+      "waf_server": {
+        "count": 6,
+        "avg_ms": 504.66763973236084,
+        "p50_ms": 527.3569822311401,
+        "p95_ms": 569.091260433197,
+        "p99_ms": 579.0062785148621,
+        "max_ms": 581.4850330352783
+      },
+      "AI_receive": {
+        "count": 6,
+        "avg_ms": 1395.808249998178,
+        "p50_ms": 1261.1801999883028,
+        "p95_ms": 1935.0260500068543,
+        "p99_ms": 2107.6182500080904,
+        "max_ms": 2150.7663000083994
+      },
+      "WAF_receive": {
+        "count": 6,
+        "avg_ms": 1223.5784833319485,
+        "p50_ms": 1239.2553499958012,
+        "p95_ms": 1282.1491249997052,
+        "p99_ms": 1286.6740650017164,
+        "max_ms": 1287.8053000022192
+      },
+      "AI_dom": {
+        "count": 6,
+        "avg_ms": 1419.412849994842,
+        "p50_ms": 1266.7453499889234,
+        "p95_ms": 2022.640125003818,
+        "p99_ms": 2217.2311450107372,
+        "max_ms": 2265.878900012467
+      },
+      "WAF_dom": {
+        "count": 6,
+        "avg_ms": 1226.9134166708682,
+        "p50_ms": 1242.4825000052806,
+        "p95_ms": 1285.4209249926498,
+        "p99_ms": 1289.904904991272,
+        "max_ms": 1291.0258999909274
+      }
+    },
+    "final_drain_observation_seconds": 19.680539399996633,
+    "clock_diagnostics": [
+      {
+        "label": "clock-source-check",
+        "uncertainty_width_ms": 12.64208984375,
+        "precise_cross_domain_reference": true,
+        "role": "diagnostic_only; server_latency_uses_server_clock; browser_latency_uses_pc_monotonic"
+      },
+      {
+        "label": "clock-warmup",
+        "uncertainty_width_ms": 14.82958984375,
+        "precise_cross_domain_reference": true,
+        "role": "diagnostic_only; server_latency_uses_server_clock; browser_latency_uses_pc_monotonic"
+      },
+      {
+        "label": "clock-measurement",
+        "uncertainty_width_ms": 27.88525390625,
+        "precise_cross_domain_reference": false,
+        "role": "diagnostic_only; server_latency_uses_server_clock; browser_latency_uses_pc_monotonic"
+      }
+    ],
+    "representative_table": [
+      {
+        "kind": "representative_table",
+        "requestId": "06e31b76a84528f1eec27f6cd4e50058",
+        "logId": 8391,
+        "observed": 181258.3761977
+      }
+    ]
+  },
+  "db": {
+    "comparison_status": "COMPARABLE",
+    "outbox_publication": {
+      "count": 60,
+      "mean_ms": 270.9938166666667,
+      "status": "OBSERVED_DELTA"
+    }
+  },
+  "restoration": {
+    "cleanup_ok": true,
+    "configuration_restored": true,
+    "post_collection_status": "COLLECTED",
+    "all_run_logs": 92,
+    "all_ai_completed": 92,
+    "running_services": 9,
+    "generator_excluded": false,
+    "generator_blacklist_count": 0,
+    "waf_healthy": true,
+    "nginx_test": true,
+    "app_sha_unchanged": true
+  },
+  "validation": {
+    "full_python_tests": 252,
+    "full_passed": 252,
+    "post_guidance_environment_tests": 16,
+    "post_guidance_passed": 16,
+    "real_k6_pure_module_boundary_test": true,
+    "remote_failure_rollback_mock": true
+  },
+  "current_source_sha256": {
+    "run_ec2_e2e.py": "b71aa0c05e1940e066257a0b0086413c1b70531be2e825f282f5389cb80b36d9",
+    "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+    "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+    "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+    "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+    "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+    "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb"
+  },
+  "public_raw_sha256": {
+    "baseline-001.json": "ee6abd8c7ecf22102a27e6167f6ef40868ab886978e16eaf1e37e862ebec4f45",
+    "browser-events.jsonl": "3d5cf7fd3e4c451cbed2a2f0510069a2b7aac9617ffebbad16e1219c5cc202d8",
+    "cleanup-after-012.json": "bdca3324179800f4679362503377f9b3caddbdc61462986175cad3606a4ef3e3",
+    "cleanup-before-011.json": "e4fe48c5e2b7375fe9bd3fbe78495c15f2486885e3ad0740d15bf4906ee23741",
+    "client-requests.jsonl": "204735228172c383d14080e9d06098b7db2250722e02720ec463d2cbd9e950db",
+    "clock-measurement.json": "adba2be7de40a064059ca80a314dfd1614fb61c17647e4d47101202d4c19b789",
+    "clock-recovery.json": "a47881b0910bffe92215918382d0ec78f2e5d581ddb5124ef4fc1921545f26c9",
+    "clock-source-check.json": "cf6599df97844b299121c5e7197320eff371a446c451f85c88a5447241815999",
+    "clock-warmup.json": "c53ea34acbe27179bce669b2dc24d3a18544d66d23e963406e6ed2de99496d27",
+    "collection-commands.jsonl": "6bcadbc33d6e957725b20ba32c6f4ccd8f20e05cb04449b265be6a43bcf3ebba",
+    "database.json": "63283f4507cff8c00b153b0905d5e4ab5ac0d7ca5180f430937d70a171fe4d6b",
+    "db-observation-after.json": "aa0c1332c445b6a8f251f18252ebbc5a81ea88e8ba04a8e10c2fa86c9991ddba",
+    "db-observation-before.json": "de4d4eedbb492e6b4504886f5ebbc055d7e0d07aed377697c27623c0dd53ef00",
+    "db-observation-comparison.json": "f811c81659f2f4e30d4e3d920ec0f83881a127f683a36d6a4cc5273fd22c960c",
+    "db-observation-preflight.json": "bb05b70dbab736a5c4a0e8689bcba039af3c1a952151366849ce81be5223aa9c",
+    "docker-stats.jsonl": "c78dfe387530994fd95dae7816f7e83b91a46a3b21476958df584edc57e5a4b1",
+    "events.jsonl": "46370294f46dbe8dd37feaec0ebb346ee80d9239e1f56c5a82e631d634f58225",
+    "exclude-after-004.json": "f245da12e2152a78829928eb5b9c2838a739f5aa699b1f5e3537d0607205555e",
+    "exclude-after-005.json": "b94ff761b6eacf32b57be90ce9b88dc5566b80983428b8d0c76bd33cde4098bc",
+    "exclude-after-006.json": "45963b54a8ceb2f8e34d40adc3640381880ed60f1827cf404280cf0fb078c0c8",
+    "exclude-after-007.json": "32aeef558c94869515e21dc79b54975682b37e7666024075e66d2c3781b02d2f",
+    "exclude-after-008.json": "fb2628ba0d7f21ea3954e0acdbc1cd589e7ac6eefefae6260c82d49dbc55fba8",
+    "exclude-after-009.json": "d578dcde88a38a3df8651530ca5cbd6afdcd637edae82d43278ab5c9d3d725f8",
+    "exclude-after-010.json": "c378ec373734f19eb8e47ee137fe571d5d92bca3004a07688049a89422e0c9e4",
+    "exclude-before-003.json": "954392ce2d06e5893f3a941afc45783f1062fae54a9ea10fa0034ebed7823997",
+    "exclude-command.json": "be30b349e721b8d526032a77654828ec31939b9bb0241efe1a72615904bae697",
+    "exclude-resource.json": "5105b2b2fe93ca415a8637e19283894352326cc3eee34d6de9b161f86bd1a7db",
+    "host-resources.jsonl": "d88f337a0f32542b18a05d88a53ff6aab55a5c6aaf360b1f470b9b4aad55fbce",
+    "https-source-002.json": "e0c3cce81f60822b7a1796113a05befb828b14c072c1a97dc075f6f72e675014",
+    "manifest.json": "f5800431525ab327b140fb5d256dfd11b690f4c2c2a4e44babb580877d5bfc2c",
+    "measurement-contract.json": "e9995aa063e4e53d6e0e9132454b8c8fa0c5e2aaf345e836e9642542ba34a42e",
+    "metrics.json": "7298c06e5727578594679bff5e6952f507d0c53c714f2793382b34726b2f336f",
+    "pipeline-events.jsonl": "19d84b087df3bd077f6dbe515c2c345c5e10e0b958bab2ac805721e802ee523d",
+    "post-recovery-check.json": "0f6d03fedc769da9cda367f93b2b45a2dff6c25e66f33fa0cb8c1cfd7895f610",
+    "post-recovery-control.json": "d6ab4d6688f855c3cfe896e94305b9262eec84dee9192e87aaafdfa5e71eae61",
+    "progress.jsonl": "d3f6a6b43a109e12310ba1a8458c741266ca62aa55d873692a33e0c746c11b3c",
+    "recovery-http.json": "b05b8dfb78006cc88d89245c79f01509fe69e72ffff9991225a4eb9a151ae751",
+    "remote-after-measurement.json": "0d013ada883dfe8337e150c57925d6df012e21a396e136fe159f64ba0d9c0770",
+    "remote-preflight.json": "8eb968fc55832ea7ec538c9d09df18c7cfd7bcf15caf607ab2dca43451adb7a7",
+    "restore-after-015.json": "3ba12cdfd00d169a2e1ca273cb8233d5d7a35e391f99c6cf981e02153590bc32",
+    "restore-after-016.json": "05aed99767f2e97c4dcfeab46222ceec94fd0045ddcb5363f61503556f14c2de",
+    "restore-after-017.json": "b1694cb93e5c4a67286f8e1ff28baafceafb27713417db2f8659ad01c23f3d13",
+    "restore-after-018.json": "793f9ba57ee659d9eacf73beb36bf44637f747238d0a3dc14be0275f4222fdc5",
+    "restore-after-019.json": "856318ebe28a39d21655be3c3f89a45ad708ba08eea2967daf13a011e74665dd",
+    "restore-after-020.json": "0eccc243d8911858c92718697d8cf19e6cca270da6e4b44b44766b20399b5d66",
+    "restore-after-021.json": "8f91dab99877210f2cc590b170073eaa2944459fd43f51d208aaba228c9449b9",
+    "restore-before-014.json": "4db261e1db4ab805614edc6da4e1adaa87c7cea028bafda6e83cb53b50d9da10",
+    "restore-command.json": "434a6171386ed8fc28f3a353ebaaff7002b804ddd15944214af1aafd7f742b04",
+    "restore-precheck-013.json": "ad288278b415993cf415b2886b0f683292c892dfa6f7e056ff7860f23a91aa09",
+    "restore-resource.json": "be55f2d4a42e0032e0c34c2950ab72cbaa7bdb51307c9d7421ea187280ee3a4a",
+    "sync-status-022.json": "f507560d48e0ea6fdf24d581cf66ec9bea82c790d4062c0afde601bfd22e49d1",
+    "raw/measurement-k6.log": "62dc09782c84af03f4386bcb0f9f97dc3d5d26a6eff15494950e48b8a321ac6b",
+    "raw/measurement-points.jsonl": "9d952eb388329851304f46702d9b128144568eada75bc7a52322fd8fc593abd6",
+    "raw/measurement-summary.json": "037d26fe66d5f8cc1a282e395d7a7746eb916f8ca2fe2d990a5131d698920980",
+    "raw/warmup-k6.log": "aa59a7c0671549ce18bf30bda99eb73e386d65102ebb52aaa17db80efd2362c0",
+    "raw/warmup-points.jsonl": "002dcb146b68945077e883deaea29eebb2d91efbcbfdc809d5e8592cd03086e6",
+    "raw/warmup-summary.json": "be4e709f2607e5a6d9cad74b210be2b6da74e4fc24745bb0506f25450e2caa09"
+  },
+  "previous_attempts": "docs/testing/ec2/evidence/20261105-p8-preliminary-attempts.json",
+  "next": "formal 1 RPS x 120 seconds x 3 independent repetitions; then 3 and 5 RPS",
+  "limitations": [
+    "pilot is not a formal repeated baseline or capacity limit",
+    "PC HTTP/browser time separate from server SLO; k6 normal HTTP timing separate from Python probe operation duration",
+    "CPU maxima include collection commands and healthchecks; cannot identify bottleneck from a maximum alone",
+    "CPU credit balance latest value was not collected; P0 console evidence is historical",
+    "input credential controller process completed; no credential values stored in evidence"
+  ]
+}

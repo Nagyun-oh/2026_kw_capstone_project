@@ -1,0 +1,68 @@
+{
+  "schema": "dualguard-preparation-evidence-v1",
+  "phase": "P3_environment_separation",
+  "recorded_at": "2026-11-05T08:54:54.617995+00:00",
+  "display_date": "2026/11/05",
+  "status": "IMPLEMENTATION_AND_MOCKED_VERIFICATION_COMPLETE",
+  "branch": "test/experiment",
+  "local_head": "d6ec7c4b324c755e3c0391eba7ce6da9363fbbad",
+  "working_tree_dirty": true,
+  "scope": "Local runner preserved; EC2 allowlisted dry-run only; P4-P8 pending",
+  "live_load_generated": false,
+  "remote_access_performed_in_p3": false,
+  "application_deployed_in_p3": false,
+  "server_or_waf_configuration_changed_in_p3": false,
+  "python_mocked_tests": {
+    "recorded_at": "2026-11-05T08:45:58.592858+00:00",
+    "scope": "Python mocked runner regression; no live service experiment",
+    "tests_run": 144,
+    "failures": 0,
+    "errors": 0,
+    "successful": true,
+    "warning_categories": []
+  },
+  "k6_initialization": {
+    "recorded_at": "2026-11-05T08:44:22.065239+00:00",
+    "checks": [
+      {
+        "environment": "local",
+        "mode": "inspect_only",
+        "return_code": 0,
+        "load_generated": false,
+        "host_mapping_confirmed": true,
+        "tls_skip_disabled": true,
+        "background_rate_per_10s": 9
+      },
+      {
+        "environment": "ec2",
+        "mode": "inspect_only",
+        "return_code": 107,
+        "load_generated": false,
+        "ec2_execution_gate_confirmed": true
+      }
+    ]
+  },
+  "cli_dry_run": {
+    "environment": "ec2",
+    "result": "PLAN_PRINTED",
+    "execution_ready": false,
+    "reserves_files": false,
+    "sends_http": false
+  },
+  "source_sha256": {
+    "scripts/testing/e2e_environment.py": "f3dea761dd733ce5ecab631de6514d1e6eaff7bf8b71644fb51b2579278d0a30",
+    "scripts/testing/run_e2e.py": "76c5f99f0afe7eb82e136c6758799f61bbd74e8b5bacde9397c2746b3e33e41f",
+    "scripts/testing/run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+    "scripts/testing/summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+    "scripts/testing/e2e_background.js": "6126a5453edb64f1490978c20bbc785affba7c9e7b5e27e6253e88d3c6fe1939",
+    "scripts/testing/profiles/ec2-e2e-v1.json": "28f38d1478f7fd28954f567b40411391821b40c386569345a3ec2d2f994b6595",
+    "scripts/testing/test_e2e_environment.py": "28f9f48dd2372f1cfa61de97591faa100bbaf9726071e9df2c0ae5a635a92351",
+    "scripts/testing/test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976"
+  },
+  "raw_validation_directory": "build/testing-validation/p3-environment-separation",
+  "limitations": [
+    "No actual EC2 TLS handshake, SSH collection, login, browser E2E or performance measured in P3.",
+    "EC2 initial targets, stop policy and cross-clock policy are not finalized.",
+    "Initial sandbox temp-directory permissions prevented one test; final full suite passed in the permitted environment."
+  ]
+}

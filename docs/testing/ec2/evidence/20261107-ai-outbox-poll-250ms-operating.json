@@ -1,0 +1,29 @@
+{
+  "at": "2026-11-07T06:06:14.931678+00:00",
+  "applied": true,
+  "ai_outbox_poll_delay_ms": 250,
+  "alert_poll_delay_ms": 250,
+  "same_backend_image": true,
+  "same_app_sha": true,
+  "other_backend_env_equal": true,
+  "health": "UP",
+  "frontend_auth_http": 401,
+  "frontend_restarted": false,
+  "backend_recreated": true,
+  "backend_started_at": "2026-11-07T06:05:51.828810535Z",
+  "backend_restart_count": 0,
+  "restart_policy": "unless-stopped",
+  "operator_override": "/home/ubuntu/.config/dualguard/compose.alerts.override.yaml",
+  "operator_override_keys": [
+    "APP_ALERTS_POLLDELAYMS",
+    "APP_AIOUTBOX_POLLDELAYMS"
+  ],
+  "base_compose_unmodified": true,
+  "waf_health": "healthy",
+  "nginx_test_ok": true,
+  "waf_exclusion_count": 0,
+  "blacklist_count": 0,
+  "collection_status": "COLLECTED",
+  "running_services": 9,
+  "required_lag_zero": true
+}
