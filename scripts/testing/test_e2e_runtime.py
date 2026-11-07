@@ -13,13 +13,16 @@ from summarize_e2e import summarize
 
 class RuntimeTests(unittest.TestCase):
     def test_browser_dependency_failure_preserves_planned_report_and_evidence(self):
+        def browser_dependency_failure(coroutine):
+            coroutine.close()
+            raise ImportError('browser')
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             output, report = root/'raw-run', root/'report.md'
             (output/'raw').mkdir(parents=True)
             with patch('run_e2e.reserve', return_value=(output, report)), \
                  patch('run_e2e.Experiment.execute', return_value=None), \
-                 patch('run_e2e.asyncio.run', side_effect=ImportError('browser')), \
+                 patch('run_e2e.asyncio.run', side_effect=browser_dependency_failure), \
                  contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(main(['--execute', '--confirm-ip-policy']), 1)
             manifest = json.loads((output/'manifest.json').read_text(encoding='utf-8'))
@@ -65,6 +68,16 @@ class RuntimeTests(unittest.TestCase):
             path = paths[1]/'manifest.json'
             value = json.loads(path.read_text(encoding='utf-8'))
             value['rate'] = 3
+            path.write_text(json.dumps(value), encoding='utf-8')
+            with self.assertRaises(ValueError):
+                summarize(paths)
+
+    def test_ec2_environment_cannot_be_mixed_into_local_stage(self):
+        with tempfile.TemporaryDirectory() as directory:
+            paths = self.runs(Path(directory))
+            path = paths[1]/'manifest.json'
+            value = json.loads(path.read_text(encoding='utf-8'))
+            value['environment'] = 'ec2'
             path.write_text(json.dumps(value), encoding='utf-8')
             with self.assertRaises(ValueError):
                 summarize(paths)

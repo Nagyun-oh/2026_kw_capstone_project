@@ -1,0 +1,450 @@
+{
+  "schema": "dualguard-preparation-evidence-v1",
+  "phase": "P4_remote_collection",
+  "recorded_at": "2026-11-05T09:49:11.915180+00:00",
+  "display_date": "2026/11/05",
+  "status": "IMPLEMENTATION_MOCKED_AND_LIVE_READ_ONLY_VERIFIED",
+  "performance_verdict": "NOT_EVALUATED",
+  "load_generated": false,
+  "server_changes": false,
+  "latest_run_id": "20261105T182244+0900-ec2-collection-r02",
+  "previous_run_id": "20261105T181809+0900-ec2-collection-r01",
+  "raw_directory": "build/test-runs/20261105T182244+0900-ec2-collection-r02",
+  "runner_head": "d6ec7c4b324c755e3c0391eba7ce6da9363fbbad",
+  "runner_working_tree_dirty": true,
+  "python_mocked_tests": {
+    "recorded_at": "2026-11-05T09:22:25.111722+00:00",
+    "scope": "Python mocked regression; live read-only collection recorded separately",
+    "tests_run": 167,
+    "failures": 0,
+    "errors": 0,
+    "successful": true,
+    "warning_categories": []
+  },
+  "samples": [
+    {
+      "status": "COLLECTED",
+      "app_sha": "e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+      "lag": [
+        {
+          "group": "ai-result-group",
+          "topic": "ai-result-topic",
+          "partition": 0,
+          "lag": 0
+        },
+        {
+          "group": "ai-service-group",
+          "topic": "ai-request-topic",
+          "partition": 0,
+          "lag": 0
+        },
+        {
+          "group": "log-group",
+          "topic": "log-topic",
+          "partition": 0,
+          "lag": 0
+        },
+        {
+          "group": "waf-detection-group",
+          "topic": "waf-detection-topic",
+          "partition": 0,
+          "lag": 0
+        }
+      ],
+      "database_row_count": 0,
+      "trace_stages": [
+        "LOG_COMMITTED",
+        "AI_RESULT_COMMITTED"
+      ],
+      "container_count": 9,
+      "container_states": [
+        {
+          "service": "waf",
+          "image_id": "sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+          "state": "running",
+          "health": "healthy",
+          "restart_count": 0,
+          "started_at": "2026-11-05T06:45:26.090652273Z"
+        },
+        {
+          "service": "frontend",
+          "image_id": "sha256:0a8492064f304524434404369a25d7d6e6633c9088e889d5d71f9a9657d5a00f",
+          "state": "running",
+          "health": null,
+          "restart_count": 0,
+          "started_at": "2026-11-05T06:43:49.91070803Z"
+        },
+        {
+          "service": "backend",
+          "image_id": "sha256:6fffda63b4b7f2747257452d59266bde3ba174986b7048f9b6b8683d7729de18",
+          "state": "running",
+          "health": null,
+          "restart_count": 0,
+          "started_at": "2026-11-05T06:43:49.604372315Z"
+        },
+        {
+          "service": "db",
+          "image_id": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+          "state": "running",
+          "health": "healthy",
+          "restart_count": 0,
+          "started_at": "2026-11-05T06:43:43.81550103Z"
+        },
+        {
+          "service": "ai",
+          "image_id": "sha256:7c0b2dc018c10e6e464094fe2f41670436ee9bbfa1da8118cc461e5b9fca5919",
+          "state": "running",
+          "health": "healthy",
+          "restart_count": 0,
+          "started_at": "2026-11-05T06:43:44.402473015Z"
+        },
+        {
+          "service": "fluent-bit",
+          "image_id": "sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+          "state": "running",
+          "health": null,
+          "restart_count": 0,
+          "started_at": "2026-11-05T05:41:08.020435413Z"
+        },
+        {
+          "service": "kafka",
+          "image_id": "sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+          "state": "running",
+          "health": "healthy",
+          "restart_count": 0,
+          "started_at": "2026-11-05T05:41:07.9854897Z"
+        },
+        {
+          "service": "juiceshop",
+          "image_id": "sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+          "state": "running",
+          "health": null,
+          "restart_count": 0,
+          "started_at": "2026-11-05T05:41:07.986942692Z"
+        },
+        {
+          "service": "zookeeper",
+          "image_id": "sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f",
+          "state": "running",
+          "health": null,
+          "restart_count": 0,
+          "started_at": "2026-11-05T05:41:07.997505259Z"
+        }
+      ],
+      "collection_elapsed_ms": 6118.149,
+      "commands": [
+        {
+          "check": "containers_discover",
+          "started_at": "2026-11-05T09:22:45.449020+00:00",
+          "ended_at": "2026-11-05T09:22:45.607813+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 838,
+          "lines_read": 9,
+          "elapsed_ms": 158.812
+        },
+        {
+          "check": "app_sha",
+          "started_at": "2026-11-05T09:22:45.608167+00:00",
+          "ended_at": "2026-11-05T09:22:45.612269+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 41,
+          "lines_read": 1,
+          "elapsed_ms": 4.112
+        },
+        {
+          "check": "kafka_lag",
+          "started_at": "2026-11-05T09:22:45.612329+00:00",
+          "ended_at": "2026-11-05T09:22:48.312242+00:00",
+          "timeout_seconds": 20,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 1510,
+          "lines_read": 12,
+          "elapsed_ms": 2699.924
+        },
+        {
+          "check": "database",
+          "started_at": "2026-11-05T09:22:48.312289+00:00",
+          "ended_at": "2026-11-05T09:22:48.501814+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 0,
+          "lines_read": 0,
+          "elapsed_ms": 189.535
+        },
+        {
+          "check": "trace_enabled",
+          "started_at": "2026-11-05T09:22:48.501860+00:00",
+          "ended_at": "2026-11-05T09:22:48.600557+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 5,
+          "lines_read": 1,
+          "elapsed_ms": 98.711
+        },
+        {
+          "check": "pipeline_traces",
+          "started_at": "2026-11-05T09:22:48.600610+00:00",
+          "ended_at": "2026-11-05T09:22:48.647263+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 21868,
+          "lines_read": 272,
+          "elapsed_ms": 46.665
+        },
+        {
+          "check": "containers_state",
+          "started_at": "2026-11-05T09:22:48.647312+00:00",
+          "ended_at": "2026-11-05T09:22:48.700545+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 1835,
+          "lines_read": 9,
+          "elapsed_ms": 53.247
+        },
+        {
+          "check": "docker_stats",
+          "started_at": "2026-11-05T09:22:48.700590+00:00",
+          "ended_at": "2026-11-05T09:22:50.800773+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 2464,
+          "lines_read": 9,
+          "elapsed_ms": 2100.202
+        }
+      ],
+      "errors": []
+    },
+    {
+      "status": "COLLECTED",
+      "app_sha": "e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+      "lag": [
+        {
+          "group": "ai-result-group",
+          "topic": "ai-result-topic",
+          "partition": 0,
+          "lag": 0
+        },
+        {
+          "group": "ai-service-group",
+          "topic": "ai-request-topic",
+          "partition": 0,
+          "lag": 0
+        },
+        {
+          "group": "log-group",
+          "topic": "log-topic",
+          "partition": 0,
+          "lag": 0
+        },
+        {
+          "group": "waf-detection-group",
+          "topic": "waf-detection-topic",
+          "partition": 0,
+          "lag": 0
+        }
+      ],
+      "database_row_count": 0,
+      "trace_stages": [
+        "LOG_COMMITTED",
+        "AI_RESULT_COMMITTED"
+      ],
+      "container_count": 9,
+      "container_states": [
+        {
+          "service": "waf",
+          "image_id": "sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+          "state": "running",
+          "health": "healthy",
+          "restart_count": 0,
+          "started_at": "2026-11-05T06:45:26.090652273Z"
+        },
+        {
+          "service": "frontend",
+          "image_id": "sha256:0a8492064f304524434404369a25d7d6e6633c9088e889d5d71f9a9657d5a00f",
+          "state": "running",
+          "health": null,
+          "restart_count": 0,
+          "started_at": "2026-11-05T06:43:49.91070803Z"
+        },
+        {
+          "service": "backend",
+          "image_id": "sha256:6fffda63b4b7f2747257452d59266bde3ba174986b7048f9b6b8683d7729de18",
+          "state": "running",
+          "health": null,
+          "restart_count": 0,
+          "started_at": "2026-11-05T06:43:49.604372315Z"
+        },
+        {
+          "service": "db",
+          "image_id": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+          "state": "running",
+          "health": "healthy",
+          "restart_count": 0,
+          "started_at": "2026-11-05T06:43:43.81550103Z"
+        },
+        {
+          "service": "ai",
+          "image_id": "sha256:7c0b2dc018c10e6e464094fe2f41670436ee9bbfa1da8118cc461e5b9fca5919",
+          "state": "running",
+          "health": "healthy",
+          "restart_count": 0,
+          "started_at": "2026-11-05T06:43:44.402473015Z"
+        },
+        {
+          "service": "fluent-bit",
+          "image_id": "sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+          "state": "running",
+          "health": null,
+          "restart_count": 0,
+          "started_at": "2026-11-05T05:41:08.020435413Z"
+        },
+        {
+          "service": "kafka",
+          "image_id": "sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+          "state": "running",
+          "health": "healthy",
+          "restart_count": 0,
+          "started_at": "2026-11-05T05:41:07.9854897Z"
+        },
+        {
+          "service": "juiceshop",
+          "image_id": "sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+          "state": "running",
+          "health": null,
+          "restart_count": 0,
+          "started_at": "2026-11-05T05:41:07.986942692Z"
+        },
+        {
+          "service": "zookeeper",
+          "image_id": "sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f",
+          "state": "running",
+          "health": null,
+          "restart_count": 0,
+          "started_at": "2026-11-05T05:41:07.997505259Z"
+        }
+      ],
+      "collection_elapsed_ms": 5936.056,
+      "commands": [
+        {
+          "check": "containers_discover",
+          "started_at": "2026-11-05T09:22:56.131188+00:00",
+          "ended_at": "2026-11-05T09:22:56.248041+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 838,
+          "lines_read": 9,
+          "elapsed_ms": 116.866
+        },
+        {
+          "check": "app_sha",
+          "started_at": "2026-11-05T09:22:56.248284+00:00",
+          "ended_at": "2026-11-05T09:22:56.250525+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 41,
+          "lines_read": 1,
+          "elapsed_ms": 2.247
+        },
+        {
+          "check": "kafka_lag",
+          "started_at": "2026-11-05T09:22:56.250566+00:00",
+          "ended_at": "2026-11-05T09:22:59.156643+00:00",
+          "timeout_seconds": 20,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 1510,
+          "lines_read": 12,
+          "elapsed_ms": 2906.096
+        },
+        {
+          "check": "database",
+          "started_at": "2026-11-05T09:22:59.156695+00:00",
+          "ended_at": "2026-11-05T09:22:59.384710+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 0,
+          "lines_read": 0,
+          "elapsed_ms": 228.071
+        },
+        {
+          "check": "trace_enabled",
+          "started_at": "2026-11-05T09:22:59.384838+00:00",
+          "ended_at": "2026-11-05T09:22:59.526343+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 5,
+          "lines_read": 1,
+          "elapsed_ms": 141.512
+        },
+        {
+          "check": "pipeline_traces",
+          "started_at": "2026-11-05T09:22:59.526389+00:00",
+          "ended_at": "2026-11-05T09:22:59.595289+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 21868,
+          "lines_read": 272,
+          "elapsed_ms": 68.912
+        },
+        {
+          "check": "containers_state",
+          "started_at": "2026-11-05T09:22:59.595337+00:00",
+          "ended_at": "2026-11-05T09:22:59.646072+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 1835,
+          "lines_read": 9,
+          "elapsed_ms": 50.749
+        },
+        {
+          "check": "docker_stats",
+          "started_at": "2026-11-05T09:22:59.646152+00:00",
+          "ended_at": "2026-11-05T09:23:01.742386+00:00",
+          "timeout_seconds": 12,
+          "status": "OK",
+          "exit_code": 0,
+          "bytes_read": 2466,
+          "lines_read": 9,
+          "elapsed_ms": 2096.255
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "source_sha256": {
+    "scripts/testing/ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+    "scripts/testing/e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+    "scripts/testing/run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+    "scripts/testing/test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+    "scripts/testing/run_e2e.py": "03088edb200f73c3174d2c805dacb11df9836cdb02f9cf373290080dd3b4e4ad",
+    "scripts/testing/e2e_environment.py": "4cd7491df61657d8c5ba461a63851cbc2a3ece9e961b916389b0b3f4f38bba50",
+    "scripts/testing/profiles/ec2-e2e-v1.json": "8dd388b5957fdfd0eeca7cbb82bfb13053424ede6a318e8dab5409d897d2eefe"
+  },
+  "raw_sha256": {
+    "manifest.json": "916646688e2f28195b783bac9d6a0c189b55696ee7fda967a4a8c6caa0e8f453",
+    "snapshot-01.json": "91e77b9c950d32252f14a94604e8614dcd2bc889d56cbb8c770649d6762e6908",
+    "snapshot-02.json": "152134b14fefd916bde89efd97c7cccf742cc3177f3418837485b5892544350a",
+    "summary.json": "865bda9c7b88186d42c841c4944cd9544329ba7f13ac74dd7b509530b4b4ce13"
+  },
+  "limitations": [
+    "새 앱 요청·부하·브라우저·서비스 변경 없음.",
+    "기존 요청의 양수 trace 필터를 실제 검증했다. 실험 ID로 조회한 DB는 빈 결과이며 양수 DB 행 파싱은 모의 검증이다.",
+    "수집 시간은 호스트별 단조 시계로 기록했다. PC·EC2 교차 시계·자원 감시는 P5, 상세 DB 관측은 P6, 실제 신규 요청 E2E는 P7 이후다."
+  ]
+}

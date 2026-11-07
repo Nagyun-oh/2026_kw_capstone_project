@@ -1,0 +1,33 @@
+{
+  "schema": "dualguard-ec2-p0-preparation-v1",
+  "id": "20261105T163246+0900-ec2-inventory-r01",
+  "recorded_at": "2026-11-05T07:40:48.247624+00:00",
+  "source": "에이전트의 수집 준비·모의 검증 결과. 실제 원격 현황 스냅샷은 없음.",
+  "target_alias": "ec2-a",
+  "state": "BLOCKED",
+  "verdict": "INCONCLUSIVE",
+  "access_result": "SSH_CONNECT_TIMEOUT",
+  "load_generated": false,
+  "server_inventory_collected": false,
+  "mock_tests": {
+    "command": "python -m unittest discover -s scripts/testing -p test_ec2_inventory.py -v",
+    "total": 12,
+    "passed": 12,
+    "failed": 0
+  },
+  "checks": {
+    "changed_document_links": "OK",
+    "json_syntax": "OK",
+    "whitespace": "OK"
+  },
+  "source_sha256": {
+    "scripts/testing/collect_ec2_inventory.py": "8ca947d2f23d5ba736403e23e84bcb26c691151afaef554ffd7eb0713b78ee03",
+    "scripts/testing/test_ec2_inventory.py": "b11c6ed6d169771760f18f6efd45c092e370abb3d81c7aa5206b402cfe653a6f"
+  },
+  "user_provided_deployment_evidence": "20261105-deployment-smoke-user-provided.json",
+  "remaining": [
+    "현재 SSH 주소·접속 가능 여부 확인",
+    "실제 EC2 P0 현황 수집",
+    "P1·부하 실행기 준비 전에 미확인 항목 검토"
+  ]
+}

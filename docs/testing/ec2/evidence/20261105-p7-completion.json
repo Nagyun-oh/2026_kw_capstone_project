@@ -1,0 +1,62 @@
+{
+  "schema": "dualguard-p7-completion-v1",
+  "reviewed_at": "2026-11-05T11:58:24.853038+00:00",
+  "phase": "P7",
+  "phase_status": "COMPLETE",
+  "performance_verdict": "NOT_EVALUATED",
+  "prior_run": {
+    "id": "20261105T195628+0900-ec2-connection-r03",
+    "original_verdict": "INCONCLUSIVE",
+    "original_raw_hashes_unchanged": true,
+    "evidence": "docs/testing/ec2/evidence/20261105-p7-connection-review.json",
+    "evidence_sha256": "9de4860bb25e4193451a5e8a619f42480fe0cff1f1da6b6e34d3fa2a25a1bc41",
+    "core_connection_checks_verified": true,
+    "configuration_restored": true,
+    "cleanup_ok": true
+  },
+  "recheck": {
+    "id": "20261105T205423+0900-ec2-table-recheck-r01",
+    "verdict": "PASS",
+    "target": {
+      "id": 681,
+      "logId": 8265,
+      "wafThreatId": 681,
+      "aiThreatId": 682,
+      "requestId": "9f6bc03689c1767245bf887f500e09d5",
+      "threatTypes": [
+        "WAF Detection",
+        "AI Detection"
+      ]
+    },
+    "checks": {
+      "group_api_200": true,
+      "group_ids_and_sources_match": true,
+      "representative_table": true,
+      "one_grouped_row": true,
+      "displayed_first_threat_id": true,
+      "linked_log_button": true,
+      "waf_detail_button": true
+    },
+    "new_probe_requests": 0,
+    "configuration_changes": false,
+    "started_at": "2026-11-05T11:54:23.690986+00:00",
+    "ended_at": "2026-11-05T11:54:29.407638+00:00",
+    "source_sha256": {
+      "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+      "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+      "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6"
+    }
+  },
+  "validation": {
+    "python_tests": 233,
+    "passed": 233,
+    "source": "observed full unittest result, 2026/11/05 20:55 KST"
+  },
+  "artifact_sha256": {
+    "build/test-runs/20261105T205423+0900-ec2-table-recheck-r01/manifest.json": "852819453d0b5596a020f65199a3fde91df38c35e6aba04bc5aa6a0cff24bcc4",
+    "build/test-runs/20261105T205423+0900-ec2-table-recheck-r01/table-observation.json": "adfb6867598ae246bcd4650af0a7ff17304bdae839d4f8001df41a4d30cb470f",
+    "docs/testing/ec2/runs/20261105T205423+0900-ec2-table-recheck-r01.md": "3153cab4e591cf0c53bc2e0c6c6a9654098bb220134e48dc87b9100a79e07a6b"
+  },
+  "next": "P8: confirm EC2 targets, stop/repetition contract and full runner integration",
+  "full_ec2_load_enabled": false
+}

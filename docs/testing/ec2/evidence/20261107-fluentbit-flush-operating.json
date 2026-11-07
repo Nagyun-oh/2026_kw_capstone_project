@@ -1,0 +1,36 @@
+{
+  "action": "apply",
+  "changed": true,
+  "confirmed": true,
+  "at": "2026-11-07T08:36:55.867419+00:00",
+  "before": {
+    "mount_source": "/home/ubuntu/2026_kw_capstone_project/waf/fluent-bit.conf",
+    "flush": "0.5",
+    "image": "sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+    "started_at": "2026-11-07T04:27:44.397480829Z",
+    "restart_count": 0,
+    "running": true
+  },
+  "after": {
+    "mount_source": "/home/ubuntu/.config/dualguard/fluent-bit.conf",
+    "flush": "0.1",
+    "image": "sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+    "started_at": "2026-11-07T08:36:43.367531963Z",
+    "restart_count": 0,
+    "running": true
+  },
+  "health": {
+    "running": true,
+    "restart_count": 0,
+    "log_errors": [],
+    "started_at": "2026-11-07T08:36:43.367531963Z"
+  },
+  "post_check": {
+    "waf_health": "healthy",
+    "nginx_test_ok": true,
+    "waf_exclusion_count": 0,
+    "collection_status": "COLLECTED",
+    "running_services": 9,
+    "required_lag_zero": true
+  }
+}

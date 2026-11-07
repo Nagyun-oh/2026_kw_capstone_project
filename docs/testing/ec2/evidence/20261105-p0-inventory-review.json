@@ -1,0 +1,480 @@
+{
+  "schema": "dualguard-ec2-p0-review-v1",
+  "recorded_at": "2026-11-05T08:09:17.589927+00:00",
+  "run_id": "20261105T165534+0900-ec2-inventory-r03",
+  "previous_run_id": "20261105T165207+0900-ec2-inventory-r02",
+  "target_alias": "ec2-a",
+  "collection_state": "COMPLETED",
+  "inventory_status": "COLLECTED_WITH_GAPS",
+  "p0_complete": true,
+  "performance_evaluated": false,
+  "load_generated": false,
+  "collection_started_at": "2026-11-05T07:55:36.179275+00:00",
+  "collection_ended_at": "2026-11-05T07:55:44.850089+00:00",
+  "target_sha": "e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+  "working_tree_clean": true,
+  "feature_commit": "d6ec7c4b",
+  "feature_commit_is_ancestor": true,
+  "containers": [
+    {
+      "service": "waf",
+      "image": "modsecurity-crs:nginx",
+      "image_id": "sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+      "state": "running",
+      "health": "healthy",
+      "exit_code": 0,
+      "restart_count": 0,
+      "started_at": "2026-11-05T06:45:26.090652273Z",
+      "memory_limit_bytes": 0,
+      "nano_cpus": 0,
+      "log_driver": "json-file",
+      "repo_digests_registry_removed": [
+        "modsecurity-crs@sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b"
+      ]
+    },
+    {
+      "service": "frontend",
+      "image": "security-frontend:e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+      "image_id": "sha256:0a8492064f304524434404369a25d7d6e6633c9088e889d5d71f9a9657d5a00f",
+      "state": "running",
+      "health": null,
+      "exit_code": 0,
+      "restart_count": 0,
+      "started_at": "2026-11-05T06:43:49.91070803Z",
+      "memory_limit_bytes": 0,
+      "nano_cpus": 0,
+      "log_driver": "json-file",
+      "repo_digests_registry_removed": [
+        "security-frontend@sha256:0a8492064f304524434404369a25d7d6e6633c9088e889d5d71f9a9657d5a00f"
+      ]
+    },
+    {
+      "service": "backend",
+      "image": "security-backend:e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+      "image_id": "sha256:6fffda63b4b7f2747257452d59266bde3ba174986b7048f9b6b8683d7729de18",
+      "state": "running",
+      "health": null,
+      "exit_code": 0,
+      "restart_count": 0,
+      "started_at": "2026-11-05T06:43:49.604372315Z",
+      "memory_limit_bytes": 0,
+      "nano_cpus": 0,
+      "log_driver": "json-file",
+      "repo_digests_registry_removed": [
+        "security-backend@sha256:6fffda63b4b7f2747257452d59266bde3ba174986b7048f9b6b8683d7729de18"
+      ]
+    },
+    {
+      "service": "db",
+      "image": "mysql:8.0",
+      "image_id": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+      "state": "running",
+      "health": "healthy",
+      "exit_code": 0,
+      "restart_count": 0,
+      "started_at": "2026-11-05T06:43:43.81550103Z",
+      "memory_limit_bytes": 0,
+      "nano_cpus": 0,
+      "log_driver": "json-file",
+      "repo_digests_registry_removed": [
+        "mysql@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b"
+      ]
+    },
+    {
+      "service": "ai",
+      "image": "security-ai:e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+      "image_id": "sha256:7c0b2dc018c10e6e464094fe2f41670436ee9bbfa1da8118cc461e5b9fca5919",
+      "state": "running",
+      "health": "healthy",
+      "exit_code": 0,
+      "restart_count": 0,
+      "started_at": "2026-11-05T06:43:44.402473015Z",
+      "memory_limit_bytes": 0,
+      "nano_cpus": 0,
+      "log_driver": "json-file",
+      "repo_digests_registry_removed": [
+        "security-ai@sha256:7c0b2dc018c10e6e464094fe2f41670436ee9bbfa1da8118cc461e5b9fca5919"
+      ]
+    },
+    {
+      "service": "waf-blacklist-init",
+      "image": "modsecurity-crs:nginx",
+      "image_id": "sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+      "state": "exited",
+      "health": "unhealthy",
+      "exit_code": 0,
+      "restart_count": 0,
+      "started_at": "2026-11-05T06:43:44.09464406Z",
+      "memory_limit_bytes": 0,
+      "nano_cpus": 0,
+      "log_driver": "json-file",
+      "repo_digests_registry_removed": [
+        "modsecurity-crs@sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b"
+      ]
+    },
+    {
+      "service": "fluent-bit",
+      "image": "fluent-bit:2.2",
+      "image_id": "sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+      "state": "running",
+      "health": null,
+      "exit_code": 0,
+      "restart_count": 0,
+      "started_at": "2026-11-05T05:41:08.020435413Z",
+      "memory_limit_bytes": 0,
+      "nano_cpus": 0,
+      "log_driver": "json-file",
+      "repo_digests_registry_removed": [
+        "fluent-bit@sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4"
+      ]
+    },
+    {
+      "service": "kafka",
+      "image": "cp-kafka:7.3.0",
+      "image_id": "sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+      "state": "running",
+      "health": "healthy",
+      "exit_code": 0,
+      "restart_count": 0,
+      "started_at": "2026-11-05T05:41:07.9854897Z",
+      "memory_limit_bytes": 0,
+      "nano_cpus": 0,
+      "log_driver": "json-file",
+      "repo_digests_registry_removed": [
+        "cp-kafka@sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b"
+      ]
+    },
+    {
+      "service": "juiceshop",
+      "image": "juice-shop",
+      "image_id": "sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+      "state": "running",
+      "health": null,
+      "exit_code": 0,
+      "restart_count": 0,
+      "started_at": "2026-11-05T05:41:07.986942692Z",
+      "memory_limit_bytes": 0,
+      "nano_cpus": 0,
+      "log_driver": "json-file",
+      "repo_digests_registry_removed": [
+        "juice-shop@sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e"
+      ]
+    },
+    {
+      "service": "zookeeper",
+      "image": "cp-zookeeper:7.3.0",
+      "image_id": "sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f",
+      "state": "running",
+      "health": null,
+      "exit_code": 0,
+      "restart_count": 0,
+      "started_at": "2026-11-05T05:41:07.997505259Z",
+      "memory_limit_bytes": 0,
+      "nano_cpus": 0,
+      "log_driver": "json-file",
+      "repo_digests_registry_removed": [
+        "cp-zookeeper@sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+      ]
+    }
+  ],
+  "runtime_flags": {
+    "AI_OUTBOX_ENABLED": true,
+    "PIPELINE_TRACE_ENABLED": true,
+    "WAF_CONSUMER_ENABLED": true
+  },
+  "host": {
+    "logical_cpus": 2,
+    "memory": {
+      "MemTotal_bytes": 8195919872,
+      "MemAvailable_bytes": 5134024704,
+      "SwapTotal_bytes": 0,
+      "SwapFree_bytes": 0
+    },
+    "load_average": [
+      0.71142578125,
+      0.6611328125,
+      0.572265625
+    ],
+    "disk_bytes": {
+      "total": 50884108288,
+      "used": 21461680128,
+      "free": 29405650944
+    },
+    "cpu": [
+      {
+        "field": "Architecture:",
+        "data": "x86_64"
+      },
+      {
+        "field": "CPU(s):",
+        "data": "2"
+      },
+      {
+        "field": "Model name:",
+        "data": "Intel(R) Xeon(R) Platinum 8175M CPU @ 2.50GHz"
+      },
+      {
+        "field": "Thread(s) per core:",
+        "data": "2"
+      },
+      {
+        "field": "Core(s) per socket:",
+        "data": "1"
+      }
+    ]
+  },
+  "clock": {
+    "chrony": [
+      "Stratum         : 4",
+      "System time     : 0.000001511 seconds fast of NTP time",
+      "Last offset     : +0.000004278 seconds",
+      "RMS offset      : 0.000003662 seconds",
+      "Leap status     : Normal"
+    ],
+    "timedatectl": "Timezone=Etc/UTC\nNTPSynchronized=yes\n"
+  },
+  "database_counts_snapshot_at": "2026-11-05T08:00:57.508895+00:00",
+  "database_exact_counts": [
+    {
+      "table": "network_logs",
+      "exact_rows": 7586
+    },
+    {
+      "table": "detected_threats",
+      "exact_rows": 239
+    },
+    {
+      "table": "waf_detections",
+      "exact_rows": 103
+    },
+    {
+      "table": "ip_blacklist",
+      "exact_rows": 0
+    },
+    {
+      "table": "request_alerts",
+      "exact_rows": 103
+    },
+    {
+      "table": "request_correlations",
+      "exact_rows": 2001
+    },
+    {
+      "table": "waf_sync_status",
+      "exact_rows": 1
+    },
+    {
+      "table": "ai_request_outbox",
+      "exact_rows": 1
+    }
+  ],
+  "required_unique_constraints_missing": [],
+  "outbox_fk_confirmed": true,
+  "core_request_columns": [
+    {
+      "kind": "column",
+      "type": "varchar(255)",
+      "table": "network_logs",
+      "column": "request_id",
+      "nullable": "YES",
+      "collation": "utf8mb4_0900_bin"
+    },
+    {
+      "kind": "column",
+      "type": "text",
+      "table": "network_logs",
+      "column": "request_url",
+      "nullable": "YES",
+      "collation": "utf8mb4_0900_ai_ci"
+    },
+    {
+      "kind": "column",
+      "type": "varchar(255)",
+      "table": "request_correlations",
+      "column": "request_id",
+      "nullable": "NO",
+      "collation": "utf8mb4_0900_bin"
+    },
+    {
+      "kind": "column",
+      "type": "varchar(255)",
+      "table": "waf_detections",
+      "column": "request_id",
+      "nullable": "NO",
+      "collation": "utf8mb4_0900_bin"
+    }
+  ],
+  "outbox_counts": [
+    {
+      "count": 1,
+      "state": "SENT"
+    }
+  ],
+  "kafka_lag": [
+    {
+      "partition": 0,
+      "current_offset": 8261,
+      "log_end_offset": 8261,
+      "lag": 0,
+      "group": "ai-result-group",
+      "topic": "ai-result-topic"
+    },
+    {
+      "partition": 0,
+      "current_offset": 8261,
+      "log_end_offset": 8261,
+      "lag": 0,
+      "group": "ai-service-group",
+      "topic": "ai-request-topic"
+    },
+    {
+      "partition": 0,
+      "current_offset": 8261,
+      "log_end_offset": 8261,
+      "lag": 0,
+      "group": "log-group",
+      "topic": "log-topic"
+    },
+    {
+      "partition": 0,
+      "current_offset": 117,
+      "log_end_offset": 117,
+      "lag": 0,
+      "group": "waf-detection-group",
+      "topic": "waf-detection-topic"
+    }
+  ],
+  "ec2": {
+    "metadata_status": "OK",
+    "credits": {
+      "mode": null,
+      "balance_datapoints": null,
+      "period_seconds": 300,
+      "lookback_minutes": 30
+    },
+    "instance_type": "t3.large",
+    "region": "ap-northeast-2",
+    "architecture": "x86_64",
+    "metadata_elapsed_ms": 56.168,
+    "credits_status": "UNCONFIRMED"
+  },
+  "dns_checks": [
+    {
+      "host": "security-monitor-kw.duckdns.org",
+      "at": "2026-11-05T08:00:57.800337+00:00",
+      "current_target_in_ipv4_answers": true,
+      "ipv4_answer_count": 1
+    },
+    {
+      "host": "security-juiceshop-kw.duckdns.org",
+      "at": "2026-11-05T08:00:58.005308+00:00",
+      "current_target_in_ipv4_answers": true,
+      "ipv4_answer_count": 1
+    }
+  ],
+  "nginx": {
+    "host": {
+      "sha256_of_config_stdout": "e54012d9644ac3864915f07f1b360139555ce35790b3da16ffa6de690aa9c442",
+      "request_id_response_header_present": false,
+      "request_start_response_header_present": false,
+      "trusted_proxy_directive_count": 0,
+      "real_ip_headers": [],
+      "real_ip_recursive": [],
+      "forwarded_for_header_set": true,
+      "websocket_upgrade_header_set": true,
+      "upstream_ports": [
+        3000,
+        8081
+      ]
+    },
+    "waf": {
+      "sha256_of_config_stdout": "7e30de0fb0dafd282d89048af5c963d5a39b27a3884fed834440467ccb4131a5",
+      "request_id_response_header_present": true,
+      "request_start_response_header_present": true,
+      "trusted_proxy_directive_count": 2,
+      "real_ip_headers": [
+        "X-Forwarded-For"
+      ],
+      "real_ip_recursive": [
+        "on",
+        "on"
+      ],
+      "forwarded_for_header_set": true,
+      "websocket_upgrade_header_set": true,
+      "upstream_ports": []
+    }
+  },
+  "file_comparison_to_feature_commit": {
+    "compose.aws.yaml": {
+      "matches_committed_d6ec7c4b": true,
+      "remote_present": true
+    },
+    "waf/nginx.conf.template": {
+      "matches_committed_d6ec7c4b": true,
+      "remote_present": true
+    },
+    "waf/nginx-logging.conf.template": {
+      "matches_committed_d6ec7c4b": true,
+      "remote_present": true
+    },
+    "waf/modsecurity.conf.template": {
+      "matches_committed_d6ec7c4b": true,
+      "remote_present": true
+    },
+    "waf/njs/headers.js": {
+      "matches_committed_d6ec7c4b": true,
+      "remote_present": true
+    },
+    "waf/sync/blacklist-sync.sh": {
+      "matches_committed_d6ec7c4b": true,
+      "remote_present": true
+    },
+    "waf/rules/CUSTOM-003-blacklist-sync.conf": {
+      "matches_committed_d6ec7c4b": true,
+      "remote_present": true
+    },
+    "AI_new/models.lock.json": {
+      "matches_committed_d6ec7c4b": true,
+      "remote_present": true
+    }
+  },
+  "cpu_credit_lookup_errors": {
+    "credit_mode": {
+      "exit_code": 254,
+      "error_class": "UnauthorizedOperation"
+    },
+    "credit_balance": {
+      "exit_code": 254,
+      "error_class": "AccessDenied"
+    }
+  },
+  "remaining": [],
+  "mock_verification": {
+    "test_count": 13,
+    "passed": 13,
+    "scope": "수집기 파서·실패 처리 모의 검증. 실제 서버 검증과 분리"
+  },
+  "source_files": {
+    "build/test-runs/20261105T165534+0900-ec2-inventory-r03/manifest.json": "e7976658b9d922829151c50d7b2f41e19a7b7a691996092e6eaade31e1e9aff0",
+    "build/test-runs/20261105T165534+0900-ec2-inventory-r03/inventory.json": "8d2c609cba17fdd6f78e2b287963c5aeac600826c1586225f637f4b38cb097c4",
+    "build/test-runs/20261105T165534+0900-ec2-inventory-r03/review.json": "ab4cd4e6116336ef440b72395856514a92330a15651385484df19eeed51d98ce",
+    "build/test-runs/20261105T165534+0900-ec2-inventory-r03/supplement.json": "940d80bcda088c32e91d188f1c06f06190bb8e7939eb361fb15f02dbe2983cc3"
+  },
+  "collector_sha256": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+  "limitations": [
+    "컨테이너 healthcheck 없음(null)은 unhealthy가 아니다. init 컨테이너 종료 코드 0은 정상 종료로 구분한다.",
+    "표본의 lag 0은 전체 업무 처리 완료·성능 합격을 증명하지 않는다.",
+    "모델 lock·설정 해시 일치와 실제 모델 바이너리 무결성·브라우저 E2E를 구분한다.",
+    "정확한 테이블 건수는 명시한 조회 시각의 값이다. 앞선 추정 행 수와 혼용하지 않는다.",
+    "크레딧 조회 권한은 추가하지 않았다. IAM 권한 거부를 크레딧 0으로 기록하지 않는다."
+  ],
+  "review_status": "COMPLETED_WITH_CONSOLE_EVIDENCE",
+  "cpu_credit_console_evidence": "20261105-cpu-credits-console.json",
+  "credits_review": {
+    "mode": "unlimited",
+    "balance": 864,
+    "balance_at": "2026-11-05T07:50:00Z",
+    "source": "user_console_text_and_tooltip_image",
+    "api_gap_preserved": true
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "dualguard-cpu-credit-console-observation-v1",
+  "target_alias": "ec2-a",
+  "recorded_at": "2026-11-05T08:09:17.589927+00:00",
+  "credit_mode": {
+    "value": "unlimited",
+    "source": "사용자의 AWS 콘솔 확인 텍스트",
+    "observed_at": null
+  },
+  "balance": {
+    "metric": "CPUCreditBalance",
+    "value": 864,
+    "unit": "Credits",
+    "observed_at": "2026-11-05T07:50:00Z",
+    "display_time_zone": "UTC",
+    "observed_at_kst": "2026/11/05 16:50:00 +09:00",
+    "source": "사용자 제공 콘솔 그래프 툴팁 사진"
+  },
+  "attachment_name": "codex-clipboard-c45d3c62-7547-4342-a9bb-6e03e8bbfb1b.png",
+  "attachment_sha256": "5dfba5479beecf57ed3ece528fe896f498991932b3123155dc3c6a9ae5731b7e",
+  "notes": [
+    "865는 앞선 그래프의 축 눈금이었다. 툴팁의 실제 값 864를 사용한다.",
+    "스크린샷 원본의 계정·인스턴스 식별값은 공유 증거에 복사하지 않는다.",
+    "서버 API 조회 권한 거부·원본 null은 그대로 보존하고 이 수동 증거로 보완한다.",
+    "부하 직전·종료 후의 크레딧 관측은 새 시각으로 기록한다."
+  ]
+}

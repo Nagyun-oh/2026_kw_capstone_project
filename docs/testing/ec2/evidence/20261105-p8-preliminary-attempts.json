@@ -1,0 +1,126 @@
+{
+  "schema": "dualguard-p8-attempt-review-v1",
+  "reviewed_at": "2026-11-05T12:56:20.688817+00:00",
+  "runs": [
+    {
+      "id": "20261105T213711+0900-ec2-pilot-r01",
+      "verdict": "INCONCLUSIVE",
+      "reasons": [
+        "ai_server p95 미측정",
+        "waf_server p95 미측정",
+        "실행 미완료: CLOCK_UNCERTAINTY_OVER_20MS",
+        "입력 요청 수·확정 부하 조건 불일치",
+        "자동 중단: clock_uncertainty",
+        "종료 후 필수 Kafka lag 0 두 번 확인 부족",
+        "측정 phase 요청 없음",
+        "측정 probe 없음",
+        "측정 기간 미충족",
+        "확정 probe 송신 수 불일치"
+      ],
+      "counts": {
+        "http": 0,
+        "db": 0,
+        "probes": 0
+      },
+      "cleanup_ok": true,
+      "configuration_restored": true,
+      "contract_sha256": "3d9a84c587692e84c7771ca0f3d6f7b2fd209a35ecdad5db5eb5e8dcc1a8149f",
+      "contract_revision": 1,
+      "raw_sha256": {
+        "baseline-001.json": "2fe5c7c679bf27196edf0ce740f44ba4debf14ba8a5bdc31f2f0e0b238802830",
+        "browser-events.jsonl": "c2f17093436e8112b77dcbcaa82eb065b6d6b317b21d49aa74f680a3fd08f7e7",
+        "clock-source-check.json": "55cdafaad00cb022bf41bb5aabf5122e1ad4de0e6a76087cbfc67596a173f5cb",
+        "collection-commands.jsonl": "bc71ed356a8989364f728edea846f85a2162692a1f69643caf508cda49f17167",
+        "db-observation-preflight.json": "77e46955f4aeb27f0b67de8ceca47c3eaf50b62a5124081e400e7fd43edd5db1",
+        "host-resources.jsonl": "ed11e752074d54405b5db4206d1f44037ec64ccf40fb9090defc73f5959013c7",
+        "manifest.json": "4a974a72f7ddd34377ab558a5ef65644787a887370185aa56c5a79679cd27d90",
+        "measurement-contract.json": "5d9bb4744d1be87c59abd9535f6e9b8d84be3a22c74582360cd8dc12a17cccb8",
+        "metrics.json": "10333115b16a0171b3960383b3ce567a917a06c5042d55703dd93b43b38960a7",
+        "remote-preflight.json": "c422967fc339c09a5990b3d5474d89c7ad6d6ce811d0f899ed348482f009fb06"
+      }
+    },
+    {
+      "id": "20261105T214342+0900-ec2-pilot-r02",
+      "verdict": "INCONCLUSIVE",
+      "reasons": [
+        "입력 요청 수·확정 부하 조건 불일치"
+      ],
+      "counts": {
+        "http": 61,
+        "db": 61,
+        "probes": 6
+      },
+      "cleanup_ok": true,
+      "configuration_restored": true,
+      "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+      "contract_revision": 2,
+      "raw_sha256": {
+        "baseline-001.json": "1f23fbda9f45c00a8fed29b0e7ee859fac53f305b1a0930bc4a03aa15f521765",
+        "browser-events.jsonl": "ae094f615a17bd957c465e51ed3600099813fc8bbe6703515b0412667b5fdd60",
+        "cleanup-after-012.json": "8f7c663915c008d5b36bb95b0825c01a0f339cd3942d715d16d8c3b2f4f359b2",
+        "cleanup-before-011.json": "bfe6de57c129aca206ed73ae862e66e888f847dcaf9106d179da8f8a5d9f7c6c",
+        "client-requests.jsonl": "6f56b320207f8fc97af2dd989ba0313d2343f4ca645734185dea7b6138103489",
+        "clock-measurement.json": "0ab84e5e5eb1dbc43411a3f28d476c5efde34db80fb02ef90322b7100e2392be",
+        "clock-recovery.json": "70500f4a493787c3c26f8efd834758a530acc45788e3216d613b2014b67d591a",
+        "clock-source-check.json": "7869f59c73d5f38f36928e4f6c78efc3e7f2b6d6d2d64d76b64a55ecd258ff52",
+        "clock-warmup.json": "98dd17073276b8808e61b50f9b95f6075ba91328f8b2e3f26bead13c3e05cae6",
+        "collection-commands.jsonl": "5261543dd7e6610bf23899a5ad0beca9ab0a311d72bc3f3f39e874151d351f6d",
+        "database.json": "c4739a95589249d478c1d44dc80936f9e2b2d54277c46998830674b0ac08c380",
+        "db-observation-after.json": "b1d4dc6b5b110d6397e2fb73d16fde4021ac30e669f3a673f22375008ef28831",
+        "db-observation-before.json": "780ab951fd65e375a707a4a83e7cdb35d8f055c4365d027efe7e3226b1d77962",
+        "db-observation-comparison.json": "a9549fda968a376df38e2b9cbf0ec86f8bc7281082e7a064e1fd09d472aff8dd",
+        "db-observation-preflight.json": "90ebe19cdad15c1111381e278f11908c8f9d94c194837e7b27ba060786140537",
+        "docker-stats.jsonl": "2fc389a24adeb0206eaba391af3b5c2beee2f2a6d3b82661f2ddb07b4ae8fe85",
+        "events.jsonl": "4d33c8b2b639a5f90eafa444ad1854cd7a25e22754b38293e957dd5512ba4918",
+        "exclude-after-004.json": "46a726a0281c6ca230661c3f0a86b58c6a979da5a48a7480ec1aa1b96e0f5bb3",
+        "exclude-after-005.json": "e5ed0c5e0279f4d44f3d4d3bb9e1955c0079b7dc3f3cecc618fdfe4aa87ad22a",
+        "exclude-after-006.json": "1141b6e248d1c48ab875d51f07f414b56a5b7ab3797eaf18dc1c385bc50c3d5e",
+        "exclude-after-007.json": "cc98ae982da023e989f0743278f81f5cd2bba79918ba71c5e4a405a76f3eb7d5",
+        "exclude-after-008.json": "a22dee07921e1d743fd1983814c048fb11c69a5689b3823a976f33567c790641",
+        "exclude-after-009.json": "f25ab7e30d9217e1c7ef67bd4f8979c03c4fde7aeccf9cb6505203051b1d0ab0",
+        "exclude-after-010.json": "e3ed83174dd6b23321a66f876e08ee166c94f0e9d79fb5583a832e447b9aae28",
+        "exclude-before-003.json": "844fee5d77b3bfb1295e7ed2de392ee69ac07d1be35f6b318364c80eb5833000",
+        "exclude-command.json": "c0067501d9312af4859f01dbda7606b416b50b1adf28c598e7509c850604b80c",
+        "exclude-resource.json": "dc70e6e44b65fe8cb799f55134b3ee0274832e2a03d80dd495efa89f6c2b8dbd",
+        "host-resources.jsonl": "d04f7c26007fd43b77d1150ff2c8359f1f6bc98925a45fbfebce1ac43292cec6",
+        "https-source-002.json": "c03733528323f6b44cd5fb155112c8f66d86cbfc12b251c0e242ac487b3648e2",
+        "manifest.json": "ec84f76607b8fec7aee8140dbbc09b94f75b482e81fb530287c1c99469e148dc",
+        "measurement-contract.json": "e9995aa063e4e53d6e0e9132454b8c8fa0c5e2aaf345e836e9642542ba34a42e",
+        "metrics.json": "851c039c2ffb68f72a24d5309e77110b79ea647f77e12920a71df9091f0c528d",
+        "pipeline-events.jsonl": "18064e035c1d6f43317e15c56ee7c4323152097ad5a0d1e775bf1cb1832ab954",
+        "progress.jsonl": "edb170431a42da9c96af8070474ee06769f432527520256ed369c85611049827",
+        "recovery-http.json": "74dcd4ec784c6d9c5ba67ea9ba7750a6601c591e04bcb3156c9971e947385fc2",
+        "remote-after-measurement.json": "3a127ad96549c48a3330a655aa3969ce1e6890bfb03c6ba19fd08388edbd077c",
+        "remote-preflight.json": "a28e47510e2e51da15946a145110f6317e76930582fbbd7de6ac702af42b6a57",
+        "restore-after-015.json": "1aa3faf7b68a28a574a84d5e155f7ef02ab8e22428aea15cc1f5930f8216525d",
+        "restore-after-016.json": "7c9a9fb4a80960edc9db9ba19c519cddd087de5bd7e52f046e347b80c2c72112",
+        "restore-after-017.json": "47fbbbb4b54d29c008dde3827e10f39353b389f6c3ec379781eeae95b2ec5a10",
+        "restore-after-018.json": "380fdaac620e6585b4604d6d191498f78032f9c976cda7bbfbfb18de6ce61b2e",
+        "restore-after-019.json": "7a921595788da2057c75e711226e4f0c01ced648e56e4f3bb816fe17485a4b2b",
+        "restore-after-020.json": "3e278edf93f6dee7ecfb942fe155ba90d1e761cf424697cb0e288a4b8ecff02b",
+        "restore-after-021.json": "25d198ceeba5fafb0ca1b97a7687c5b431be244a3ef2692cea226f43c3aaa4b1",
+        "restore-before-014.json": "e2b5d773149987c10a8161a1a469afa2f76abda401495ebb28f5089f1c2a7be3",
+        "restore-command.json": "6657de66b1434adc0270f045bc19141da5e22bf38586357e74c1743d15ed79d0",
+        "restore-precheck-013.json": "e2b8ca0911bc8abc8273cc7d575b006097e570a89ee3ea7c9691c85ed21fde9e",
+        "restore-resource.json": "5202d5360f794f898a8308c084ff78cab970b96aacdfb19bad21ce70699d8963",
+        "sync-status-022.json": "ae9e5aa96bd91f92f769791a6375f41a53b5efc94735058c691b8f8e140420e8",
+        "raw/measurement-k6.log": "6ccdd195b18a4c09c952cdf895d7bb4bd18dd3f3d30765eeacd94a578aaf9062",
+        "raw/measurement-points.jsonl": "ebe082314c56f3f12242821be94615a0e536f0fde67ff1bbab9e40b19d2a5a79",
+        "raw/measurement-summary.json": "92cafc371136ce85550adc72a979a3a6c57a7af707fd9079a01dda538afa63a3",
+        "raw/warmup-k6.log": "ee7c21e3465a5796a1bfd70ffc493ccee745e9c6ad7b85d85d54a4163d3d86ab",
+        "raw/warmup-points.jsonl": "bc55089d72c7d755dab6976e71994475d8678356a38cecf508c430852b6d1315",
+        "raw/warmup-summary.json": "f864845014188d0b1af95a0934770840218a11714760fdf813b16d8f6672b91e"
+      }
+    }
+  ],
+  "clock_followup": {
+    "samples": 15,
+    "uncertainty_width_ms": 33.802734375
+  },
+  "interpretation": [
+    "r01: no load requests; clock width diagnostic design corrected prospectively in revision 2",
+    "r02: actual 61 requests all saved/AI completed; fixed input contract failed, not a formal baseline",
+    "Generator scheduler boundary capped in a new source version; server SLO remains p95 3000ms"
+  ],
+  "original_verdicts_preserved": true
+}

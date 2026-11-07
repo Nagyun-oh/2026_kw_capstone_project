@@ -1,0 +1,515 @@
+{
+  "schema": "dualguard-preparation-evidence-v1",
+  "phase": "P5_clock_resource_guards",
+  "recorded_at": "2026-11-05T10:08:46.026596+00:00",
+  "display_date": "2026/11/05",
+  "status": "IMPLEMENTATION_REGRESSION_AND_LIVE_READ_ONLY_VERIFIED",
+  "performance_verdict": "NOT_EVALUATED",
+  "load_generated": false,
+  "server_changes": false,
+  "run_id": "20261105T190322+0900-ec2-watch-r01",
+  "raw_directory": "build/test-runs/20261105T190322+0900-ec2-watch-r01",
+  "runner_head": "d6ec7c4b324c755e3c0391eba7ce6da9363fbbad",
+  "runner_working_tree_dirty": true,
+  "policy_sha256": "e7c829a0a7d34ebea7e138628453671d58663f0368318de28ea9691da208eece",
+  "policy_status": "P5_GUARD_IMPLEMENTED_P8_CONFIRMATION_PENDING",
+  "python_tests": {
+    "recorded_at": "2026-11-05T10:05:55.488430+00:00",
+    "scope": "Python regression including owned temporary process stop; live read-only observation recorded separately",
+    "tests_run": 186,
+    "failures": 0,
+    "errors": 0,
+    "successful": true,
+    "warning_categories": []
+  },
+  "clock_calibration": {
+    "offset_lower_ms": 329.475341796875,
+    "offset_upper_ms": 334.557373046875,
+    "uncertainty_width_ms": 5.08203125,
+    "samples": 5,
+    "calibrated_at": "2026-11-05T10:03:23.026180+00:00",
+    "observed_monotonic": 170870.9616998,
+    "direction": "server_epoch_minus_generator_epoch",
+    "method": "four_timestamp_offset_interval",
+    "resolution_margin_ms": 1
+  },
+  "clock_roundtrip_ms": [
+    47.52529997495003,
+    4.476600006455556,
+    4.3277999793644994,
+    3.9758000057190657,
+    3.903199976775795
+  ],
+  "resource_samples": [
+    {
+      "at": "2026-11-05T10:03:23.337446+00:00",
+      "generator_memory": {
+        "total_bytes": 17063960576,
+        "available_bytes": 5216083968,
+        "source": "Windows GlobalMemoryStatusEx"
+      },
+      "server_memory": {
+        "total_bytes": 8195919872,
+        "available_bytes": 5104201728,
+        "source": "Linux /proc/meminfo"
+      },
+      "cpu_interval": null,
+      "ntp_synced": true,
+      "roundtrip_ms": 309.4165000075009,
+      "containers": [
+        {
+          "service": "waf",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "frontend",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "backend",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "db",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "ai",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "fluent-bit",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "kafka",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "juiceshop",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "zookeeper",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T10:03:28.502651+00:00",
+      "generator_memory": {
+        "total_bytes": 17063960576,
+        "available_bytes": 5149110272,
+        "source": "Windows GlobalMemoryStatusEx"
+      },
+      "server_memory": {
+        "total_bytes": 8195919872,
+        "available_bytes": 5123874816,
+        "source": "Linux /proc/meminfo"
+      },
+      "cpu_interval": {
+        "generator": {
+          "busy_percent": 4.103726082578047,
+          "steal_percent": null
+        },
+        "server": {
+          "busy_percent": 8.571428571428571,
+          "steal_percent": 0.7619047619047619
+        }
+      },
+      "ntp_synced": null,
+      "roundtrip_ms": 173.6082000134047,
+      "containers": [
+        {
+          "service": "waf",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "frontend",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "backend",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "db",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "ai",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "fluent-bit",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "kafka",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "juiceshop",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "zookeeper",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T10:03:33.831278+00:00",
+      "generator_memory": {
+        "total_bytes": 17063960576,
+        "available_bytes": 5151559680,
+        "source": "Windows GlobalMemoryStatusEx"
+      },
+      "server_memory": {
+        "total_bytes": 8195919872,
+        "available_bytes": 5100699648,
+        "source": "Linux /proc/meminfo"
+      },
+      "cpu_interval": {
+        "generator": {
+          "busy_percent": 2.666340508806262,
+          "steal_percent": null
+        },
+        "server": {
+          "busy_percent": 13.580246913580247,
+          "steal_percent": 1.2345679012345678
+        }
+      },
+      "ntp_synced": null,
+      "roundtrip_ms": 318.2929999893531,
+      "containers": [
+        {
+          "service": "waf",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "frontend",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "backend",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "db",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "ai",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "fluent-bit",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "kafka",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "juiceshop",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "zookeeper",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T10:03:38.992525+00:00",
+      "generator_memory": {
+        "total_bytes": 17063960576,
+        "available_bytes": 5154508800,
+        "source": "Windows GlobalMemoryStatusEx"
+      },
+      "server_memory": {
+        "total_bytes": 8195919872,
+        "available_bytes": 5101281280,
+        "source": "Linux /proc/meminfo"
+      },
+      "cpu_interval": {
+        "generator": {
+          "busy_percent": 4.490413723511604,
+          "steal_percent": null
+        },
+        "server": {
+          "busy_percent": 42.254901960784316,
+          "steal_percent": 0.5882352941176471
+        }
+      },
+      "ntp_synced": null,
+      "roundtrip_ms": 156.79330000421032,
+      "containers": [
+        {
+          "service": "waf",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "frontend",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "backend",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "db",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "ai",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "fluent-bit",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "kafka",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "juiceshop",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "zookeeper",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T10:03:44.188531+00:00",
+      "generator_memory": {
+        "total_bytes": 17063960576,
+        "available_bytes": 5135622144,
+        "source": "Windows GlobalMemoryStatusEx"
+      },
+      "server_memory": {
+        "total_bytes": 8195919872,
+        "available_bytes": 5112864768,
+        "source": "Linux /proc/meminfo"
+      },
+      "cpu_interval": {
+        "generator": {
+          "busy_percent": 5.672690763052208,
+          "steal_percent": null
+        },
+        "server": {
+          "busy_percent": 5.93385214007782,
+          "steal_percent": 0.6809338521400778
+        }
+      },
+      "ntp_synced": null,
+      "roundtrip_ms": 193.4744000027422,
+      "containers": [
+        {
+          "service": "waf",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "frontend",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "backend",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "db",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "ai",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "fluent-bit",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "kafka",
+          "running": true,
+          "oom_killed": false,
+          "health": "healthy",
+          "restart_count": 0
+        },
+        {
+          "service": "juiceshop",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        },
+        {
+          "service": "zookeeper",
+          "running": true,
+          "oom_killed": false,
+          "health": null,
+          "restart_count": 0
+        }
+      ]
+    }
+  ],
+  "guard_abort": null,
+  "source_sha256_current": {
+    "scripts/testing/ec2_watch.py": "f28aea46281c74042b70d125ad51a6c74a5b9272625e355d038fb57bde2568d7",
+    "scripts/testing/ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+    "scripts/testing/run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+    "scripts/testing/test_ec2_watch.py": "108f301c1ec5a2ac4bea7cc5e13c6bdc62a005dc65b0164a5f8a11507fef2851",
+    "scripts/testing/profiles/ec2-observation-v1.json": "e7c829a0a7d34ebea7e138628453671d58663f0368318de28ea9691da208eece",
+    "scripts/testing/e2e_core.py": "43120d291dc80031f91b4747ddb04c243f9d69e9f30a5130eb11f100eab42ddc",
+    "scripts/testing/run_e2e.py": "ea37f0129199408a3e4a68e88a7cadd3a60fc0e2222136b9ff1812afa7ce478c",
+    "scripts/testing/e2e_environment.py": "de28346a1513a9351ca2067e4b42b3237fa0c3f55a25cc64886e6ab5c99d1f13",
+    "scripts/testing/profiles/ec2-e2e-v1.json": "f675cc67b6ac8a1b14bb99691d7349bc15cc7bb79158e25810d8286b54c4e138"
+  },
+  "raw_sha256": {
+    "clock.json": "6924445cf4fcce0daeaaf5dee61be93a02467d9f0c1b510848b81ad4f503cd38",
+    "manifest.json": "7551bb51b3d43b466e622657447f4973ee022fa9f5021912af2d9f87f3946dc3",
+    "sample-01.json": "426f40ca2d147373edbe4a6f40a733d7e9d6e25f94c77853dc5dfa6e693bddbd",
+    "sample-02.json": "5094d3fa7fb50af48a33c30e04efa4020d676db3235afccf4ecffebe3a51abc6",
+    "sample-03.json": "24fbefd280379cb7bf605433fd03f0a5903e3e99dadff51f7476cc94c3f4b9c3",
+    "sample-04.json": "d72315b650ae40c4e3b00905ed68b61a7bb77c938bdb07ec67c52fec90333f67",
+    "sample-05.json": "b5fb0e909abb197bc5c8569d9e302a7bd0eb898c997d9a0e2bca2ad5780849c8",
+    "summary.json": "db11efcd70c3ac9f505aaebe5e1f44ad39e7224867e9b37aa26f4284d397503d"
+  },
+  "limitations": [
+    "신규 부하나 장애는 주입하지 않았다.",
+    "CPU 크레딧 최신값·Windows NTP 상태·실제 네트워크 포화는 미측정이다.",
+    "시계 오프셋은 이 회차의 구간 관측이다. 영구 상수로 사용하지 않는다.",
+    "소유한 임시 프로세스 중단은 테스트로 확인했다. 앱 OOM·재시작 장애는 주입하지 않았다.",
+    "실제 E2E의 감시 제공자 구성·성능 SLO·최종 목표와 중단 계약은 P6~P8에서 연결·확정한다."
+  ]
+}

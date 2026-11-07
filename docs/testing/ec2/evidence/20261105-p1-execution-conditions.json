@@ -1,0 +1,54 @@
+{
+  "schema": "dualguard-ec2-p1-decisions-v1",
+  "id": "20261105T172253+0900-ec2-execution-conditions-r01",
+  "recorded_at": "2026-11-05T17:22:53.245515+09:00",
+  "decisions": {
+    "generator": "current_windows_pc",
+    "browser": "same_current_windows_pc",
+    "ip_policy": "temporary_single_generator_public_ip_exclusion",
+    "time_window": "after_preparation_team_not_using_confirmed_by_user",
+    "login": "manual_in_real_ec2_dashboard_no_saved_credentials"
+  },
+  "generator": {
+    "alias": "generator-a",
+    "os": "Windows 11 Pro",
+    "os_version": "10.0.26200",
+    "cpu": "AMD Ryzen 5 5600",
+    "physical_cores": 6,
+    "logical_cpus": 12,
+    "memory_observed": {
+      "total_bytes": 17063960576,
+      "available_bytes": 2846810112,
+      "source": "Windows GlobalMemoryStatusEx"
+    },
+    "tools": {
+      "python": "3.12.7",
+      "playwright": "1.64.1",
+      "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+      "chrome": "156.0.8078.80"
+    }
+  },
+  "access": {
+    "generator_alias": "generator-a",
+    "observed_at": "2026-11-05T08:22:54.398972+00:00",
+    "source_is_global": true,
+    "waf_exclusion_configured": false,
+    "waf_exclusion_entry_count": 0,
+    "database_blacklisted": false,
+    "actual_ip_saved_only_in_ignored_raw": true,
+    "https_client_ip_verified": false
+  },
+  "applied": {
+    "waf_exclusion": false,
+    "server_restart": false,
+    "load": false
+  },
+  "p1_decisions_complete": true,
+  "load_readiness": false,
+  "pending": [
+    "EC2 실행기·원격 수집·시계·중단 감시 준비",
+    "실행 직전 발생기·서버 각각 2GiB 이상 여유 메모리 확인",
+    "발생기 IP 하나만 임시 제외 적용·실제 HTTPS 출구 IP 대조",
+    "관리자 직접 로그인·소량 E2E 연결·P8 기준 확정"
+  ]
+}

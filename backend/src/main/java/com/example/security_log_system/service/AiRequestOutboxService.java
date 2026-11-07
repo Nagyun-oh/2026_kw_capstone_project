@@ -20,6 +20,7 @@ public class AiRequestOutboxService {
 
     private final AiRequestOutboxRepository repository;
     private final ObjectMapper objectMapper;
+    private final AiRequestOutboxWakeup wakeup;
 
     public record Job(
             long logId,
@@ -41,6 +42,10 @@ public class AiRequestOutboxService {
             String payload = objectMapper.writeValueAsString(request);
 
             repository.insert(request.getLogId(),payload);
+
+            // 로그 저장 트랜잭션이 커밋된 뒤 발행기를 바로 깨운다.
+            // 롤백되면 깨우지 않고, 깨우기에 실패해도 주기 조회가 이 행을 처리한다.
+            wakeup.requestAfterCommit();
         }catch (JsonProcessingException exception){
             throw new IllegalStateException("AI request seralization failed",exception);
         }

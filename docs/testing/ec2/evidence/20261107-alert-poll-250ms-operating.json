@@ -1,0 +1,18 @@
+{
+  "at": "2026-11-07T05:20:56.665074+00:00",
+  "applied": true,
+  "poll_delay_ms": 250,
+  "same_backend_image": true,
+  "same_app_sha": true,
+  "health": "UP",
+  "frontend_auth_http": 401,
+  "frontend_restarted": false,
+  "backend_recreated": true,
+  "restart_policy": "unless-stopped",
+  "operator_override": "/home/ubuntu/.config/dualguard/compose.alerts.override.yaml",
+  "base_compose_unmodified": true,
+  "collection_status": "COLLECTED",
+  "running_services": 9,
+  "waf_health": "healthy",
+  "required_lag_zero": true
+}

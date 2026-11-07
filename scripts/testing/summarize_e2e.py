@@ -16,7 +16,8 @@ def summarize(paths):
         path = Path(path)
         manifest = json.loads((path/'manifest.json').read_text(encoding='utf-8'))
         metrics = json.loads((path/'metrics.json').read_text(encoding='utf-8'))
-        if manifest.get('schema') != 'local-e2e-v2' or manifest.get('connection_check'):
+        if (manifest.get('schema') != 'local-e2e-v2' or manifest.get('connection_check')
+                or manifest.get('environment', 'local') != 'local'):
             raise ValueError('본 측정 v2 회차만 합산할 수 있습니다.')
         if any(manifest.get(k) is None for k in ('rate', 'seconds', 'warmup_seconds', 'fixture_sha256',
                   'contract_sha256', 'runner_files_sha256', 'app_sources_sha256', 'versions', 'images')):
@@ -29,6 +30,9 @@ def summarize(paths):
             'fixture_sha256', 'contract_sha256', 'runner_files_sha256', 'app_sources_sha256',
             'ip_policy_confirmed', 'versions')})
         keys[-1]['image_digests'] = sorted(row.split()[-1] for row in manifest.get('images', []))
+        keys[-1].update(environment=manifest.get('environment', 'local'),
+                        target_url=manifest.get('target_url', 'http://localhost/'),
+                        dashboard_url=manifest.get('dashboard_url', 'http://localhost:3000/'))
         for name, values in metrics.get('latency_samples_ms', {}).items():
             if not isinstance(values, list) or any(type(v) not in (int, float) or not math.isfinite(v) or v < 0 for v in values):
                 raise ValueError('합산 원본 지연 표본 형식 오류')
