@@ -16,6 +16,10 @@ STAGES = {'LOG_COMMITTED', 'AI_RESULT_COMMITTED', 'AI_RESULT_DUPLICATE',
           'WAF_COMMITTED', 'ALERT_SEND_BEGIN', 'ALERT_SEND_RETURNED'}
 
 
+class ClockObservationError(ValueError):
+    """응답 식별값은 있지만 현재 보정 구간으로 시각을 확인하지 못했다."""
+
+
 def finite(value):
     return type(value) in (int, float) and math.isfinite(value)
 
@@ -41,7 +45,8 @@ def fixture(path=FIXTURE):
     return value, hashlib.sha256(raw).hexdigest()
 
 
-def client_record(phase, kind, sequence, headers, status, duration_ms, sent_ms, ended_ms, c0=None):
+def client_record(phase, kind, sequence, headers, status, duration_ms, sent_ms, ended_ms, c0=None, *, clock=None,
+                  client_clock_resolution_ms=0):
     headers = {k.lower(): str(v) for k, v in headers.items()}
     request_id = headers.get('x-request-id', '')
     try:
@@ -54,15 +59,26 @@ def client_record(phase, kind, sequence, headers, status, duration_ms, sent_ms, 
         raise ValueError('실험 phase·kind 오류')
     if not all(finite(v) for v in (duration_ms, sent_ms, ended_ms)) or duration_ms < 0 or ended_ms < sent_ms:
         raise ValueError('클라이언트 시각 오류')
+    if client_clock_resolution_ms not in (0,1):
+        raise ValueError('지원하지 않는 클라이언트 시각 해상도')
     # HTTP 송신~응답 사이여야 같은 머신/VM의 UTC 시계가 모순되지 않는다.
-    if not sent_ms - 100 <= start * 1000 <= ended_ms + 100:
-        raise ValueError('WAF·발생기 시계 차이가 허용 관측 오차 100ms를 넘었습니다.')
+    if clock is None:
+        if not sent_ms - 100 <= start * 1000 <= ended_ms + 100:
+            raise ValueError('WAF·발생기 시계 차이가 허용 관측 오차 100ms를 넘었습니다.')
+    else:
+        from ec2_watch import ingress_in_clock_interval
+        calibrations = [clock, *clock.get('previous_calibrations', [])]
+        if not any(ingress_in_clock_interval(start*1000,sent_ms,ended_ms,item,
+                       ingress_resolution_ms=1,client_resolution_ms=client_clock_resolution_ms)
+                   for item in calibrations):
+            raise ClockObservationError('WAF 시각이 EC2 보정 구간 밖이거나 보정이 오래됐습니다.')
     return dict(phase=phase, kind=kind, sequence=int(sequence), requestId=request_id,
                 ingress=start, status=int(status), duration_ms=duration_ms,
-                sent_ms=sent_ms, ended_ms=ended_ms, c0=c0)
+                sent_ms=sent_ms, ended_ms=ended_ms, c0=c0,
+                clock_resolution_ms=dict(ingress=1,client=client_clock_resolution_ms))
 
 
-def parse_points(path, *, partial=False):
+def parse_points(path, *, partial=False, clock=None):
     rows = []
     text = Path(path).read_text(encoding='utf-8')
     lines = text.splitlines()
@@ -75,7 +91,8 @@ def parse_points(path, *, partial=False):
         tags = point['data']['tags']
         rows.append(client_record(tags['phase'], tags['kind'], tags['sequence'],
                     {'x-request-id': tags['request_id'], 'x-dualguard-request-start': tags['ingress']},
-                    tags['status'], point['data']['value'], float(tags['sent_at_ms']), float(tags['ended_at_ms'])))
+                    tags['status'], point['data']['value'], float(tags['sent_at_ms']), float(tags['ended_at_ms']),
+                    clock=clock,client_clock_resolution_ms=1))
     return rows
 
 
@@ -228,7 +245,8 @@ def evaluate(clients, traces, database, browser, spec, *, errors=(), abort=None,
             (failures if observation_complete else unknowns).append('알림 최신 revision 수신 미확인')
         if waf_at is not None or c['kind'] == 'probe':
             waf_ms = delay('waf_server', waf_at, start)
-            if c['kind'] == 'probe' and waf_ms is not None and waf_ms > targets['waf_server_probe_deadline_ms']:
+            if (c['kind'] == 'probe' and waf_ms is not None and targets['waf_server_probe_deadline_ms'] is not None
+                    and waf_ms > targets['waf_server_probe_deadline_ms']):
                 failures.append('WAF probe 저장 기한 초과')
         if c['kind'] != 'probe':
             continue
@@ -244,14 +262,17 @@ def evaluate(clients, traces, database, browser, spec, *, errors=(), abort=None,
                 observed = min((b['observed'] for b in browser if b.get('kind') == kind
                     and b.get('alertId') == alert_id and source in b.get('sources', [])), default=None)
                 ms = delay(source + '_' + metric, observed, c.get('c0'))
-                if ms is not None and ms > targets[limit]:
+                if ms is not None and targets[limit] is not None and ms > targets[limit]:
                     failures.append(source + ' ' + metric + ' 기한 초과')
                 elif observed is None and produced and sends and observation_complete:
                     failures.append(source + ' ' + metric + ' 최종 관측 기한까지 미도착')
             if not row.get('aiDetected' if source == 'AI' else 'wafDetected'):
                 unknowns.append(source + ' probe 기대 탐지 미확인')
     stats = {k: distribution(v) for k, v in values.items()}
-    for key, limit in [('http', targets['http_request_path_p95_ms']), ('ai_server', targets['ai_server_e2e_p95_ms'])]:
+    checks=[('http',targets['http_request_path_p95_ms']),('ai_server',targets['ai_server_e2e_p95_ms'])]
+    if 'waf_server_e2e_p95_ms' in targets: checks.append(('waf_server',targets['waf_server_e2e_p95_ms']))
+    for key,limit in checks:
+        if limit is None: continue
         p95 = stats[key]['p95_ms']
         if p95 is None:
             unknowns.append(key + ' p95 미측정')
@@ -261,7 +282,7 @@ def evaluate(clients, traces, database, browser, spec, *, errors=(), abort=None,
         unknowns.append('측정 probe 없음')
     if abort:
         (failures if abort['verdict'] == 'FAIL' else unknowns).append('자동 중단: ' + abort['code'])
-    return dict(version='local-e2e-v2', verdict='FAIL' if failures else 'INCONCLUSIVE' if unknowns else 'PASS',
+    return dict(version=spec.get('version','local-e2e-v2'), verdict='FAIL' if failures else 'INCONCLUSIVE' if unknowns else 'PASS',
                 reasons=sorted(set(failures + unknowns)) or ['출처별 서버·브라우저·DOM 및 정합성 기준 충족'],
                 stats_ms=stats, missing=missing, links=links,
                 latency_samples_ms=values,

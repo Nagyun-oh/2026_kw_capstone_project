@@ -97,9 +97,9 @@ def arguments(argv=None):
     return a
 
 
-def reserve(root, run_id):
-    output = root / "build" / "test-runs" / run_id
-    report = root / "docs" / "testing" / "local" / "runs" / (run_id + ".md")
+def reserve(root, run_id, environment="local"):
+    from e2e_environment import result_paths
+    output, report = result_paths(root, run_id, environment)
     if output.exists() or report.exists():
         raise FileExistsError("같은 실험 ID가 이미 있습니다.")
     output.mkdir(parents=True, exist_ok=False)

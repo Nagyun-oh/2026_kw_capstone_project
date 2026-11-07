@@ -1,0 +1,73 @@
+{
+  "version": "ec2-e2e-v1",
+  "revision": 2,
+  "status": "CONFIRMED_ENGINEERING_CONTRACT",
+  "executable": true,
+  "execution_profile": "scripts/testing/run_ec2_e2e.py",
+  "confirmed_on": "2026/11/05",
+  "environment": "ec2",
+  "scope": {
+    "server_pipeline": ["http-access-log-ai", "http-waf-detection"],
+    "browser": "external_network_and_browser_latency_reported_separately",
+    "detection_accuracy": "security_team_separate_scope"
+  },
+  "proposal": {
+    "total_rates_per_second": [1, 3, 5],
+    "measurement_seconds": 120,
+    "warmup_seconds": 30,
+    "status": "SUPERSEDED_BY_CONFIRMED_WORKLOAD"
+  },
+  "workload": {
+    "total_rates_per_second": [1, 3, 5],
+    "measurement_seconds": 120,
+    "warmup_seconds_per_repetition": 30,
+    "repetitions_per_rate": 3,
+    "probe_interval_seconds": 10,
+    "final_observation_seconds": 60,
+    "lag_confirmation_interval_seconds": 10,
+    "lag_zero_consecutive_samples": 2,
+    "pilot_rate": 1,
+    "pilot_seconds": 60
+  },
+  "initial_targets": {
+    "status": "project_engineering_targets_not_production_sla",
+    "http_request_path_p95_ms": null,
+    "ai_server_e2e_p95_ms": 3000,
+    "waf_server_e2e_p95_ms": 3000,
+    "waf_server_probe_deadline_ms": null,
+    "browser_source_probe_deadline_ms": null,
+    "dom_source_probe_deadline_ms": null,
+    "unnecessary_duplicate_db_results": 0,
+    "duplicate_popup_for_same_alert_revision": 0
+  },
+  "statistics": {
+    "record": ["count", "avg", "p50", "p95", "p99", "max", "missing"],
+    "p99_role": "reference_only",
+    "http_and_browser_latency": "external_pc_observation_separate_from_server_slo",
+    "eps": "unique_run_requests_and_committed_outcomes_separate_from_detection_event_count"
+  },
+  "clock_policy": {
+    "require_consistent_offset_interval": true,
+    "max_age_seconds": 300,
+    "precision_reference_width_ms": 20,
+    "width_role": "diagnostic_only_independent_server_and_pc_clock_domains",
+    "cross_domain_latency_subtraction": false
+  },
+  "stop": {
+    "min_available_memory_bytes": 1073741824,
+    "low_memory_seconds": 15,
+    "consecutive_collection_failures": 2,
+    "resource_interval_seconds": 5,
+    "http_window_seconds": 10,
+    "http_min_samples": 5,
+    "http_error_rate": 0.1,
+    "oldest_incomplete_request_seconds": 60
+  },
+  "observation_policy": "scripts/testing/profiles/ec2-observation-v1.json",
+  "readiness_pending": [],
+  "notes": [
+    "고정 계약을 검증하는 run_ec2_e2e.py 전용 경로로 실행한다. 실제 구현·예비 측정 검증 상태는 EC2 목차에 기록한다. 기존 run_e2e.py의 EC2 실행 경로는 계속 차단한다.",
+    "PC HTTP·브라우저 지연과 EC2 서버 내부 지연을 분리한다.",
+    "목표 요청률의 실제 송신·서버 도착 여부와 발생기 자원을 확인해야 한다."
+  ]
+}
