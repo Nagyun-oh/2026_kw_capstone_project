@@ -521,7 +521,7 @@ sudo docker compose --env-file .env.aws -f compose.aws.yaml images
 sudo docker compose --env-file .env.aws -f compose.aws.yaml ps -a
 ```
 
-CD는 `git fetch --quiet origin main`으로 코드를 가져와 배포 SHA로 `checkout --detach`한 뒤, 새 이미지를 pull하고 컨테이너를 재생성하며 `.env.aws`의 `IMAGE_*` 값을 갱신한다. EC2의 detached HEAD는 정상적인 배포 상태이며, Actions 배포 전에 SSH에서 별도로 `git pull`할 필요는 없다. 이미지에 포함되는 `frontend/nginx.conf`는 호스트 파일 편집이나 컨테이너 `restart`만으로 교체되지 않는다. 환경변수 변경도 재생성이 필요하다. 호스트 Nginx 설정은 2절처럼 별도로 검사·reload한다.
+CD는 `git fetch --quiet origin main`으로 코드를 가져와 배포 SHA로 `checkout --detach`한 뒤, 새 이미지를 pull하고 컨테이너를 재생성하며 `.env.aws`의 `IMAGE_*` 값을 갱신한다. EC2의 detached HEAD는 정상적인 배포 상태이며, Actions 배포 전에 SSH에서 별도로 `git pull`할 필요는 없다. `compose up -d`는 이미지가 같아도 Compose 설정(환경변수, 볼륨, healthcheck 등)이 바뀐 서비스를 재생성한다. 예를 들어 Kafka healthcheck 간격을 바꾼 배포에서는 Kafka 컨테이너가 한 번 재시작된다. 데이터는 `kafka-data` 볼륨에 남고, backend·ai·fluent-bit은 Kafka가 다시 healthy가 될 때까지 기동을 기다린다. 이미지에 포함되는 `frontend/nginx.conf`는 호스트 파일 편집이나 컨테이너 `restart`만으로 교체되지 않는다. 환경변수 변경도 재생성이 필요하다. 호스트 Nginx 설정은 2절처럼 별도로 검사·reload한다.
 
 ### 수동 복구와 롤백
 

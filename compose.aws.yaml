@@ -71,10 +71,14 @@ services:
         - --bootstrap-server
         - kafka:29092
         - --list
-      interval: 15s
+      # kafka-topics는 실행할 때마다 JVM을 띄워 회당 약 3.8 CPU초를 쓴다(15초 간격이면 상시 약 0.22 vCPU).
+      # 확인 방식은 유지하고, 기동 중(start_period)에만 5초 간격, 이후에는 60초 간격으로 확인한다.
+      # 연속 실패로 unhealthy가 되는 시간은 이전(15초 × 12회)과 같은 약 3분(60초 × 3회)으로 맞춘다.
+      interval: 60s
       timeout: 10s
-      retries: 12
-      start_period: 40s
+      retries: 3
+      start_period: 120s
+      start_interval: 5s
   # ────────────────── Spring Boot ──────────────────────
   backend:
     build:
