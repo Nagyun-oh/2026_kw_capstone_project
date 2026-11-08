@@ -36,6 +36,14 @@ function LoginPage({onLogin,noticeMessage = ''}){
 
             if(httpStatus === 401){
                 setErrorMessage("아이디 또는 비밀번호를 확인해주세요.");
+            } else if(httpStatus === 429){
+                // 실패가 반복돼 잠긴 경우: 서버가 Retry-After(초)로 남은 시간을 알려준다
+                const retryAfter = Number(error.response?.headers?.['retry-after']);
+                const minutes = Number.isFinite(retryAfter) && retryAfter > 0
+                    ? Math.ceil(retryAfter / 60) : null;
+                setErrorMessage(minutes
+                    ? `로그인 실패가 반복되어 잠시 잠겼습니다. 약 ${minutes}분 후 다시 시도해주세요.`
+                    : "로그인 실패가 반복되어 잠시 잠겼습니다. 잠시 후 다시 시도해주세요.");
             } else if(httpStatus === 403){
                 setErrorMessage("요청이 거부되었습니다. 페이지를 새로고침한 뒤 다시 시도해주세요.");
             } else if(httpStatus ===400){

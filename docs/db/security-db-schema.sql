@@ -85,46 +85,13 @@ CREATE TABLE `network_logs` (
   `raw_log` text,
   `request_method` varchar(255) DEFAULT NULL,
   `request_url` text,
+  `request_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_bin DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_network_logs_request_id` (`request_id`),
   KEY `idx_network_logs_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `SPRING_SESSION`
---
-
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `SPRING_SESSION` (
-  `PRIMARY_ID` char(36) NOT NULL,
-  `SESSION_ID` char(36) NOT NULL,
-  `CREATION_TIME` bigint NOT NULL,
-  `LAST_ACCESS_TIME` bigint NOT NULL,
-  `MAX_INACTIVE_INTERVAL` int NOT NULL,
-  `EXPIRY_TIME` bigint NOT NULL,
-  `PRINCIPAL_NAME` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`PRIMARY_ID`),
-  UNIQUE KEY `SPRING_SESSION_IX1` (`SESSION_ID`),
-  KEY `SPRING_SESSION_IX2` (`EXPIRY_TIME`),
-  KEY `SPRING_SESSION_IX3` (`PRINCIPAL_NAME`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `SPRING_SESSION_ATTRIBUTES`
---
-
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `SPRING_SESSION_ATTRIBUTES` (
-  `SESSION_PRIMARY_ID` char(36) NOT NULL,
-  `ATTRIBUTE_NAME` varchar(200) NOT NULL,
-  `ATTRIBUTE_BYTES` blob NOT NULL,
-  PRIMARY KEY (`SESSION_PRIMARY_ID`,`ATTRIBUTE_NAME`),
-  CONSTRAINT `SPRING_SESSION_ATTRIBUTES_FK` FOREIGN KEY (`SESSION_PRIMARY_ID`) REFERENCES `SPRING_SESSION` (`PRIMARY_ID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
-/*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -190,6 +157,89 @@ CREATE TABLE waf_sync_status (
     CONSTRAINT fk_ai_outbox_log
         FOREIGN KEY (log_id)
         REFERENCES network_logs (id)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_bin;
+
+-- 아래 세 테이블과 network_logs.request_id는 새 DB에서 이 파일 하나로 만들어지도록 포함했다.
+-- 기존 DB에는 각각 add-request-correlation.sql, add-waf-detections.sql, add-request-alerts.sql을 한 번만 적용한다.
+
+-- 요청 단위 상관관계 잠금 행 (RequestCorrelationService)
+CREATE TABLE request_correlations (
+    request_id VARCHAR(255)
+        CHARACTER SET utf8mb4
+        COLLATE utf8mb4_0900_bin
+        NOT NULL,
+
+    PRIMARY KEY (request_id)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_bin;
+
+-- WAF 탐지 상세 (WafDetectionWriter)
+CREATE TABLE waf_detections (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+
+    request_id VARCHAR(255)
+        CHARACTER SET utf8mb4
+        COLLATE utf8mb4_0900_bin
+        NOT NULL,
+
+    threat_id BIGINT NOT NULL,
+
+    client_ip VARCHAR(45) NOT NULL,
+    request_method TEXT NOT NULL,
+    request_path TEXT NOT NULL,
+    response_status INT NULL,
+
+    anomaly_score INT NULL,
+    matched_rules_json LONGTEXT NOT NULL,
+
+    event_time_raw TEXT NOT NULL,
+    occurred_at DATETIME(6) NULL,
+    received_at DATETIME(6) NOT NULL,
+
+    PRIMARY KEY (id),
+
+    CONSTRAINT uk_waf_detections_request_id
+        UNIQUE (request_id),
+
+    CONSTRAINT uk_waf_detections_threat_id
+        UNIQUE (threat_id),
+
+    CONSTRAINT fk_waf_detections_threat
+        FOREIGN KEY (threat_id)
+        REFERENCES detected_threats (id),
+
+    INDEX idx_waf_detections_occurred_at (occurred_at)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
+
+-- 요청별 통합 알림과 커밋 후 발행 대기 상태 (RequestAlertService)
+CREATE TABLE request_alerts (
+    alert_key VARCHAR(300)
+        CHARACTER SET utf8mb4
+        COLLATE utf8mb4_0900_bin
+        NOT NULL,
+
+    alert_id CHAR(36) NOT NULL,
+    client_ip VARCHAR(45) NULL,
+
+    waf_detected BOOLEAN NOT NULL DEFAULT FALSE,
+    ai_detected BOOLEAN NOT NULL DEFAULT FALSE,
+    alert_level INT NOT NULL DEFAULT 0,
+
+    revision BIGINT NOT NULL DEFAULT 0,
+    published_revision BIGINT NOT NULL DEFAULT 0,
+    pending BOOLEAN NOT NULL DEFAULT FALSE,
+
+    created_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6) NOT NULL,
+
+    PRIMARY KEY (alert_key),
+    CONSTRAINT uk_request_alerts_alert_id UNIQUE (alert_id),
+    INDEX idx_request_alerts_pending (pending, updated_at)
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_0900_bin;

@@ -2,7 +2,7 @@
 
 가짜 백엔드(HTTP 서버)와 호출만 기록하는 가짜 nginx를 사용한다. 가짜 백엔드는 스냅샷 조회(GET)와
 상태 보고(POST /internal/waf/sync-status)를 받는다. 실제 백엔드 보고 API가 아직 없어 보고 형식은
-docs/waf-sync-status-api.md 초안을 기준으로 검증한다.
+docs/design/05_waf_sync.md 초안을 기준으로 검증한다.
 장애 재현용으로 지정한 파일의 mv를 한 번 실패시키는 가짜 mv와, reload 뒤 worker 교체를 늦추는 기능을 둔다.
 """
 

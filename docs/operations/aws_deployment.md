@@ -2,7 +2,7 @@
 
 ## 1. 범위와 검증 기록
 
-단일 EC2에서 [compose.aws.yaml](../compose.aws.yaml)로 9개 서비스를 실행하는 개발·시연 환경이다. 로컬 전용 [compose.yaml](../compose.yaml)과 혼합해서 실행하지 않는다.
+단일 EC2에서 [compose.aws.yaml](../../compose.aws.yaml)로 9개 서비스를 실행하는 개발·시연 환경이다. 로컬 전용 [compose.yaml](../../compose.yaml)과 혼합해서 실행하지 않는다.
 
 현재 접속 구성은 **DuckDNS 도메인 + EC2 호스트 Nginx의 HTTPS + 프론트 컨테이너**다. 앱 이미지 배포는 GitHub Actions의 **Deploy to EC2**를 수동 실행하는 방식이다. PR 머지만으로 배포되지는 않는다.
 
@@ -22,7 +22,7 @@
 | EC2 중지·시작 | 사용자가 기존 데이터 보존 및 새 요청 처리 확인 |
 | 자동 기동·백업 복구·부하 테스트 | 별도 검증 필요 |
 
-당시 배포 버전은 관리 API 접근을 보안 그룹으로 제한했다. 새 버전은 HTTP 세션·CSRF·관리자 권한 검사를 적용하며, AWS 통합 검증은 새 이미지 배포 후 수행한다. 당시 WAF는 `DetectionOnly`였고 블랙리스트 표시가 실제 WAF 차단을 의미하지 않았다. 이후 블랙리스트 자동 동기화([waf/README.md](../waf/README.md#블랙리스트-자동-동기화))를 추가해 블랙리스트 IP의 요청만 WAF에서 403으로 차단한다. 로컬에서 검증했으며 AWS 검증은 배포 후 수행한다.
+당시 배포 버전은 관리 API 접근을 보안 그룹으로 제한했다. 새 버전은 HTTP 세션·CSRF·관리자 권한 검사를 적용하며, AWS 통합 검증은 새 이미지 배포 후 수행한다. 당시 WAF는 `DetectionOnly`였고 블랙리스트 표시가 실제 WAF 차단을 의미하지 않았다. 이후 블랙리스트 자동 동기화([waf/README.md](../../waf/README.md#블랙리스트-자동-동기화))를 추가해 블랙리스트 IP의 요청만 WAF에서 403으로 차단한다. 로컬에서 검증했으며 AWS 검증은 배포 후 수행한다.
 
 ### 1-2. HTTPS 전환 진행 상태 (2026-10-08 기준)
 
@@ -249,13 +249,13 @@ proxy_pass http://backend:8080;
 
 현재 저장소는 서비스 이름 `backend`를 사용한다. EC2에서만 고치지 말고 변경을 PR에 포함한다. 이미지 이름과 서비스 이름을 혼동하지 않는다.
 
-[frontend/nginx.conf](../frontend/nginx.conf)는 로컬·AWS 이미지에 공통으로 포함된다. 두 경로 모두 `X-Forwarded-Proto`를 `$original_scheme`으로 전달하여 앞단의 HTTPS 정보를 보존한다. 전달 헤더가 없는 로컬 HTTP 환경은 `$scheme`을 사용한다. AWS에서는 2-3절의 호스트 헤더 설정 및 3000번 내부 바인딩과 함께 적용한다.
+[frontend/nginx.conf](../../frontend/nginx.conf)는 로컬·AWS 이미지에 공통으로 포함된다. 두 경로 모두 `X-Forwarded-Proto`를 `$original_scheme`으로 전달하여 앞단의 HTTPS 정보를 보존한다. 전달 헤더가 없는 로컬 HTTP 환경은 `$scheme`을 사용한다. AWS에서는 2-3절의 호스트 헤더 설정 및 3000번 내부 바인딩과 함께 적용한다.
 
 **현재 기본 배포는 ECR 이미지를 사용하는 CD다.** CI/CD에서 모델 다운로드·검증 후 AI 이미지에 포함하므로 EC2에서 모델을 별도로 받을 필요가 없다. 아래 모델 전달 절차는 **EC2 수동 빌드 시에만** 사용한다.
 
 AI 서비스는 `AI_new/`(3모델 앙상블)로 빌드한다. 모델 `.pkl`은 Git에서 제외돼 있으며 AI 팀이 공개 Kaggle 데이터셋 [hyunwook23/capstone-new2026](https://www.kaggle.com/datasets/hyunwook23/capstone-new2026)에 올린다. 데이터셋 전체(약 1.3GB)가 아니라 서빙에 필요한 2개 파일만 **버전을 고정해** EC2에서 직접 받는다. 로컬 DB 폴더나 과거 WAF 로그를 서버에 복사하지 않는다.
 
-받을 파일·Kaggle 버전·SHA-256은 [AI_new/models.lock.json](../AI_new/models.lock.json)에 고정돼 있다. CI·CD와 같은 스크립트를 사용한다.
+받을 파일·Kaggle 버전·SHA-256은 [AI_new/models.lock.json](../../AI_new/models.lock.json)에 고정돼 있다. CI·CD와 같은 스크립트를 사용한다.
 
 | Kaggle 파일 | 저장 위치 |
 | --- | --- |
@@ -491,9 +491,9 @@ systemctl list-timers --all | grep -i certbot
 
 ### 코드 변경 반영
 
-배포 기준 브랜치는 `main`이며, [.github/workflows/deploy.yml](../.github/workflows/deploy.yml)의 `workflow_dispatch`로 수동 실행한다. 기본 흐름은 **기능 PR → CI·리뷰 → develop 통합 → 릴리스 PR·CI·리뷰 → main 머지 → Deploy to EC2 수동 실행 → AWS 검증**이다. `main` 머지만으로 자동 배포되지는 않는다. 상세 사전 설정은 [CI/CD 문서](07_cicd_pipeline.md)를 참고한다.
+배포 기준 브랜치는 `main`이며, [.github/workflows/deploy.yml](../../.github/workflows/deploy.yml)의 `workflow_dispatch`로 수동 실행한다. 기본 흐름은 **기능 PR → CI·리뷰 → develop 통합 → 릴리스 PR·CI·리뷰 → main 머지 → Deploy to EC2 수동 실행 → AWS 검증**이다. `main` 머지만으로 자동 배포되지는 않는다. 상세 사전 설정은 [CI/CD 문서](cicd.md)를 참고한다.
 
-> `develop` 배포에서 전환할 때는 `deploy.yml`의 브랜치 검사·EC2 fetch 대상뿐 아니라 GitHub Actions용 IAM Role의 실제 OIDC 신뢰 정책도 `main`을 허용하도록 변경해야 한다. 전환 절차는 [CI/CD 문서 8장](07_cicd_pipeline.md#8-첫-배포와-롤백)을 따른다. 문서 수정만으로 AWS 설정이 변경되지는 않는다.
+> `develop` 배포에서 전환할 때는 `deploy.yml`의 브랜치 검사·EC2 fetch 대상뿐 아니라 GitHub Actions용 IAM Role의 실제 OIDC 신뢰 정책도 `main`을 허용하도록 변경해야 한다. 전환 절차는 [CI/CD 문서 8장](cicd.md#8-첫-배포와-롤백)을 따른다. 문서 수정만으로 AWS 설정이 변경되지는 않는다.
 
 1. 기능 PR과 `develop` → `main` 릴리스 PR의 CI·리뷰를 확인하고, 배포할 변경이 `main`에 머지됐는지 확인한다. CI의 백엔드 테스트·빌드, 프론트 빌드, AI 이미지 기동, WAF 스크립트 테스트 및 Compose 검사를 확인한다. 프론트 자동 테스트는 현재 실행하지 않는다.
 2. EC2의 `.env.aws`에 HTTPS CORS 주소를 반영하고, 4-1절에 따라 최초 관리자 발급 여부를 결정한다.
@@ -526,7 +526,7 @@ CD는 `git fetch --quiet origin main`으로 코드를 가져와 배포 SHA로 `c
 
 ### 수동 복구와 롤백
 
-CD를 쓸 수 없어 EC2에서 빌드해야 한다면, 먼저 변경을 보존하고 사용할 `main` 릴리스 또는 이전 검증된 배포 커밋을 확정한다. `.env.aws`를 별도로 안전하게 보관한 뒤 ECR용 `IMAGE_REGISTRY_PREFIX`·`IMAGE_TAG`를 제거해 기본 `security-*:aws` 이름을 사용한다. 이후 3절 모델 준비와 5절 빌드를 수행한다. 명령 예시는 [CI/CD 문서의 수동 복구 절차](07_cicd_pipeline.md#cd를-쓸-수-없을-때-수동-복구)를 참고한다. ECR SHA 태그 아래에 로컬 빌드 이미지를 덮어쓰는 방식과 혼합하지 않는다.
+CD를 쓸 수 없어 EC2에서 빌드해야 한다면, 먼저 변경을 보존하고 사용할 `main` 릴리스 또는 이전 검증된 배포 커밋을 확정한다. `.env.aws`를 별도로 안전하게 보관한 뒤 ECR용 `IMAGE_REGISTRY_PREFIX`·`IMAGE_TAG`를 제거해 기본 `security-*:aws` 이름을 사용한다. 이후 3절 모델 준비와 5절 빌드를 수행한다. 명령 예시는 [CI/CD 문서의 수동 복구 절차](cicd.md#cd를-쓸-수-없을-때-수동-복구)를 참고한다. ECR SHA 태그 아래에 로컬 빌드 이미지를 덮어쓰는 방식과 혼합하지 않는다.
 
 CD 롤백은 **Run workflow의 브랜치를 `main`으로 선택하고**, `sha`에 ECR에 존재하는 이전 성공 배포의 40자리 SHA를 입력해 실행한다. 이 경로는 이미지 빌드를 생략하므로 해당 이미지가 ECR에 남아 있어야 한다. **HTTPS 전환 전 커밋은 WAF 80번 바인딩 등 현재 호스트 Nginx와 충돌할 수 있다.** 이전 Compose·인증·환경변수 호환성을 확인한 뒤 수행한다. 앱 이미지 롤백이 DB 데이터나 호스트 Nginx 설정을 되돌리는 것은 아니다.
 
@@ -596,4 +596,4 @@ DB의 `DELETE`는 AUTO_INCREMENT를 초기화하지 않는다. 화면 건수와 
 - [MySQL 컨테이너 초기화](https://hub.docker.com/_/mysql)
 - [EC2 중지·시작](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/how-ec2-instance-stop-start-works.html)
 - [Nginx WebSocket 프록시](https://nginx.org/en/docs/http/websocket.html)
-- [로컬 실행 문서](05_infra_deployment.md)
+- [로컬 실행 문서](local_compose.md)

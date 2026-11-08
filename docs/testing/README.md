@@ -32,7 +32,7 @@ v2는 탐지 품질 평가를 추가하지 않고 AI·WAF 분기의 서버 처�
 | 부하 | 저부하 예비 측정 후 정식 상한·목표·중단 기준을 정한다. |
 | 데이터 | 정상 부하와 라벨이 있는 공격·차단 실험을 구분한다. 데이터 파일·버전·정답 기준은 실험별로 확정한다. |
 
-환경 구성은 [로컬 인프라](../05_infra_deployment.md), [AWS 배포](../06_aws_deployment.md), WAF 보고 의미는 [동기화 계약](../waf-sync-status-api.md)을 참고한다.
+환경 구성은 [로컬 인프라](../operations/local_compose.md), [AWS 배포](../operations/aws_deployment.md), WAF 보고 의미는 [동기화 계약](../design/05_waf_sync.md)을 참고한다.
 
 ## 2. 기록 위치와 실험 ID
 

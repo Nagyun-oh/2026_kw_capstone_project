@@ -20,7 +20,7 @@ git ls-files --others --exclude-standard | wc -l
 
 - 로컬 E2E 완료. EC2 P0~P8 및 정식 1·3·5 RPS·120초·각 3회 모두 PASS. 다음은 구간별 지연·완료 EPS·lag·자원 분석이며 진행표는 EC2 목차다. 최대 처리량·knee point는 미확정이다.
 - outbox·결과 재시도/DLT·계측 코드와 기존 실험 도구·문서는 `d6ec7c4b`에 커밋됐다. EC2 HEAD는 `e50029b1`이며 앱 이미지 3개 태그와 일치하고 d6ec7c4b를 포함한다. 5 RPS 정식 세 회차 종료 후에도 같은 SHA·9서비스 정상·원복을 확인했다. 원격 수집·전체 실행기는 이번 작업 트리에 추가됐다.
-- 배포 순서와 롤백은 [AWS 배포 문서](docs/06_aws_deployment.md)와 [CI/CD 문서](docs/07_cicd_pipeline.md)를 따른다. 삭제된 별도 배포 절차서는 참조하지 않는다.
+- 배포 순서와 롤백은 [AWS 배포 문서](docs/operations/aws_deployment.md)와 [CI/CD 문서](docs/operations/cicd.md)를 따른다. 삭제된 별도 배포 절차서는 참조하지 않는다.
 - EC2 P0는 실제 SSH 조회와 사용자 콘솔 자료로 완료했다. [r03 보고서](docs/testing/ec2/runs/20261105T165534+0900-ec2-inventory-r03.md)에 버전·DB·lag·자원과 크레딧 unlimited/864(16:50 KST)를 기록했다. [수집 가이드](docs/testing/ec2/P0.md)를 따르고 부하 직전·종료 후 크레딧을 새 시각으로 확인한다.
 - P1·P3~P7 완료. [P7](docs/testing/ec2/P7.md)은 실제 로그인·정상 3건·probe 1건의 저장/AI 완료·두 출처 알림 수신/DOM·임시 제외 보고·원복까지 확인했다. 복구 요청 포함 최종 5건 완료·lag 0·9서비스 실행. 남았던 대표 행도 [20:54 실환경 재확인 PASS](docs/testing/ec2/runs/20261105T205423+0900-ec2-table-recheck-r01.md)로 종결했다. 기존 위협 681·로그 8265·WAF 681·AI 682의 단일 행과 상세 버튼 확인이며 새 probe·차단 변경 없음. r03 원본 INCONCLUSIVE는 보존. [완료 증거](docs/testing/ec2/evidence/20261105-p7-completion.json). 실제 IP는 공유하지 않는다.
 - P7에서 Windows Python 3.12의 거친 UTC 시각 조회를 발견해 정밀 Windows UTC API로 보완했다. 허용 오차·시계 점프 검사는 완화하지 않았다. 이전 실패 회차 원본·판정은 보존했다.
@@ -60,6 +60,8 @@ EC2 SSH·SSM 접속, 운영 URL 요청(단건 포함), Actions 실행·배포, D
 backend·frontend·WAF 전체 검증은 AGENTS.md의 표를 따른다.
 
 ## 탐색 지도
+
+문서 위치(2026/11/08 재구성): [docs/README.md](docs/README.md) 문서 지도, 설계는 `docs/design/00~08`, 실행·배포는 `docs/operations/`, 시나리오는 `docs/testing/scenario_catalog.md`. 이전 `docs/0X_*.md`·`waf-sync-status-api.md` 경로는 쓰지 않는다.
 
 읽지 않을 곳: `build/test-runs/`(원본, 필요한 회차의 `metrics.json`·`manifest.json` 요약 필드만), `build/`의 기타 백업, `node_modules`, `frontend/build`, `AI_new/models`, `waf/logs`. 로컬 회차 보고서 `docs/testing/local/runs/`는 목차 표에서 필요한 회차만 연다.
 

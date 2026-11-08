@@ -234,7 +234,7 @@ WAF 컨테이너 안 blacklist-sync.sh (10초 간격)
 
 ### 상태 보고
 
-동기화 루프(`run`)는 동기화가 끝날 때마다 `POST /internal/waf/sync-status`로 결과를 한 번 보고한다. 형식과 상태 의미는 [docs/waf-sync-status-api.md](../docs/waf-sync-status-api.md)의 합의 초안을 따른다. 백엔드 수신 API는 아직 없으므로, 그 전까지는 `상태 보고 실패: HTTP 403`(또는 404) 같은 로그가 한 번 남고 차단 동작에는 영향이 없다.
+동기화 루프(`run`)는 동기화가 끝날 때마다 `POST /internal/waf/sync-status`로 결과를 한 번 보고한다. 형식과 상태 의미는 [docs/design/05_waf_sync.md](../docs/design/05_waf_sync.md)의 계약을 따른다. 백엔드는 이 보고를 `WafSyncController`로 받아 WAF별 최신 상태로 저장하고 대시보드(`WafSyncStatusPanel`)에 표시한다. 보고가 실패해도(예: 백엔드 중단) `상태 보고 실패` 로그만 남고 차단 동작에는 영향이 없다.
 
 - `appliedVersion`은 실행 중인 nginx에 **적용을 확인한** version이다. 적용 중(`.prev` 있음)이거나 reload 결과를 확인하지 못했으면(`/tmp/waf-blacklist-sync.unverified` 있음) `null`로 보낸다.
 - 구버전 룰에 제외 메타데이터가 없으면 `excludedIps=[]`로 추정하지 않고 적용 상태를 미확인으로 보고한다. 다음 정상 동기화에서 새 메타데이터를 포함해 적용한다.
@@ -315,7 +315,7 @@ docker exec security-ai-local python -c "import urllib.request; print(urllib.req
 
 **2026-10-26** (상태 보고, 일회용 WAF 컨테이너 + 가짜 백엔드)
 
-실제 nginx(`owasp/modsecurity-crs:nginx`)에 스크립트를 마운트하고, 스냅샷을 주고 보고를 기록하는 가짜 백엔드를 같은 Docker 네트워크에 두었다. 백엔드 보고 API가 아직 없어 본문은 [합의 초안](../docs/waf-sync-status-api.md) 기준으로 확인했다.
+실제 nginx(`owasp/modsecurity-crs:nginx`)에 스크립트를 마운트하고, 스냅샷을 주고 보고를 기록하는 가짜 백엔드를 같은 Docker 네트워크에 두었다. 백엔드 보고 API가 아직 없어 본문은 [합의 초안](../docs/design/05_waf_sync.md) 기준으로 확인했다.
 
 | 상황 | 보고 | 실제 응답 |
 | --- | --- | --- |

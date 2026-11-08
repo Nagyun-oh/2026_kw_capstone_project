@@ -3,6 +3,7 @@ package com.example.security_log_system.service;
 
 import com.example.security_log_system.dto.AuthRequestDto;
 import com.example.security_log_system.entity.AdminUser;
+import com.example.security_log_system.exception.LoginRateLimitedException;
 import com.example.security_log_system.repository.AdminUserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,6 +53,9 @@ public class AuthServiceTest {
 
     @Mock
     private SecurityContextRepository securityContextRepository;
+
+    @Mock
+    private LoginAttemptLimiter loginAttemptLimiter;
 
     @AfterEach
     void tearDown(){
@@ -126,6 +130,37 @@ public class AuthServiceTest {
         ).isInstanceOf(BadCredentialsException.class);
 
         verifyNoInteractions(sessionAuthenticationStrategy,securityContextRepository);
+        verify(loginAttemptLimiter).recordFailure("admin");
+        verify(loginAttemptLimiter, never()).recordSuccess(any());
+    }
+
+    @Test
+    @DisplayName("로그인 성공 시 해당 사용자 이름의 실패 기록을 지운다")
+    void loginWithSession_whenSuccess_thenResetFailures(){
+        var authentication = UsernamePasswordAuthenticationToken.authenticated(
+                "admin", null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        when(authenticationManager.authenticate(any())).thenReturn(authentication);
+
+        authService.loginWithSession(loginRequest("admin","1234"),
+                new MockHttpServletRequest(), new MockHttpServletResponse());
+
+        verify(loginAttemptLimiter).recordSuccess("admin");
+        verify(loginAttemptLimiter, never()).recordFailure(any());
+    }
+
+    @Test
+    @DisplayName("실패가 반복돼 잠긴 사용자 이름은 비밀번호를 검사하지 않고 거절한다")
+    void loginWithSession_whenLocked_thenRejectWithoutAuthenticating(){
+        when(loginAttemptLimiter.retryAfterSeconds("admin")).thenReturn(120L);
+
+        assertThatThrownBy(() ->
+                authService.loginWithSession(loginRequest("admin","1234"),
+                        new MockHttpServletRequest(), new MockHttpServletResponse())
+        ).isInstanceOf(LoginRateLimitedException.class)
+                .extracting("retryAfterSeconds").isEqualTo(120L);
+
+        verifyNoInteractions(authenticationManager, sessionAuthenticationStrategy, securityContextRepository);
+        verify(loginAttemptLimiter, never()).recordFailure(any());
     }
 
     @Test

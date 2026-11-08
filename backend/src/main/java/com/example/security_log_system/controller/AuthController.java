@@ -3,11 +3,13 @@ package com.example.security_log_system.controller;
 import com.example.security_log_system.dto.AuthRequestDto;
 import com.example.security_log_system.dto.AuthUserResponseDto;
 import com.example.security_log_system.dto.CsrfResponseDto;
+import com.example.security_log_system.exception.LoginRateLimitedException;
 import com.example.security_log_system.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -45,6 +47,12 @@ public class AuthController {
         try {
             Authentication authentication = authService.loginWithSession(loginRequest,request,response);
             return ResponseEntity.ok(toUserResponse(authentication));
+        } catch(LoginRateLimitedException exception){
+            // 실패가 반복돼 잠긴 사용자 이름: 남은 시간을 Retry-After(초)로 알린다
+            return ResponseEntity
+                    .status(HttpStatus.TOO_MANY_REQUESTS)
+                    .header(HttpHeaders.RETRY_AFTER, String.valueOf(exception.getRetryAfterSeconds()))
+                    .body("Too many failed login attempts. Try again later.");
         } catch(AuthenticationException exception){
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
