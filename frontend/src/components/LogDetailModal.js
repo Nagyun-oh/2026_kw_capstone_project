@@ -1,5 +1,6 @@
 import {useEffect,useRef} from 'react';
 import { formatDateTime } from '../utils/dateTime';
+import AiEvidence from './AiEvidence';
 
 function formatRawLog(rawLog) {
   if (!rawLog) return '-';
@@ -37,6 +38,7 @@ function getStatusTone(statusCode){
 function LogDetailModal({
   isOpen,
   log,
+  aiDescription,
   loading,
   error,
   onClose,
@@ -182,6 +184,8 @@ function LogDetailModal({
               </div>
             </dl>
           </section>
+
+          <AiEvidence log={log} aiDescription={aiDescription} />
 
           <section className='log-detail-section'>
             <h3>요청 URL</h3>

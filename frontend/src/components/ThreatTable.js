@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import AiReason from './AiReason';
 import TablePagination from './TablePagination';
 
 const EMPTY_FORM = {
@@ -220,7 +221,7 @@ function ThreatTable({
                         <button
                           type="button"
                           className="data-reference-button"
-                          onClick={() => onViewLog(threat.logId)}
+                          onClick={() => onViewLog(threat.logId, threat.aiDescription)}
                           aria-label={`원본 로그 ${threat.logId} 상세 보기`}
                         >
                           로그 #{threat.logId}
@@ -260,7 +261,7 @@ function ThreatTable({
                   </td>
 
                   <td className="data-description">
-                    {threat.aiDescription || '—'}
+                    <AiReason text={threat.aiDescription} />
                   </td>
                 </tr>
               ))
