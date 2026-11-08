@@ -2,6 +2,7 @@ package com.example.security_log_system.service;
 
 import com.example.security_log_system.dto.AuthRequestDto;
 import com.example.security_log_system.entity.AdminUser;
+import com.example.security_log_system.exception.LoginRateLimitedException;
 import com.example.security_log_system.repository.AdminUserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +28,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final SessionAuthenticationStrategy sessionAuthenticationStrategy; // 로그인 성공 시 세션 ID 변경, 기존 CSRF 토큰 초기화
     private final SecurityContextRepository securityContextRepository; // 인증 정보를 세션에 저장하고 이후 요청에서 복원
+    private final LoginAttemptLimiter loginAttemptLimiter; // 사용자 이름별 로그인 실패 횟수 제한
 
     public Authentication authenticate(AuthRequestDto request){
         UsernamePasswordAuthenticationToken loginRequest =
@@ -42,9 +45,22 @@ public class AuthService {
             HttpServletRequest request,
             HttpServletResponse response
     ){
+        // 0. 실패가 반복돼 잠긴 사용자 이름이면 비밀번호를 검사하지 않고 거절
+        long retryAfterSeconds = loginAttemptLimiter.retryAfterSeconds(loginRequest.getUsername());
+        if (retryAfterSeconds > 0) {
+            throw new LoginRateLimitedException(retryAfterSeconds);
+        }
+
         // 1. 아이디·비밀번호 검증
-        // 실패하면 예외가 발생하므로 아래 저장 과정은 실행되지 않음
-        Authentication authentication = authenticate(loginRequest);
+        // 실패하면 실패 횟수를 기록하고 예외를 그대로 던지므로 아래 저장 과정은 실행되지 않음
+        Authentication authentication;
+        try {
+            authentication = authenticate(loginRequest);
+        } catch (AuthenticationException exception) {
+            loginAttemptLimiter.recordFailure(loginRequest.getUsername());
+            throw exception;
+        }
+        loginAttemptLimiter.recordSuccess(loginRequest.getUsername());
 
         // 2. 로그인 성공 시 세션 보호 처리
         // 기존 세션 ID 변경 + 기존 CSRF 토큰 초기화

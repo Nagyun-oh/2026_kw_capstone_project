@@ -35,6 +35,12 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 app:
+  # 관리자 로그인 실패 제한(사용자 이름별): 기간 안에 max-failures번 실패하면 lock-seconds 동안 429로 거절
+  auth:
+    login-limit:
+      max-failures: ${APP_AUTH_LOGINLIMIT_MAXFAILURES:5}
+      window-seconds: ${APP_AUTH_LOGINLIMIT_WINDOWSECONDS:900}
+      lock-seconds: ${APP_AUTH_LOGINLIMIT_LOCKSECONDS:900}
   testing:
       trace-enabled: ${PIPELINE_TRACE_ENABLED:false}
   kafka:
