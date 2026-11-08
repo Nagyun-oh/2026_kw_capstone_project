@@ -2,7 +2,7 @@ name: Deploy to EC2
 
 # 앱 이미지(backend/frontend/ai)를 빌드해 ECR에 push하고, SSM으로 EC2에서 교체한다.
 # main에서 수동 배포
-# 설정 절차: docs/07_cicd_pipeline.md
+# 설정 절차: docs/operations/cicd.md
 on:
   workflow_dispatch:
     inputs:

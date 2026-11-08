@@ -1,0 +1,75 @@
+{
+  "schema": "dualguard-ai-workers-rollback-check-v1",
+  "note": "되돌리기 배포 후 읽기 전용 확인. 파티션 0 오프셋 48,049(06:10Z, A 배포 직후) -> 50,431, 파티션 1 0 -> 2,486: A 기간 메시지 4,868건이 49:51로 나뉘어 소비됨",
+  "check": {
+    "at": "2026-11-08T07:01:01.933335+00:00",
+    "head": "b56b5cabcaef3f87d2f0a488913ab78b0b8e2f70",
+    "contains_change": true,
+    "contains_pr113": false,
+    "services": [
+      "ai|Up 2 minutes (healthy)",
+      "backend|Up 2 minutes",
+      "db|Up 6 hours (healthy)",
+      "fluent-bit|Up 6 hours",
+      "frontend|Up 2 minutes",
+      "juiceshop|Up 6 hours",
+      "kafka|Up 5 hours (healthy)",
+      "waf|Up 26 minutes (healthy)",
+      "zookeeper|Up 6 hours"
+    ],
+    "containers": {
+      "backend": {
+        "started_at": "2026-11-08T06:58:22.436249127Z",
+        "restart_count": 0,
+        "image": "sha256:56e24a02f050"
+      },
+      "ai": {
+        "started_at": "2026-11-08T06:58:22.209337872Z",
+        "restart_count": 0,
+        "image": "sha256:c7193c36851d"
+      },
+      "kafka": {
+        "started_at": "2026-11-08T02:06:48.83960941Z",
+        "restart_count": 0,
+        "image": "sha256:06e5d17d6c51"
+      }
+    },
+    "ai_processes": [
+      {
+        "pid": 1,
+        "ppid": 0,
+        "rss_mib": 715,
+        "kind": "uvicorn-master"
+      },
+      {
+        "pid": 84,
+        "ppid": 0,
+        "rss_mib": 2,
+        "kind": "worker"
+      }
+    ],
+    "ai_thread_env": "1 1",
+    "ai_stats": {
+      "CPUPerc": "1.25%",
+      "MemUsage": "610.4MiB / 7.633GiB",
+      "MemPerc": "7.81%"
+    },
+    "ai_health": {
+      "status": "healthy",
+      "model_loaded": true
+    },
+    "topic_describe": [
+      "Topic: ai-request-topic\tTopicId: xbLDWJshSTioenjs3tHpxg\tPartitionCount: 2\tReplicationFactor: 1\tConfigs: ",
+      "\tTopic: ai-request-topic\tPartition: 0\tLeader: 1\tReplicas: 1\tIsr: 1",
+      "\tTopic: ai-request-topic\tPartition: 1\tLeader: 1\tReplicas: 1\tIsr: 1"
+    ],
+    "group_describe": [
+      "GROUP            TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                             HOST            CLIENT-ID",
+      "ai-service-group ai-request-topic 0          50431           50431           0               kafka-python-2.2.3-2b7fe19c-d035-4093-b5f9-16f1c7e54aa2 /<ipv4>     kafka-python-2.2.3",
+      "ai-service-group ai-request-topic 1          2486            2486            0               kafka-python-2.2.3-2b7fe19c-d035-4093-b5f9-16f1c7e54aa2 /<ipv4>     kafka-python-2.2.3"
+    ],
+    "ai_explainer_ready_lines": "0",
+    "ai_explainer_warning_lines": "0",
+    "host_mem_available": "MemAvailable:    4776624 kB"
+  }
+}

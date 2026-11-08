@@ -1315,32 +1315,216 @@
   resize: vertical;
 }
 
+/* 일반 노트북 화면(1366px)에서도 가로 스크롤 없이 들어가도록 고정 열을 줄인다 */
 .data-table--threats {
-  min-width: 1320px;
+  min-width: 1000px;
+}
+
+.data-table--threats .data-column-id {
+  width: 90px;
+}
+
+.data-table--threats .data-column-reference {
+  width: 140px;
 }
 
 .data-table--threats .data-column-type {
-  width: 230px;
+  width: 190px;
 }
 
-/* 남는 공간을 확보해 설명 영역을 오른쪽으로 밀기 */
+/* 위험도는 배지만 들어가므로 좁게 고정 */
 .data-table--threats .data-column-severity {
-  width: auto;
+  width: 120px;
 }
 
-/* 설명 두 열은 고정 너비 */
+/* WAF 설명은 고정, 남는 공간은 근거 목록이 긴 AI 설명이 사용 */
 .data-table--threats .threat-column-waf-description {
-  width: 260px;
+  width: 180px;
 }
 
 .data-table--threats .threat-column-ai-description {
-  width: 320px;
+  width: auto;
 }
 
-/* 위험도 제목과 배지를 오른쪽으로 이동 */
+/* AI 탐지 설명: 판정 출처 배지 + 근거 목록 */
+.ai-reason__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.ai-reason__list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.ai-reason__item::marker {
+  color: var(--dashboard-muted);
+  font-size: 12px;
+}
+
+.ai-reason__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.ai-reason__label {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.ai-reason__score {
+  flex-shrink: 0;
+  color: #2455a4;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ai-reason__evidence {
+  display: block;
+  margin-top: 2px;
+  color: var(--dashboard-muted);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+}
+
+.ai-reason__rules {
+  margin: 8px 0 0;
+  color: var(--dashboard-muted);
+  font-size: 12px;
+}
+
+/* 로그 상세의 AI 판정 근거 위치: 모양은 피처 종류, 색은 기여도 순위 */
+.log-detail-section {
+  --evidence-1: #dc2626;
+  --evidence-1-soft: rgba(220, 38, 38, 0.22);
+  --evidence-2: #d97706;
+  --evidence-2-soft: rgba(217, 119, 6, 0.24);
+  --evidence-3: #2563eb;
+  --evidence-3-soft: rgba(37, 99, 235, 0.18);
+}
+
+.ai-evidence__request {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  background: #fafafa;
+}
+
+.ai-evidence__line {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.ai-evidence__line-title {
+  padding-top: 4px;
+  color: var(--dashboard-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ai-evidence__text {
+  color: #1e293b;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 2.2;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ai-evidence__mark {
+  padding: 2px 0;
+  background: transparent;
+  color: inherit;
+}
+
+.ai-evidence__fill--1 { background: var(--evidence-1-soft); }
+.ai-evidence__fill--2 { background: var(--evidence-2-soft); }
+.ai-evidence__fill--3 { background: var(--evidence-3-soft); }
+
+/* 잰 구간: 아래 실선 */
+.ai-evidence__range--1 { box-shadow: inset 0 -3px 0 var(--evidence-1); }
+.ai-evidence__range--2 { box-shadow: inset 0 -3px 0 var(--evidence-2); }
+.ai-evidence__range--3 { box-shadow: inset 0 -3px 0 var(--evidence-3); }
+
+/* 정상 트래픽 사전과 비교: 위 점선 */
+.ai-evidence__compare--1 { border-top: 2px dashed var(--evidence-1); }
+.ai-evidence__compare--2 { border-top: 2px dashed var(--evidence-2); }
+.ai-evidence__compare--3 { border-top: 2px dashed var(--evidence-3); }
+
+.ai-evidence__absent-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ai-evidence__absent {
+  padding: 2px 10px;
+  border: 1.5px dashed currentColor;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ai-evidence__absent--1 { color: var(--evidence-1); }
+.ai-evidence__absent--2 { color: var(--evidence-2); }
+.ai-evidence__absent--3 { color: var(--evidence-3); }
+
+.ai-evidence__legend {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-evidence__legend-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.ai-evidence__legend-text {
+  display: grid;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.ai-evidence__caption {
+  color: var(--dashboard-muted);
+  font-size: 12px;
+}
+
+.ai-evidence__swatch {
+  flex-shrink: 0;
+  width: 28px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.ai-evidence__swatch--rank-1 { --swatch: var(--evidence-1); --swatch-soft: var(--evidence-1-soft); }
+.ai-evidence__swatch--rank-2 { --swatch: var(--evidence-2); --swatch-soft: var(--evidence-2-soft); }
+.ai-evidence__swatch--rank-3 { --swatch: var(--evidence-3); --swatch-soft: var(--evidence-3-soft); }
+
+.ai-evidence__swatch--pattern { background: var(--swatch-soft); }
+.ai-evidence__swatch--range { box-shadow: inset 0 -3px 0 var(--swatch); }
+.ai-evidence__swatch--compare { border-top: 2px dashed var(--swatch); border-radius: 0; }
+.ai-evidence__swatch--absent { border: 1.5px dashed var(--swatch); border-radius: 999px; }
+
+/* 위험도 제목과 배지 왼쪽 여백 */
 .data-table--threats th:nth-child(4),
 .data-table--threats td:nth-child(4) {
-  padding-left: 48px;
+  padding-left: 24px;
 }
 
 .dashboard-toolbar--refresh {

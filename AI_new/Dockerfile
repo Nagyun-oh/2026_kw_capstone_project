@@ -20,7 +20,7 @@ RUN groupadd --gid 10001 app \
     && useradd --uid 10001 --gid app --no-create-home \
         --shell /usr/sbin/nologin app
 
-COPY --chown=app:app main.py features_v2.py schema_expert.py ./
+COPY --chown=app:app main.py features_v2.py schema_expert.py ensemble_explainer.py ./
 COPY --chown=app:app security_ai ./security_ai
 COPY --chown=app:app models ./models
 

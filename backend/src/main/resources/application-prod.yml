@@ -16,17 +16,17 @@ spring:
       hibernate:
         format_sql: false
 
-  management:
-    # 운영에서는 상태 확인 endpoint만 HTTP로 노출
-    endpoints:
-      web:
-        exposure:
-          include:
-            - health
+management:
+  # 운영에서는 상태 확인 endpoint만 HTTP로 노출
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
 
-    endpoint:
-      health:
-        show-details: never
+  endpoint:
+    health:
+      show-details: never
 
 app:
   cors:

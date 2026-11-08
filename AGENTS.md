@@ -45,6 +45,7 @@ DB 블랙리스트 → 인증된 스냅샷 조회 → WAF 규칙 적용 → 적�
 | API·인증·시간 표시 | `frontend/src/api/`, `frontend/src/config.js`, `frontend/src/utils/dateTime.js` |
 | 로고·사이트 제목 | `frontend/public/`, `LoginPage`, `DashboardLayout` |
 | DB·배포·CI | `docs/db/`, `scripts/deploy.sh`, `.github/workflows/` |
+| 설계 근거·문서 위치 | `docs/README.md`(문서 지도), `docs/design/`(설계), `docs/operations/`(실행·배포) |
 
 이름이 바뀌었다면 `rg --files`로 확인한다. 파일을 찾기 위해 저장소 전체 내용을 반복해서 출력하지 않는다.
 
@@ -66,7 +67,7 @@ DB 블랙리스트 → 인증된 스냅샷 조회 → WAF 규칙 적용 → 적�
 - DB 등록과 WAF 적용 사이에는 지연·실패가 있다. 적용 version 일치, 상태 보고 수신, 실제 요청의 403 검증을 구분한다.
 - 정상적인 빈 목록은 차단 해제를 뜻한다. 조회·JSON 검증·파일 교체·reload 실패는 마지막 정상 설정을 유지·복구해야 한다.
 - `attemptedVersion`과 `appliedVersion`, `excludedIps: null`과 `[]`의 의미를 보존한다. 보고 실패 때문에 적용 완료한 차단을 되돌리지 않는다.
-- 보고 중단은 상태 미확인이며 차단 해제를 뜻하지 않는다. 기본 동기화·보고 주기는 10초, stale 기준은 60초다. 계약은 `docs/waf-sync-status-api.md`를 따른다.
+- 보고 중단은 상태 미확인이며 차단 해제를 뜻하지 않는다. 기본 동기화·보고 주기는 10초, stale 기준은 60초다. 계약은 `docs/design/05_waf_sync.md`를 따른다.
 - 프록시·게이트웨이 제외 IP를 고려한다. ‘적용 확인’을 ‘모든 등록 IP 차단 완료’로 표시하지 않는다. 실제 IP 신뢰 설정을 완화하거나 임의의 `X-Forwarded-For`를 신뢰하지 않는다.
 
 ### 인증·시간·구현 계층
@@ -130,14 +131,14 @@ DB 블랙리스트 → 인증된 스냅샷 조회 → WAF 규칙 적용 → 적�
 ## Docker와 배포
 
 - 로컬 명령은 루트의 `compose.yaml`과 `.env`를 사용한다. Compose 서비스명은 `db`이며 `security-mysql`은 컨테이너명이다.
-- 로컬은 외부 `security-net`, Kafka/Zookeeper 데이터 볼륨, MySQL 데이터 경로 준비가 필요하다. 새 환경은 `docs/05_infra_deployment.md`와 `.env.example`을 확인한다.
+- 로컬은 외부 `security-net`, Kafka/Zookeeper 데이터 볼륨, MySQL 데이터 경로 준비가 필요하다. 새 환경은 `docs/operations/local_compose.md`와 `.env.example`을 확인한다.
 - 재빌드 예: `docker compose --env-file .env -f compose.yaml up -d --build --no-deps backend frontend`. `--build`, `--no-deps`는 `up` 뒤에 둔다. 의존 서비스가 준비됐을 때만 `--no-deps`를 사용한다.
 - 소스 변경은 이미지 재빌드·컨테이너 재생성이 필요하다. `restart`만으로 갱신되지 않는다. `frontend/build/`나 컨테이너 내부 정적 파일을 직접 고쳐 영구 변경으로 삼지 않는다.
 - Kafka unhealthy는 로그·healthcheck·볼륨 연결을 먼저 확인한다. 데이터 볼륨 삭제·`down -v`·prune을 일반 해결책으로 쓰지 않는다.
 - PowerShell에서 여러 줄 Python을 컨테이너에 전달할 때는 `$probeCode | docker exec -i security-ai-local python -`처럼 표준 입력을 사용한다.
 - 현재 배포 설정은 `main` 대상 `workflow_dispatch` 수동 실행이다. 보통 기능 PR → `develop` → 배포 PR → `main` → Actions 실행 순서다. 머지만으로 배포됐다고 판단하지 않는다.
 - SHA 입력이 없으면 새 이미지를 빌드하고, 기존 SHA 지정은 이미 존재하는 이미지로 되돌리는 경로다. EC2 배포는 SSM·`scripts/deploy.sh`가 체크아웃을 수행하므로 수동 `git pull`을 필수 단계로 추가하지 않는다.
-- 운영 변경은 `docs/06_aws_deployment.md`, CI/CD는 `docs/07_cicd_pipeline.md`를 따른다. 워크플로·Compose·배포 스크립트와 문서가 다른 경우 실제 코드를 확인하고 함께 맞춘다. AWS IAM·실행 중 컨테이너 상태는 별도 확인 대상이다.
+- 운영 변경은 `docs/operations/aws_deployment.md`, CI/CD는 `docs/operations/cicd.md`를 따른다. 워크플로·Compose·배포 스크립트와 문서가 다른 경우 실제 코드를 확인하고 함께 맞춘다. AWS IAM·실행 중 컨테이너 상태는 별도 확인 대상이다.
 
 ## Git·보안·완료 보고
 

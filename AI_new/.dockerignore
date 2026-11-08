@@ -6,6 +6,7 @@
 !main.py
 !features_v2.py
 !schema_expert.py
+!ensemble_explainer.py
 !security_ai/**
 !models/**
 

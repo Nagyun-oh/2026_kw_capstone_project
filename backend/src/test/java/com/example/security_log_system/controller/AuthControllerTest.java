@@ -1,6 +1,7 @@
 package com.example.security_log_system.controller;
 
 import com.example.security_log_system.exception.GlobalExceptionHandler;
+import com.example.security_log_system.exception.LoginRateLimitedException;
 import com.example.security_log_system.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -95,6 +96,29 @@ public class AuthControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string(
                         "Invalid username or password."
+                ));
+    }
+
+    @Test
+    @DisplayName("실패가 반복돼 잠긴 사용자 이름은 429와 Retry-After(초)를 반환한다")
+    void login_whenLocked_thenReturnTooManyRequests() throws Exception {
+
+        when(authService.loginWithSession(any(),any(),any()))
+                .thenThrow(new LoginRateLimitedException(300));
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                        """
+                        {
+                            "username": "admin",
+                            "password":"1234"
+                        }
+                        """))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string("Retry-After", "300"))
+                .andExpect(content().string(
+                        "Too many failed login attempts. Try again later."
                 ));
     }
 

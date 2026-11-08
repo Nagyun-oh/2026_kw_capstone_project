@@ -14,6 +14,7 @@ v1 대비 변경점
   5. body가 없어도(운영 현재 상태) 동일하게 동작하도록 설계.
 """
 import re
+from collections import Counter
 from urllib.parse import unquote
 
 MAX_SCAN = 65_536          # 초대형 body 방어 (길이 피처는 실제 길이 사용)
@@ -121,6 +122,14 @@ def _count(text, patterns):
     return sum(text.count(p) for p in patterns)
 
 
+def _scan_texts(url_path, query_params, body_content):
+    """피처 계산(build_feature_row)과 근거 추출(feature_evidence)이 같은 문자열을 보게 한다."""
+    full_url = url_path + (("?" + query_params) if query_params else "")
+    url_s, body_s, q_s = full_url[:MAX_SCAN], body_content[:MAX_SCAN], query_params[:MAX_SCAN]
+    decoded = unquote(url_s[:REGEX_SCAN]) + " " + unquote(body_s[:REGEX_SCAN])
+    return full_url, url_s, body_s, q_s, decoded
+
+
 def build_feature_row(method, url_path, query_params, body_content, user_agent):
     """HTTP 요청 → 피처 dict. 학습 스크립트와 FastAPI 서버가 모두 이 함수를 사용한다."""
     method = (method or "UNKNOWN").upper()
@@ -129,13 +138,10 @@ def build_feature_row(method, url_path, query_params, body_content, user_agent):
     body_content = body_content or ""
     user_agent = user_agent or ""
 
-    full_url = url_path + (("?" + query_params) if query_params else "")
-    url_s, body_s, q_s = full_url[:MAX_SCAN], body_content[:MAX_SCAN], query_params[:MAX_SCAN]
+    full_url, url_s, body_s, q_s, decoded = _scan_texts(url_path, query_params, body_content)
 
     url_len, body_len = len(full_url), len(body_content)
     total_len = url_len + body_len
-
-    decoded = unquote(url_s[:REGEX_SCAN]) + " " + unquote(body_s[:REGEX_SCAN])
 
     scan = url_s + body_s
     special = _count(url_s, SPECIAL_CHARS) + _count(body_s, SPECIAL_CHARS)
@@ -234,6 +240,50 @@ RULE_GATE = [
 
 def rule_hits(row):
     return [(name, desc) for name, fn, desc in RULE_GATE if fn(row)]
+
+
+# ─────────────────────────────────────────────────────────────
+# 근거 문자열 — 피처·규칙 값이 요청의 어느 부분에서 나왔는지 보여준다(설명 전용, 판정에는
+# 쓰지 않는다). 피처를 계산한 정규식을 같은 문자열(_scan_texts)에 다시 적용하므로,
+# 개수형 피처는 근거 횟수의 합이 피처 값과 같다.
+# ─────────────────────────────────────────────────────────────
+ENCODED_RE = re.compile(r"%[0-9A-Fa-f]{0,2}")   # "%" 하나당 한 번 매칭 → encoded_char_count와 같은 개수
+EVIDENCE_PATTERNS = {
+    "sql_keyword_count": SQL_RE, "sql_tautology": SQL_TAUTOLOGY_RE,
+    "sql_comment_count": SQL_COMMENT_RE, "sql_quote_comment": QUOTE_COMMENT_RE,
+    "sql_union_select": UNION_SELECT_RE, "sql_statement": SQL_STMT_RE,
+    "xss_keyword_count": XSS_RE, "xss_event_handler": XSS_EVENT_RE,
+    "path_traversal_count": PT_RE, "cmd_keyword_count": CMD_RE, "cmd_metachar": CMD_META_RE,
+    "template_injection": TEMPLATE_RE, "log4shell": LOG4SHELL_RE, "ssti": SSTI_RE,
+    "nosql_count": NOSQL_RE,
+}
+UA_EVIDENCE_PATTERNS = {"ua_is_bot": BOT_UA_RE, "ua_is_scanner": SCANNER_UA_RE}
+# 규칙 게이트 이름 → 근거를 보여줄 피처
+RULE_EVIDENCE = {
+    "sql_tautology": ["sql_tautology"], "xss_event_handler": ["xss_event_handler"],
+    "xss_keyword_2": ["xss_keyword_count"], "path_traversal_2": ["path_traversal_count"],
+    "nosql": ["nosql_count"], "quote_comment": ["sql_quote_comment"],
+    "union_select": ["sql_union_select"], "cmd_with_meta": ["cmd_keyword_count", "cmd_metachar"],
+    "cmd_keyword_2": ["cmd_keyword_count"], "log4shell": ["log4shell"],
+    "sql_statement": ["sql_statement"], "ssti": ["ssti"], "scanner_ua": ["ua_is_scanner"],
+}
+
+
+def feature_evidence(feature, url_path, query_params, body_content, user_agent):
+    """피처 값을 만든 문자열 조각 → [(조각, 횟수), ...] 많은 순. 근거 문자열이 없는 피처는 []."""
+    _, url_s, body_s, _, decoded = _scan_texts(url_path or "", query_params or "", body_content or "")
+    if feature in EVIDENCE_PATTERNS:
+        found = [m.group(0) for m in EVIDENCE_PATTERNS[feature].finditer(decoded)]
+    elif feature in UA_EVIDENCE_PATTERNS:
+        found = [m.group(0) for m in UA_EVIDENCE_PATTERNS[feature].finditer(user_agent or "")]
+    elif feature == "encoded_char_count":
+        found = ENCODED_RE.findall(url_s) + ENCODED_RE.findall(body_s)
+    elif feature == "special_char_count":
+        counts = {c: url_s.count(c) + body_s.count(c) for c in SPECIAL_CHARS}
+        return sorted(((c, n) for c, n in counts.items() if n), key=lambda item: -item[1])
+    else:
+        return []
+    return Counter(found).most_common()
 
 # 응답 상태 코드 정책 — 학습 데이터에 status가 없어 모델 피처로는 쓸 수 없다.
 # 대신 판정 후 위험도 조정에만 사용한다.

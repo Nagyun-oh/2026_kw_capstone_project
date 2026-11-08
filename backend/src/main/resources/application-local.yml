@@ -15,16 +15,16 @@ spring:
       hibernate:
         format_sql: true
 
-  management:
-    # 로컬 성능 점검에 필요한 endpoint 노출
-    endpoints:
-      web:
-        exposure:
-          include:
-            - health
-            - info
-            - metrics
-            - prometheus
+management:
+  # 로컬 성능 점검에 필요한 endpoint 노출
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
 
 app:
   cors:
