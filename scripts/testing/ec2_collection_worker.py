@@ -180,7 +180,7 @@ def collect(config, runner=None):
         result['app_sha'] = head.strip() if head is not None else None
     if config['mode'] in ('pipeline', 'check'):
         kafka, db, backend = (ids.get(key) for key in ('kafka', 'db', 'backend'))
-        if kafka:
+        if kafka and config.get('include_lag', True):
             result['lag_text'] = runner.run('kafka_lag', ['sudo', '-n', 'docker', 'exec', kafka,
                 'kafka-consumer-groups', '--bootstrap-server', 'kafka:29092', '--all-groups', '--describe'],
                 timeout=20, transform=lag_line)

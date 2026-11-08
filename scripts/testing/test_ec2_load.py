@@ -33,6 +33,16 @@ class LoadPolicyTests(unittest.TestCase):
         changed['initial_targets']['ai_server_e2e_p95_ms']=4000
         with self.assertRaises(ValueError): validate_contract(changed)
 
+    def test_contract_revision_3_separates_lag_measurement_interval(self):
+        self.assertEqual(self.policy['revision'],3)
+        self.assertEqual(self.policy['workload']['lag_measurement_interval_seconds'],60)
+        self.assertEqual(self.policy['workload']['lag_confirmation_interval_seconds'],10)
+        for value in (None,10):
+            changed=copy.deepcopy(self.policy)
+            if value is None: del changed['workload']['lag_measurement_interval_seconds']
+            else: changed['workload']['lag_measurement_interval_seconds']=value
+            with self.assertRaises(ValueError): validate_contract(changed)
+
     def test_ec2_http_and_browser_latency_are_reference_but_server_slo_applies(self):
         c,t,d,b=example()
         for row in c: row['duration_ms']=900
@@ -244,3 +254,47 @@ class RuntimeFlowTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_load_exception_still_cleans_up_and_restores(self):
         await self.flow(failed=True)
+
+
+class LagCadenceTests(unittest.IsolatedAsyncioTestCase):
+    def experiment(self):
+        exp=object.__new__(EC2Experiment)
+        exp.lag_interval=60
+        exp.force_lag=False
+        exp.keys={('log-group','log-topic',0)}
+        exp.last_lag_at=None
+        return exp
+
+    def test_lag_runs_first_then_only_every_interval_unless_forced(self):
+        exp=self.experiment()
+        with patch('run_ec2_e2e.time.perf_counter',return_value=100.0):
+            self.assertTrue(exp.should_collect_lag())
+            exp.last_lag_at=100.0
+            self.assertFalse(exp.should_collect_lag())
+            exp.force_lag=True
+            self.assertTrue(exp.should_collect_lag())
+        exp.force_lag=False
+        with patch('run_ec2_e2e.time.perf_counter',return_value=159.9):
+            self.assertFalse(exp.should_collect_lag())
+        with patch('run_ec2_e2e.time.perf_counter',return_value=160.0):
+            self.assertTrue(exp.should_collect_lag())
+        exp.keys=set()
+        with patch('run_ec2_e2e.time.perf_counter',return_value=101.0):
+            self.assertTrue(exp.should_collect_lag())
+
+    async def test_drain_always_collects_lag_and_restores_cadence_even_on_error(self):
+        exp=self.experiment()
+        seen=[]
+        async def finished(recovery=False):
+            seen.append((exp.force_lag,recovery))
+            return True
+        exp._drain=finished
+        self.assertTrue(await exp.drain(recovery=True))
+        self.assertEqual(seen,[(True,True)])
+        self.assertFalse(exp.force_lag)
+        async def failed(recovery=False):
+            raise RuntimeError('drain failed')
+        exp._drain=failed
+        with self.assertRaises(RuntimeError):
+            await exp.drain()
+        self.assertFalse(exp.force_lag)
