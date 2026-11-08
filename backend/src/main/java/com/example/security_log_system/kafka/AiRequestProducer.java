@@ -1,5 +1,6 @@
 package com.example.security_log_system.kafka;
 
+import com.example.security_log_system.config.AiRequestTopicConfig;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -16,8 +17,9 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class AiRequestProducer {
 
+    // 토픽 이름·파티션 수는 AiRequestTopicConfig 한 곳에서 관리한다.
     private static final String AI_REQUEST_TOPIC =
-            "ai-request-topic";
+            AiRequestTopicConfig.AI_REQUEST_TOPIC;
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final MeterRegistry meterRegistry;

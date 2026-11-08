@@ -1,6 +1,6 @@
 {
   "version": "ec2-e2e-v1",
-  "revision": 3,
+  "revision": 6,
   "status": "CONFIRMED_ENGINEERING_CONTRACT",
   "executable": true,
   "execution_profile": "scripts/testing/run_ec2_e2e.py",
@@ -25,7 +25,10 @@
     "probe_interval_seconds": 10,
     "final_observation_seconds": 60,
     "lag_confirmation_interval_seconds": 10,
-    "lag_measurement_interval_seconds": 60,
+    "lag_measurement_interval_seconds": null,
+    "step_rates_per_second": [7, 9, 11, 13],
+    "step_max_vus": 20,
+    "step_recovery_drain_seconds": 300,
     "lag_zero_consecutive_samples": 2,
     "pilot_rate": 1,
     "pilot_seconds": 60
@@ -41,6 +44,13 @@
     "unnecessary_duplicate_db_results": 0,
     "duplicate_popup_for_same_alert_revision": 0
   },
+  "knee_criteria": {
+    "scope": "step_mode_sending_window",
+    "completion_ratio_below": 0.95,
+    "pending_slope_per_input_rps_above": 0.05,
+    "server_p95_ms_above": 3000,
+    "drain_seconds_above": 60
+  },
   "statistics": {
     "record": ["count", "avg", "p50", "p95", "p99", "max", "missing"],
     "p99_role": "reference_only",
@@ -52,7 +62,8 @@
     "max_age_seconds": 300,
     "precision_reference_width_ms": 20,
     "width_role": "diagnostic_only_independent_server_and_pc_clock_domains",
-    "cross_domain_latency_subtraction": false
+    "cross_domain_latency_subtraction": false,
+    "k6_background_window_mismatch": "diagnostic"
   },
   "stop": {
     "min_available_memory_bytes": 1073741824,
@@ -70,6 +81,9 @@
     "고정 계약을 검증하는 run_ec2_e2e.py 전용 경로로 실행한다. 실제 구현·예비 측정 검증 상태는 EC2 목차에 기록한다. 기존 run_e2e.py의 EC2 실행 경로는 계속 차단한다.",
     "PC HTTP·브라우저 지연과 EC2 서버 내부 지연을 분리한다.",
     "목표 요청률의 실제 송신·서버 도착 여부와 발생기 자원을 확인해야 한다.",
-    "개정 3(2026/11/07): 부하 중 Kafka lag 조회(kafka-consumer-groups CLI)는 lag_measurement_interval_seconds(60초)마다만 실행한다. DG_TRACE·DB 수집 주기와 적체 해소 확인의 10초 lag 확인은 그대로다. 측정 도구 부담 근거는 docs/testing/ec2/트러블슈팅_6(상세본).md."
+    "개정 3(2026/11/07): 부하 중 Kafka lag 조회(kafka-consumer-groups CLI)는 lag_measurement_interval_seconds(60초)마다만 실행한다. DG_TRACE·DB 수집 주기와 적체 해소 확인의 10초 lag 확인은 그대로다. 측정 도구 부담 근거는 docs/testing/ec2/트러블슈팅_6(상세본).md.",
+    "개정 4(2026/11/08): knee point 탐색용 단계 부하 모드(step)를 추가한다. 허용 RPS는 step_rates_per_second(7·9·11·13)이고 k6 VU 상한은 step_max_vus(20)다. 측정 120초·워밍업 30초·probe 10초 간격과 기존 중단 조건(컨테이너 종료·재시작, 재부팅, 메모리 부족, HTTP 오류율, 미처리 60초 초과)은 그대로다. 회차마다 knee_criteria로 송신 구간의 처리 완료 비율·미처리 기울기·서버 p95·해소 시간을 계산한다. 측정 후 적체 해소 판정은 60초 그대로이고, 단계 모드의 원복 전 처리 정리 확인만 step_recovery_drain_seconds(300초)까지 기다린다. 300초 안에 정리되지 않으면 원복을 멈추고 수동 확인 대상으로 남긴다. 1·3·5 RPS 정식·예비 측정은 바뀌지 않는다.",
+    "개정 5(2026/11/08): 부하 중 Kafka lag 조회를 끈다(lag_measurement_interval_seconds: null). lag는 한계·SLO 판정에 쓰지 않고, 측정 후 적체 해소 확인(10초 간격, 연속 2회 0)에서만 조회한다. 단계 부하 13 RPS에서 부하 중 lag CLI가 8.9초까지 길어져 측정 대상을 교란했다. 같은 날 실행기 DB 수집 쿼리도 회차 시작 전 최대 로그 id 하한·인덱스 조회로 바꿨다(계약 밖 실행기 변경). 근거는 docs/testing/ec2/step-load-plan.md 4-3절.",
+    "개정 6(2026/11/08): k6 일반 요청의 교차 시계 구간 이탈은 중단하지 않고 요청 기록(clock_window)과 metrics의 clock_window_diagnostics(건수·최대 초과 ms)에 남긴다. 새 이탈이 보이면 기존 재보정(단계당 3회, 300초 기한, 불연속 중단)을 먼저 시도한다. probe 시각 검증, 보정 만료, 시계 점프 감시, 서버 p95 3초·정합성 판정은 그대로다. 서버 지연은 서버 시계만 쓰므로 영향이 없다. 근거는 step-load-plan.md 4-4절."
   ]
 }

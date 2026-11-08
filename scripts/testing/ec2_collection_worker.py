@@ -2,6 +2,7 @@
 
 단독 CLI가 아니라 e2e_remote.py가 검증한 요청을 main()에 전달한다.
 일반 로그·환경 값·DB 본문·명령 stderr는 SSH 응답에 포함하지 않는다.
+DB 조회가 실패하면 stderr에서 원인 분류 코드(MySQL 오류 번호/SQLSTATE 또는 고정 표시)만 뽑아 남긴다.
 """
 from datetime import datetime, timezone
 import json
@@ -11,6 +12,7 @@ import re
 import selectors
 import signal
 import subprocess
+import tempfile
 import time
 
 SCHEMA = 'dualguard-ec2-collection-v1'
@@ -26,20 +28,38 @@ def now():
     return datetime.now(timezone.utc).isoformat()
 
 
+MYSQL_ERROR = re.compile(r'ERROR (\d{4}) \(([0-9A-Z]{5})\)')
+
+
+def error_codes(text):
+    """실패한 명령의 stderr에서 원인 분류 코드만 뽑는다. 메시지 본문은 응답에 넣지 않는다."""
+    codes = sorted({f'{number}/{state}' for number, state in MYSQL_ERROR.findall(text)})
+    if 'Error response from daemon' in text:
+        codes.append('DOCKER_DAEMON')
+    if text.startswith('sudo:') or '\nsudo:' in text:
+        codes.append('SUDO')
+    if not codes:
+        codes.append('NO_STDERR' if not text.strip() else 'OTHER')
+    return codes[:5]
+
+
 class Runner:
     """Linux 비차단 읽기와 제한 시간. 종료할 수 있는 것은 자신이 시작한 조회 프로세스뿐이다."""
     def __init__(self):
         self.commands = []
 
     def run(self, label, argv, *, input_text=None, timeout=12, transform=None, max_bytes=4*1024*1024,
-            merge_stderr=False):
+            merge_stderr=False, classify_errors=False):
         item = dict(check=label, started_at=now(), timeout_seconds=timeout,
                     status='UNAVAILABLE', exit_code=None, bytes_read=0, lines_read=0)
         started, proc = time.monotonic(), None
         lines, pending = [], b''
+        # 실패 원인 분류용 stderr는 이름 없는 임시 파일(생성 즉시 삭제됨)에만 받고 분류 코드만 남긴다.
+        errors_file = tempfile.TemporaryFile() if classify_errors and not merge_stderr else None
         try:
             proc = subprocess.Popen(argv, cwd=REPO, stdin=subprocess.PIPE if input_text else subprocess.DEVNULL,
-                stdout=subprocess.PIPE, stderr=subprocess.STDOUT if merge_stderr else subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT if merge_stderr else (errors_file or subprocess.DEVNULL),
                 start_new_session=True)
             if input_text:
                 encoded = input_text.encode('utf-8')
@@ -101,6 +121,13 @@ class Runner:
                 for stream in (proc.stdin, proc.stdout):
                     if stream and not stream.closed:
                         stream.close()
+            if errors_file is not None:
+                try:
+                    if item['status'] == 'COMMAND_FAILED':
+                        errors_file.seek(0)
+                        item['error_codes'] = error_codes(errors_file.read(4096).decode('utf-8', errors='replace'))
+                finally:
+                    errors_file.close()
             item.update(ended_at=now(), elapsed_ms=round((time.monotonic()-started)*1000, 3))
             self.commands.append(item)
         return '\n'.join(lines) if item['status'] == 'OK' else None
@@ -188,10 +215,17 @@ def collect(config, runner=None):
             def db_line(line):
                 value = json.loads(line)
                 return json.dumps({k:value.get(k) for k in DB_KEYS}, separators=(',', ':'))
-            result['database_text'] = runner.run('database', ['sudo', '-n', 'docker', 'exec', '-i', db,
+            mysql_argv = ['sudo', '-n', 'docker', 'exec', '-i', db,
                 'sh', '-c', 'test -n "$MYSQL_USER" && MYSQL_PWD="$MYSQL_PASSWORD" exec mysql '
                 '-u "$MYSQL_USER" -D security_db --connect-timeout=3 --default-character-set=utf8mb4 '
-                '--batch --raw --skip-column-names'], input_text=config['database_sql'], transform=db_line)
+                '--batch --raw --skip-column-names']
+            result['database_text'] = runner.run('database', mysql_argv, input_text=config['database_sql'],
+                transform=db_line, classify_errors=True)
+            if config['mode'] == 'check':
+                # 회차 시작 전 최대 로그 id(기본 키 조회). 이후 수집은 이 id보다 큰 행만 읽는다.
+                result['log_id_floor'] = runner.run('log_id_floor', mysql_argv,
+                    input_text='SET SESSION MAX_EXECUTION_TIME=3000;\nSELECT COALESCE(MAX(id),0) FROM network_logs;\n',
+                    transform=lambda line: line if re.fullmatch(r'\d{1,19}', line) else None, classify_errors=True)
         request_ids = set(config['request_ids'])
         if result['database_text'] is not None:
             request_ids.update(json.loads(line)['requestId'] for line in result['database_text'].splitlines())

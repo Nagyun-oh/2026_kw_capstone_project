@@ -147,19 +147,28 @@ def calibrate(exchanges):
         direction='server_epoch_minus_generator_epoch',method='four_timestamp_offset_interval',resolution_margin_ms=1)
 
 
-def ingress_in_clock_interval(start_ms,sent_ms,ended_ms,clock,*,monotonic=None,max_age=300,
-                              ingress_resolution_ms=0,client_resolution_ms=0):
+def clock_window_excess(start_ms,sent_ms,ended_ms,clock,*,monotonic=None,max_age=300,
+                        ingress_resolution_ms=0,client_resolution_ms=0):
+    """WAF 시작 시각이 보정 구간(송신~수신 + 오프셋 구간)을 벗어난 크기(ms). 0 이하면 구간 안이다.
+
+    값이 유효하지 않거나 보정이 오래돼 판단할 수 없으면 None이다.
+    """
     if not all(type(v) in (int,float) and math.isfinite(v) for v in (start_ms,sent_ms,ended_ms)):
-        return False
+        return None
     current=time.perf_counter() if monotonic is None else monotonic
     if current-clock['observed_monotonic']<0 or current-clock['observed_monotonic']>max_age:
-        return False
+        return None
     if ingress_resolution_ms not in (0,1) or client_resolution_ms not in (0,1):
-        return False
+        return None
     # 각 필드의 실제 1ms 해상도를 가능한 시각 구간으로 전파한다.
     # Nginx 시작 시각은 ms 값의 차이, k6 Date.now()는 정수 ms다.
-    return (sent_ms+clock['offset_lower_ms']<=start_ms+ingress_resolution_ms
-            and start_ms-ingress_resolution_ms<=ended_ms+client_resolution_ms+clock['offset_upper_ms'])
+    return max((sent_ms+clock['offset_lower_ms'])-(start_ms+ingress_resolution_ms),
+               (start_ms-ingress_resolution_ms)-(ended_ms+client_resolution_ms+clock['offset_upper_ms']))
+
+
+def ingress_in_clock_interval(start_ms,sent_ms,ended_ms,clock,**options):
+    excess=clock_window_excess(start_ms,sent_ms,ended_ms,clock,**options)
+    return excess is not None and excess<=0
 
 
 def generator_snapshot():

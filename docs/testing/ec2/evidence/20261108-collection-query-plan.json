@@ -1,0 +1,138 @@
+{
+  "schema": "dualguard-collection-query-check-v1",
+  "purpose": "실행기 DB 수집 쿼리(e2e_core.database_sql) 진단과 보완 확인. 읽기 전용(READ ONLY 트랜잭션, 실행 제한), 앱 계정.",
+  "run_id": "20261108T125333+0900-ec2-step-rps11-r02",
+  "candidates_check": {
+    "at": "2026-11-08T04:12:57.349293+00:00",
+    "results": {
+      "server": {
+        "ok": true,
+        "exit_code": 0,
+        "error_codes": [],
+        "elapsed_ms": 114.2,
+        "stdout": "8.0.46\tSYSTEM\tSYSTEM\tUTC\t2026-11-08T04:12:57.455684\t2026-11-08T04:12:57.455684\n"
+      },
+      "columns": {
+        "ok": true,
+        "exit_code": 0,
+        "error_codes": [],
+        "elapsed_ms": 113.9,
+        "stdout": "detected_threats\tid\tbigint\t-\t-\tauto_increment\ndetected_threats\tlog_id\tbigint\t-\t-\t\nnetwork_logs\tcreated_at\tdatetime(6)\t-\t-\t\nnetwork_logs\tid\tbigint\t-\t-\tauto_increment\nnetwork_logs\traw_log\ttext\tutf8mb4_0900_ai_ci\t-\t\nnetwork_logs\trequest_id\tvarchar(255)\tutf8mb4_0900_bin\t-\t\nrequest_alerts\talert_key\tvarchar(300)\tutf8mb4_0900_bin\t-\t\nrequest_alerts\tcreated_at\tdatetime(6)\t-\t-\t\nwaf_detections\tid\tbigint\t-\t-\tauto_increment\nwaf_detections\trequest_id\tvarchar(255)\tutf8mb4_0900_bin\t-\t\n"
+      },
+      "indexes": {
+        "ok": true,
+        "exit_code": 0,
+        "error_codes": [],
+        "elapsed_ms": 123.6,
+        "stdout": "detected_threats\tFKp5y1cn4hp7qs4ng46dmdb8aj1\t1\tlog_id\t1\ndetected_threats\tPRIMARY\t1\tid\t0\nnetwork_logs\tidx_network_logs_created_at\t1\tcreated_at\t1\nnetwork_logs\tPRIMARY\t1\tid\t0\nnetwork_logs\tuk_network_logs_request_id\t1\trequest_id\t0\nrequest_alerts\tidx_request_alerts_pending\t1\tpending\t1\nrequest_alerts\tidx_request_alerts_pending\t2\tupdated_at\t1\nrequest_alerts\tPRIMARY\t1\talert_key\t0\nrequest_alerts\tuk_request_alerts_alert_id\t1\talert_id\t0\nwaf_detections\tidx_waf_detections_occurred_at\t1\toccurred_at\t1\nwaf_detections\tPRIMARY\t1\tid\t0\nwaf_detections\tuk_waf_detections_request_id\t1\trequest_id\t0\nwaf_detections\tuk_waf_detections_threat_id\t1\tthreat_id\t0\n"
+      },
+      "sizes": {
+        "ok": true,
+        "exit_code": 0,
+        "error_codes": [],
+        "elapsed_ms": 132.3,
+        "stdout": "network_logs\t37152\nwaf_detections\t851\nrequest_alerts\t851\ndetected_threats\t1678\n"
+      },
+      "created_at_sample": {
+        "ok": true,
+        "exit_code": 0,
+        "error_codes": [],
+        "elapsed_ms": 118.6,
+        "stdout": "36476\t2026-11-08T12:53:39.646264\n37826\t2026-11-08T12:57:09.648337\n"
+      },
+      "current_rows": {
+        "ok": true,
+        "exit_code": 0,
+        "error_codes": [],
+        "elapsed_ms": 1343.2,
+        "rows": 1352
+      },
+      "current_plan": {
+        "ok": true,
+        "exit_code": 0,
+        "error_codes": [],
+        "elapsed_ms": 1774.2,
+        "stdout": "-> Sort: n.id  (actual time=1644..1644 rows=1352 loops=1)\n    -> Stream results  (cost=2.93e+6 rows=29.3e+6) (actual time=588..1640 rows=1352 loops=1)\n        -> Left hash join (<hash>(cast(a.alert_key as char charset binary))=<hash>(cast(concat('request:',n.request_id) as char charset binary))), extra conditions: (cast(a.alert_key as char charset binary) = cast(concat('request:',n.request_id) as char charset binary))  (cost=2.93e+6 rows=29.3e+6) (actual time=586..636 rows=1352 loops=1)\n            -> Filter: (cast(json_unquote(json_extract(if(json_valid(n.raw_log),n.raw_log,'{}'),'$.test_run')) as char charset binary) = <cache>(cast(convert(0x3230323631313038543132353333332b303930302d6563322d737465702d72707331312d723032 using utf8mb4) as char charset binary)))  (cost=4269 rows=34432) (actual time=586..632 rows=1352 loops=1)\n                -> Table scan on n  (cost=4269 rows=34432) (actual time=0.0127..47.2 rows=37152 loops=1)\n            -> Hash\n                -> Table scan on a  (cost=0.00883 rows=851) (actual time=0.0668..0.435 rows=851 loops=1)\n-> Select #2 (subquery in projection; dependent)\n    -> Aggregate: count(0)  (cost=0.501 rows=1) (actual time=0.0101..0.0102 rows=1 loops=1352)\n        -> Filter: (t.threat_type = 'AI Detection')  (cost=0.482 rows=0.185) (actual time=0.00955..0.00956 rows=0.0111 loops=1352)\n            -> Index lookup on t using FKp5y1cn4hp7qs4ng46dmdb8aj1 (log_id=n.id)  (cost=0.482 rows=1.85) (actual time=0.0092..0.00922 rows=0.0222 loops=1352)\n-> Select #3 (subquery in projection; dependent)\n    -> Aggregate: count(0)  (cost=185 rows=1) (actual time=0.649..0.649 rows=1 loops=1352)\n        -> Filter: (cast(w.request_id as char charset binary) = cast(n.request_id as char charset binary))  (cost=105 rows=804) (actual time=0.645..0.649 rows=0.0111 loops=1352)\n            -> Covering index scan on w using uk_waf_detections_request_id  (cost=105 rows=804) (actual time=0.0179..0.275 rows=851 loops=1352)\n\n"
+      },
+      "bounded_rows": {
+        "ok": true,
+        "exit_code": 0,
+        "error_codes": [],
+        "elapsed_ms": 900.7,
+        "rows": 1352
+      },
+      "bounded_plan": {
+        "ok": true,
+        "exit_code": 0,
+        "error_codes": [],
+        "elapsed_ms": 938.3,
+        "stdout": "-> Sort: n.id  (actual time=809..809 rows=1352 loops=1)\n    -> Stream results  (cost=115067 rows=1.15e+6) (actual time=1.53..806 rows=1352 loops=1)\n        -> Left hash join (<hash>(cast(a.alert_key as char charset binary))=<hash>(cast(concat('request:',n.request_id) as char charset binary))), extra conditions: (cast(a.alert_key as char charset binary) = cast(concat('request:',n.request_id) as char charset binary))  (cost=115067 rows=1.15e+6) (actual time=0.89..46.1 rows=1352 loops=1)\n            -> Filter: (cast(json_unquote(json_extract(if(json_valid(n.raw_log),n.raw_log,'{}'),'$.test_run')) as char charset binary) = '20261108T125333+0900-ec2-step-rps11-r02')  (cost=609 rows=1352) (actual time=0.0776..43 rows=1352 loops=1)\n                -> Index range scan on n using idx_network_logs_created_at over ('2026-11-08 12:48:33.000000' <= created_at), with index condition: (n.created_at >= TIMESTAMP'2026-11-08 12:48:33')  (cost=609 rows=1352) (actual time=0.0264..8.83 rows=1352 loops=1)\n            -> Hash\n                -> Table scan on a  (cost=0.0716 rows=851) (actual time=0.0607..0.423 rows=851 loops=1)\n-> Select #2 (subquery in projection; dependent)\n    -> Aggregate: count(0)  (cost=0.501 rows=1) (actual time=0.0119..0.0119 rows=1 loops=1352)\n        -> Filter: (t.threat_type = 'AI Detection')  (cost=0.482 rows=0.185) (actual time=0.0114..0.0114 rows=0.0111 loops=1352)\n            -> Index lookup on t using FKp5y1cn4hp7qs4ng46dmdb8aj1 (log_id=n.id)  (cost=0.482 rows=1.85) (actual time=0.011..0.011 rows=0.0222 loops=1352)\n-> Select #3 (subquery in projection; dependent)\n    -> Aggregate: count(0)  (cost=185 rows=1) (actual time=0.491..0.491 rows=1 loops=1352)\n        -> Filter: (cast(w.request_id as char charset binary) = cast(n.request_id as char charset binary))  (cost=105 rows=804) (actual time=0.488..0.49 rows=0.0111 loops=1352)\n            -> Covering index scan on w using uk_waf_detections_request_id  (cost=105 rows=804) (actual time=0.0137..0.211 rows=851 loops=1352)\n\n"
+      },
+      "bounded_indexed_joins_rows": {
+        "ok": true,
+        "exit_code": 0,
+        "error_codes": [],
+        "elapsed_ms": 228.3,
+        "rows": 1352
+      },
+      "bounded_indexed_joins_plan": {
+        "ok": true,
+        "exit_code": 0,
+        "error_codes": [],
+        "elapsed_ms": 248.1,
+        "stdout": "-> Nested loop left join  (cost=1082 rows=1352) (actual time=28.6..39.1 rows=1352 loops=1)\n    -> Sort: n.id  (cost=609 rows=1352) (actual time=28.6..33.7 rows=1352 loops=1)\n        -> Filter: (cast(json_unquote(json_extract(if(json_valid(n.raw_log),n.raw_log,'{}'),'$.test_run')) as char charset binary) = '20261108T125333+0900-ec2-step-rps11-r02')  (cost=609 rows=1352) (actual time=0.0776..25 rows=1352 loops=1)\n            -> Index range scan on n using idx_network_logs_created_at over ('2026-11-08 12:48:33.000000' <= created_at), with index condition: (n.created_at >= TIMESTAMP'2026-11-08 12:48:33')  (cost=609 rows=1352) (actual time=0.0267..4.7 rows=1352 loops=1)\n    -> Filter: ((a.alert_key = concat('request:',n.request_id)) and (cast(a.alert_key as char charset binary) = cast(concat('request:',n.request_id) as char charset binary)))  (cost=0.25 rows=1) (actual time=0.00379..0.00379 rows=0.0111 loops=1352)\n        -> Single-row index lookup on a using PRIMARY (alert_key=concat('request:',n.request_id))  (cost=0.25 rows=1) (actual time=0.00355..0.00355 rows=0.0111 loops=1352)\n-> Select #2 (subquery in projection; dependent)\n    -> Aggregate: count(0)  (cost=0.501 rows=1) (actual time=0.00406..0.00411 rows=1 loops=1352)\n        -> Filter: (t.threat_type = 'AI Detection')  (cost=0.482 rows=0.185) (actual time=0.00374..0.00375 rows=0.0111 loops=1352)\n            -> Index lookup on t using FKp5y1cn4hp7qs4ng46dmdb8aj1 (log_id=n.id)  (cost=0.482 rows=1.85) (actual time=0.00352..0.00355 rows=0.0222 loops=1352)\n-> Select #3 (subquery in projection; dependent)\n    -> Aggregate: count(0)  (cost=0.45 rows=1) (actual time=0.00416..0.0042 rows=1 loops=1352)\n        -> Filter: (cast(w.request_id as char charset binary) = cast(n.request_id as char charset binary))  (cost=0.35 rows=1) (actual time=0.00393..0.00393 rows=0.0111 loops=1352)\n            -> Single-row covering index lookup on w using uk_waf_detections_request_id (request_id=n.request_id)  (cost=0.35 rows=1) (actual time=0.00374..0.00374 rows=0.0111 loops=1352)\n\n"
+      }
+    },
+    "sql": {
+      "current": "SELECT JSON_OBJECT(\n 'requestId',n.request_id,'logId',n.id,\n 'phase',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.test_phase')),\n 'kind',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.test_kind')),\n 'sequence',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.test_seq')),\n 'ingress',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.request_start_epoch_s')),\n 'alertId',a.alert_id,'revision',a.revision,\n 'aiDetected',a.ai_detected,'wafDetected',a.waf_detected,\n 'aiRows',(SELECT COUNT(*) FROM detected_threats t WHERE t.log_id=n.id AND t.threat_type='AI Detection'),\n 'wafRows',(SELECT COUNT(*) FROM waf_detections w WHERE BINARY w.request_id=BINARY n.request_id)\n)\nFROM network_logs n LEFT JOIN request_alerts a\n ON BINARY a.alert_key=BINARY CONCAT('request:',n.request_id)\nWHERE BINARY JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(n.raw_log),n.raw_log,'{}'),'$.test_run'))\n = BINARY CONVERT(0x3230323631313038543132353333332b303930302d6563322d737465702d72707331312d723032 USING utf8mb4)\nORDER BY n.id;",
+      "bounded": "SELECT JSON_OBJECT(\n 'requestId',n.request_id,'logId',n.id,\n 'phase',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.test_phase')),\n 'kind',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.test_kind')),\n 'sequence',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.test_seq')),\n 'ingress',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.request_start_epoch_s')),\n 'alertId',a.alert_id,'revision',a.revision,\n 'aiDetected',a.ai_detected,'wafDetected',a.waf_detected,\n 'aiRows',(SELECT COUNT(*) FROM detected_threats t WHERE t.log_id=n.id AND t.threat_type='AI Detection'),\n 'wafRows',(SELECT COUNT(*) FROM waf_detections w WHERE BINARY w.request_id=BINARY n.request_id)\n)\nFROM network_logs n LEFT JOIN request_alerts a\n ON BINARY a.alert_key=BINARY CONCAT('request:',n.request_id)\nWHERE n.created_at >= '2026-11-08 12:48:33' AND BINARY JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(n.raw_log),n.raw_log,'{}'),'$.test_run'))\n = BINARY CONVERT(0x3230323631313038543132353333332b303930302d6563322d737465702d72707331312d723032 USING utf8mb4)\nORDER BY n.id;",
+      "bounded_indexed_joins": "SELECT JSON_OBJECT(\n 'requestId',n.request_id,'logId',n.id,\n 'phase',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.test_phase')),\n 'kind',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.test_kind')),\n 'sequence',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.test_seq')),\n 'ingress',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.request_start_epoch_s')),\n 'alertId',a.alert_id,'revision',a.revision,\n 'aiDetected',a.ai_detected,'wafDetected',a.waf_detected,\n 'aiRows',(SELECT COUNT(*) FROM detected_threats t WHERE t.log_id=n.id AND t.threat_type='AI Detection'),\n 'wafRows',(SELECT COUNT(*) FROM waf_detections w WHERE w.request_id=n.request_id AND BINARY w.request_id=BINARY n.request_id)\n)\nFROM network_logs n LEFT JOIN request_alerts a\n ON a.alert_key=CONCAT('request:',n.request_id) AND BINARY a.alert_key=BINARY CONCAT('request:',n.request_id)\nWHERE n.created_at >= '2026-11-08 12:48:33' AND BINARY JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(n.raw_log),n.raw_log,'{}'),'$.test_run'))\n = BINARY CONVERT(0x3230323631313038543132353333332b303930302d6563322d737465702d72707331312d723032 USING utf8mb4)\nORDER BY n.id;"
+    },
+    "bound_kst_candidate": "2026-11-08 12:48:33"
+  },
+  "adopted_sql_check": {
+    "at": "2026-11-08T04:18:24.523817+00:00",
+    "run_id": "20261108T125333+0900-ec2-step-rps11-r02",
+    "log_id_floor": 36475,
+    "new": {
+      "ok": true,
+      "exit_code": 0,
+      "error_codes": [],
+      "elapsed_ms": 273.7,
+      "rows": 1352,
+      "min_log_id": 36476,
+      "max_log_id": 37827,
+      "phases": {
+        "warmup": 32,
+        "measurement": 1320
+      }
+    },
+    "new_plan": {
+      "ok": true,
+      "exit_code": 0,
+      "error_codes": [],
+      "elapsed_ms": 215.6,
+      "stdout": "-> Nested loop left join  (cost=1450 rows=2634) (actual time=0.0894..24.4 rows=1352 loops=1)\n    -> Filter: ((n.id > 36475) and (cast(json_unquote(json_extract(if(json_valid(n.raw_log),n.raw_log,'{}'),'$.test_run')) as char charset binary) = '20261108T125333+0900-ec2-step-rps11-r02'))  (cost=528 rows=2634) (actual time=0.0717..19.9 rows=1352 loops=1)\n        -> Index range scan on n using PRIMARY over (36475 < id)  (cost=528 rows=2634) (actual time=0.0262..1.72 rows=1352 loops=1)\n    -> Filter: ((a.alert_key = concat('request:',n.request_id)) and (cast(a.alert_key as char charset binary) = cast(concat('request:',n.request_id) as char charset binary)))  (cost=0.25 rows=1) (actual time=0.0031..0.0031 rows=0.0111 loops=1352)\n        -> Single-row index lookup on a using PRIMARY (alert_key=concat('request:',n.request_id))  (cost=0.25 rows=1) (actual time=0.00295..0.00295 rows=0.0111 loops=1352)\n-> Select #2 (subquery in projection; dependent)\n    -> Aggregate: count(0)  (cost=0.501 rows=1) (actual time=0.00294..0.00299 rows=1 loops=1352)\n        -> Filter: (t.threat_type = 'AI Detection')  (cost=0.482 rows=0.185) (actual time=0.0027..0.00271 rows=0.0111 loops=1352)\n            -> Index lookup on t using FKp5y1cn4hp7qs4ng46dmdb8aj1 (log_id=n.id)  (cost=0.482 rows=1.85) (actual time=0.00251..0.00253 rows=0.0222 loops=1352)\n-> Select #3 (subquery in projection; dependent)\n    -> Aggregate: count(0)  (cost=0.45 rows=1) (actual time=0.00317..0.00321 rows=1 loops=1352)\n        -> Filter: (cast(w.request_id as char charset binary) = cast(n.request_id as char charset binary))  (cost=0.35 rows=1) (actual time=0.00298..0.00298 rows=0.0111 loops=1352)\n            -> Single-row covering index lookup on w using uk_waf_detections_request_id (request_id=n.request_id)  (cost=0.35 rows=1) (actual time=0.0028..0.0028 rows=0.0111 loops=1352)\n\n"
+    },
+    "preflight_full": {
+      "ok": true,
+      "exit_code": 0,
+      "error_codes": [],
+      "elapsed_ms": 724.9,
+      "rows": 1352
+    },
+    "current_max_id": "37827",
+    "sql": "SELECT JSON_OBJECT(\n 'requestId',n.request_id,'logId',n.id,\n 'phase',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.test_phase')),\n 'kind',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.test_kind')),\n 'sequence',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.test_seq')),\n 'ingress',JSON_UNQUOTE(JSON_EXTRACT(n.raw_log,'$.request_start_epoch_s')),\n 'alertId',a.alert_id,'revision',a.revision,\n 'aiDetected',a.ai_detected,'wafDetected',a.waf_detected,\n 'aiRows',(SELECT COUNT(*) FROM detected_threats t WHERE t.log_id=n.id AND t.threat_type='AI Detection'),\n 'wafRows',(SELECT COUNT(*) FROM waf_detections w\n   WHERE w.request_id=n.request_id AND BINARY w.request_id=BINARY n.request_id)\n)\nFROM network_logs n LEFT JOIN request_alerts a\n ON a.alert_key=CONCAT('request:',n.request_id) AND BINARY a.alert_key=BINARY CONCAT('request:',n.request_id)\nWHERE n.id > 36475 AND BINARY JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(n.raw_log),n.raw_log,'{}'),'$.test_run'))\n = BINARY CONVERT(0x3230323631313038543132353333332b303930302d6563322d737465702d72707331312d723032 USING utf8mb4)\nORDER BY n.id;"
+  },
+  "conclusion": {
+    "created_at_storage": "KST 벽시계(datetime(6)); DB time_zone=SYSTEM(UTC). 채택안은 시각에 의존하지 않는 id 하한을 쓴다.",
+    "rows_equal": {
+      "current_full": 1352,
+      "adopted": 1352
+    },
+    "idle_elapsed_ms": {
+      "current": 1343.2,
+      "adopted": 273.7
+    }
+  }
+}

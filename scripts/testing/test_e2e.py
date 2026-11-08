@@ -175,6 +175,18 @@ class E2ETests(unittest.TestCase):
         self.assertNotIn("x' OR 1=1", sql)
         self.assertNotIn('created_at', sql)
 
+    def test_sql_floor_and_joins_allow_index_lookups_without_datetime(self):
+        # 2026/11/08 EC2 실행 계획: 전체 raw_log 해석·탐지 테이블 반복 스캔을 기본 키 범위·인덱스 조회로 바꾼다.
+        sql = database_sql('run', 36475)
+        self.assertIn('WHERE n.id > 36475 AND BINARY JSON_UNQUOTE(', sql)
+        self.assertIn("ON a.alert_key=CONCAT('request:',n.request_id) AND BINARY a.alert_key=", sql)
+        self.assertIn('WHERE w.request_id=n.request_id AND BINARY w.request_id=BINARY n.request_id', sql)
+        self.assertNotIn('created_at', sql)
+        self.assertNotIn('n.id >', database_sql('run'))
+        for bad in (-1, '1 OR 1=1', 1.5, True):
+            with self.assertRaises(ValueError):
+                database_sql('run', bad)
+
     def test_fixture_has_no_credentials_or_cookie_headers(self):
         value, digest = fixture()
         self.assertEqual(value['path'], '/rest/user/login')

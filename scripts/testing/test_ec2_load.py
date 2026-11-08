@@ -12,9 +12,9 @@ from pathlib import Path
 import unittest
 from unittest.mock import AsyncMock,Mock,patch
 
-from ec2_load_policy import load_contract,selected_contract,validate_contract,assess,summarize_stage
+from ec2_load_policy import load_contract,selected_contract,validate_contract,assess,summarize_stage,knee_signals
 from ec2_login import Credentials,read_credentials,login_ec2
-from e2e_core import evaluate
+from e2e_core import evaluate,ClockObservationError
 from run_ec2_e2e import main,EC2Experiment
 from e2e_core import fixture
 from e2e_environment import select_environment
@@ -33,13 +33,33 @@ class LoadPolicyTests(unittest.TestCase):
         changed['initial_targets']['ai_server_e2e_p95_ms']=4000
         with self.assertRaises(ValueError): validate_contract(changed)
 
-    def test_contract_revision_3_separates_lag_measurement_interval(self):
-        self.assertEqual(self.policy['revision'],3)
-        self.assertEqual(self.policy['workload']['lag_measurement_interval_seconds'],60)
-        self.assertEqual(self.policy['workload']['lag_confirmation_interval_seconds'],10)
-        for value in (None,10):
+    def test_contract_revision_6_records_background_clock_mismatch(self):
+        self.assertEqual(self.policy['revision'],6)
+        self.assertEqual(self.policy['clock_policy']['k6_background_window_mismatch'],'diagnostic')
+        for value in ('missing','abort','ignore'):
             changed=copy.deepcopy(self.policy)
-            if value is None: del changed['workload']['lag_measurement_interval_seconds']
+            if value=='missing': del changed['clock_policy']['k6_background_window_mismatch']
+            else: changed['clock_policy']['k6_background_window_mismatch']=value
+            with self.assertRaises(ValueError): validate_contract(changed)
+
+    def test_contract_keeps_step_mode_and_turns_off_lag_during_load(self):
+        self.assertEqual(self.policy['workload']['step_rates_per_second'],[7,9,11,13])
+        self.assertEqual(self.policy['workload']['step_max_vus'],20)
+        self.assertEqual(selected_contract(self.policy,'step',9)['workload']['measurement_seconds'],120)
+        for mode,rate in (('step',5),('step',15),('formal',7),('pilot',7)):
+            with self.assertRaises(ValueError): selected_contract(self.policy,mode,rate)
+        for key,value in (('step_rates_per_second',[7,9,11,13,15]),('step_max_vus',50)):
+            changed=copy.deepcopy(self.policy)
+            changed['workload'][key]=value
+            with self.assertRaises(ValueError): validate_contract(changed)
+        changed=copy.deepcopy(self.policy)
+        changed['knee_criteria']['completion_ratio_below']=0.5
+        with self.assertRaises(ValueError): validate_contract(changed)
+        self.assertIsNone(self.policy['workload']['lag_measurement_interval_seconds'])
+        self.assertEqual(self.policy['workload']['lag_confirmation_interval_seconds'],10)
+        for value in ('missing',60,10):
+            changed=copy.deepcopy(self.policy)
+            if value=='missing': del changed['workload']['lag_measurement_interval_seconds']
             else: changed['workload']['lag_measurement_interval_seconds']=value
             with self.assertRaises(ValueError): validate_contract(changed)
 
@@ -121,6 +141,52 @@ class LoadPolicyTests(unittest.TestCase):
             self.assertEqual(main(['--dry-run','--mode','pilot']),0)
         secret.assert_not_called();reserve.assert_not_called();experiment.assert_not_called()
 
+    def test_step_plan_uses_separate_ids_and_rejects_rates_outside_contract(self):
+        out=io.StringIO()
+        with patch('run_ec2_e2e.reserve') as reserve,contextlib.redirect_stdout(out):
+            self.assertEqual(main(['--dry-run','--mode','step','--rate','9']),0)
+        plan=json.loads(out.getvalue())
+        self.assertIn('-ec2-step-rps9-r01',plan['id'])
+        self.assertEqual((plan['mode'],plan['rate'],plan['expected_measurement_requests']),('step',9,1080))
+        reserve.assert_not_called()
+        for argv in (['--mode','step','--rate','5'],['--mode','formal','--rate','9']):
+            with contextlib.redirect_stderr(io.StringIO()),self.assertRaises(SystemExit):
+                main(['--dry-run',*argv])
+
+
+def progress(points,start=datetime(2026,11,8,3,tzinfo=timezone.utc).timestamp()):
+    """(경과 초, 측정 HTTP 수, AI 완료 수) 목록을 progress.jsonl 행 모양으로 만든다."""
+    return [dict(at=datetime.fromtimestamp(start+t,timezone.utc).isoformat(),
+                 counts=dict(measurement=dict(http=h,AI_RESULT_COMMITTED=a,pending_ai=h-a)))
+            for t,h,a in points]
+
+
+class KneeSignalTests(unittest.TestCase):
+    def setUp(self): self.policy,_=load_contract()
+
+    def test_sustained_step_has_no_knee_signal(self):
+        rows=progress([(0,0,0)]+[(10*i,90*i,90*i-3) for i in range(1,13)]+[(130,1080,1080)])
+        r=knee_signals(rows,rate=9,expected=1080,stats_ms=dict(ai_server=dict(p95_ms=420),waf_server=dict(p95_ms=300)),
+                       drain_seconds=20,criteria=self.policy['knee_criteria'])
+        self.assertEqual(r['status'],'EVALUATED')
+        self.assertFalse(r['knee'])
+        self.assertAlmostEqual(r['completion_ratio'],1.0,places=2)
+        self.assertEqual(r['backlog_clear_seconds_after_send'],10.0)
+
+    def test_falling_behind_triggers_ratio_slope_and_drain_reasons(self):
+        rows=progress([(10*i,130*i,104*i) for i in range(1,13)])
+        r=knee_signals(rows,rate=13,expected=1560,stats_ms=dict(ai_server=dict(p95_ms=3500)),drain_seconds=None,
+                       criteria=self.policy['knee_criteria'])
+        self.assertTrue(r['knee'])
+        self.assertAlmostEqual(r['completion_ratio'],0.8,places=2)
+        self.assertGreater(r['pending_slope_per_second'],0.05*13)
+        self.assertEqual(len(r['reasons']),4)
+
+    def test_too_few_samples_is_not_judged(self):
+        r=knee_signals(progress([(10,90,90),(20,180,175)]),rate=9,expected=1080,criteria=self.policy['knee_criteria'])
+        self.assertEqual(r['status'],'INSUFFICIENT_SAMPLES')
+        self.assertIsNone(r['knee'])
+
 
 class LoginTests(unittest.IsolatedAsyncioTestCase):
     def page(self,url='https://security-monitor-kw.duckdns.org/'):
@@ -181,6 +247,10 @@ class GeneratorBoundaryTests(unittest.TestCase):
         result=subprocess.run(['k6','run','--no-color',str(script)],
             capture_output=True,text=True,timeout=15,env=dict(os.environ,K6_NO_USAGE_REPORT='true'))
         self.assertEqual(result.returncode,0,result.stderr)
+        # k6는 반복 함수의 예외를 로그로만 남기고 종료 코드 0을 돌려준다. 단언 실패를 로그로 잡는다.
+        output=result.stdout+result.stderr
+        self.assertNotIn('script exception',output,output)
+        self.assertNotIn('level=error',output,output)
 
 
 class RuntimeFlowTests(unittest.IsolatedAsyncioTestCase):
@@ -224,7 +294,7 @@ class RuntimeFlowTests(unittest.IsolatedAsyncioTestCase):
             if failed: raise RuntimeError('FIXTURE_LOAD_FAILURE')
             return seconds
         r.phase=AsyncMock(side_effect=phase)
-        remote=dict(transport={},commands=[],collection_status='COLLECTED',errors=[],app_sha='a'*40,database=[],
+        remote=dict(transport={},commands=[],collection_status='COLLECTED',errors=[],app_sha='a'*40,database=[],log_id_floor=36475,
             lag=dict(code=0,rows=[dict(group=g,topic=t,partition=0,lag=0) for g,t in
                 [('log-group','log-topic'),('ai-service-group','ai-request-topic'),('ai-result-group','ai-result-topic'),('waf-detection-group','waf-detection-topic')]]),
             resources=dict(states=[dict(service='waf',image_id='image')]))
@@ -251,6 +321,11 @@ class RuntimeFlowTests(unittest.IsolatedAsyncioTestCase):
         r=await self.flow()
         self.assertEqual([c.args[0] for c in r.database_observation.await_args_list],['preflight','before','after'])
         self.assertEqual(r.manifest['state'],'COMPLETED')
+        # 시작 전 check 수집은 하한 없이(충돌 확인용 전체 조회), 이후 수집은 시작 전 최대 id를 하한으로 쓴다.
+        calls=r.remote_collector.collect.call_args_list
+        self.assertIsNone(calls[0].kwargs.get('log_id_floor'))
+        self.assertTrue(calls[1:] and all(c.kwargs.get('log_id_floor')==36475 for c in calls[1:]))
+        self.assertEqual(r.manifest['log_id_floor'],36475)
 
     async def test_load_exception_still_cleans_up_and_restores(self):
         await self.flow(failed=True)
@@ -285,16 +360,124 @@ class LagCadenceTests(unittest.IsolatedAsyncioTestCase):
     async def test_drain_always_collects_lag_and_restores_cadence_even_on_error(self):
         exp=self.experiment()
         seen=[]
-        async def finished(recovery=False):
-            seen.append((exp.force_lag,recovery))
+        async def finished(recovery=False,limit=60):
+            seen.append((exp.force_lag,recovery,limit))
             return True
         exp._drain=finished
         self.assertTrue(await exp.drain(recovery=True))
-        self.assertEqual(seen,[(True,True)])
+        self.assertEqual(seen,[(True,True,60)])
         self.assertFalse(exp.force_lag)
-        async def failed(recovery=False):
+        async def failed(recovery=False,limit=60):
             raise RuntimeError('drain failed')
         exp._drain=failed
         with self.assertRaises(RuntimeError):
             await exp.drain()
         self.assertFalse(exp.force_lag)
+
+    def test_null_interval_skips_lag_during_load_but_not_when_forced_or_unkeyed(self):
+        exp=self.experiment()
+        exp.lag_interval=None
+        exp.last_lag_at=100.0
+        with patch('run_ec2_e2e.time.perf_counter',return_value=10_000.0):
+            self.assertFalse(exp.should_collect_lag())
+            exp.force_lag=True
+            self.assertTrue(exp.should_collect_lag())
+            exp.force_lag=False
+            exp.keys=set()
+            self.assertTrue(exp.should_collect_lag())
+
+    async def test_failed_collection_still_counts_as_lag_attempt(self):
+        # 2026/11/08 13 RPS: DB 수집 실패 뒤 lag 조회 시각이 갱신되지 않아 25초 만에 CLI가 다시 실행됐다.
+        exp=self.experiment()
+        exp.collection_lock=asyncio.Lock()
+        async def failing():
+            exp.lag_requested=exp.should_collect_lag()
+            raise RuntimeError('원격 수집 불완전: DATABASE_UNAVAILABLE')
+        with patch('run_e2e.Experiment.collect',side_effect=failing),patch('run_ec2_e2e.time.perf_counter',return_value=100.0):
+            with self.assertRaises(RuntimeError):
+                await exp.collect()
+        self.assertEqual(exp.last_lag_at,100.0)
+        with patch('run_e2e.Experiment.collect',side_effect=failing),patch('run_ec2_e2e.time.perf_counter',return_value=125.0):
+            with self.assertRaises(RuntimeError):
+                await exp.collect()
+        self.assertEqual(exp.last_lag_at,100.0)
+
+
+class BackgroundClockDiagnosticTests(unittest.IsolatedAsyncioTestCase):
+    """계약 개정 6: k6 일반 요청의 교차 시계 구간 이탈은 중단하지 않고 기록하며, 새 이탈마다 재보정을 먼저 시도한다."""
+
+    def setUp(self):
+        import tempfile
+        from ec2_watch import calibrate
+        self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
+        self.points=Path(self.temp.name)/'measurement-points.jsonl'
+        rows=[('a'*32,'1.355',1),('b'*32,'1.400',2)]  # 두 번째는 응답 수신보다 늦은 WAF 시작 시각
+        self.points.write_text(''.join(json.dumps(dict(type='Point',metric='dg_client_request',data=dict(value=12,tags=dict(
+            phase='measurement',kind='background',sequence=str(seq),request_id=rid,ingress=ingress,status='200',
+            sent_at_ms='1000',ended_at_ms='1012'))))+'\n' for rid,ingress,seq in rows),encoding='utf-8')
+        exchange=dict(client_sent_ms=1000,client_received_ms=1012,server_received_ms=1355,server_sent_ms=1357,
+                      roundtrip_ms=12,observed_monotonic=1)
+        policy,_=load_contract()
+        self.exp=object.__new__(EC2Experiment)
+        self.exp.contract=policy
+        self.exp.clock_calibration=calibrate([exchange]*3)
+        self.exp.seen_clients=set()
+        self.exp.refresh_clock_observation=AsyncMock(return_value=True)
+
+    async def test_mismatch_is_recorded_and_recheck_runs_once_per_new_row(self):
+        with patch('ec2_watch.time.perf_counter',return_value=2):
+            rows=await self.exp.read_client_points(self.points,partial=True)
+            self.assertEqual([('clock_window' in r) for r in rows],[False,True])
+            self.assertEqual(self.exp.refresh_clock_observation.await_count,1)
+            self.exp.seen_clients={(r['phase'],r['kind'],r['sequence']) for r in rows}
+            await self.exp.read_client_points(self.points)
+        self.assertEqual(self.exp.refresh_clock_observation.await_count,1)
+
+    async def test_contract_without_diagnostic_policy_keeps_abort(self):
+        self.exp.contract=copy.deepcopy(self.exp.contract)
+        self.exp.contract['clock_policy']['k6_background_window_mismatch']='abort'
+        self.exp.refresh_clock_observation=AsyncMock(return_value=False)
+        with patch('ec2_watch.time.perf_counter',return_value=2),self.assertRaises(ClockObservationError):
+            await self.exp.read_client_points(self.points)
+
+
+class RecoveryDrainTests(unittest.IsolatedAsyncioTestCase):
+    """계약 개정 4: 측정 후 해소 판정은 60초, 단계 모드의 원복 전 처리 정리 확인만 300초까지 기다린다."""
+
+    def test_only_step_mode_extends_recovery_drain(self):
+        policy,_=load_contract()
+        self.assertEqual(selected_contract(policy,'step',11)['workload']['recovery_drain_seconds'],300)
+        for mode,rate in (('pilot',1),('formal',5)):
+            self.assertEqual(selected_contract(policy,mode,rate)['workload']['recovery_drain_seconds'],60)
+        changed=copy.deepcopy(policy)
+        changed['workload']['step_recovery_drain_seconds']=900
+        with self.assertRaises(ValueError): validate_contract(changed)
+
+    async def test_drain_waits_until_given_limit_without_backlog_clearing(self):
+        exp=object.__new__(EC2Experiment)
+        exp.force_lag=False;exp.keys=set();exp.clients=[dict(requestId='a'*32,kind='background')]
+        exp.traces=[];exp.database=[];exp.browser_events=[];exp.check_abort=Mock()
+        clock=[0.0];calls=[]
+        async def collect():
+            calls.append(clock[0]);return None
+        async def sleep(seconds): clock[0]+=seconds
+        exp.collect=collect
+        with (patch('run_ec2_e2e.time.perf_counter',side_effect=lambda:clock[0]),
+                patch('run_ec2_e2e.asyncio.sleep',side_effect=sleep),patch('run_ec2_e2e.zero_lag',return_value=False)):
+            self.assertFalse(await exp.drain())
+            self.assertEqual(len(calls),6)
+            clock[0]=0.0;calls.clear()
+            self.assertFalse(await exp.drain(recovery=True,limit=300))
+            self.assertEqual(len(calls),30)
+
+    async def test_restore_uses_recovery_limit_and_holds_exclusion_when_not_drained(self):
+        from types import SimpleNamespace
+        exp=object.__new__(EC2Experiment)
+        exp.process=None;exp.page=Mock();exp.final_lag=False;exp.recovery_drain_seconds=300
+        exp.clients=[dict(requestId='a'*32)]
+        exp.setup=SimpleNamespace(baseline=dict(exclusions=''),changed=True,cleanup=AsyncMock(),reconfigure=AsyncMock())
+        exp.drain=AsyncMock(return_value=False)
+        with self.assertRaisesRegex(RuntimeError,'RESTORE_HELD_PROCESSING_NOT_DRAINED'):
+            await exp.restore()
+        exp.drain.assert_awaited_once_with(recovery=True,limit=300)
+        exp.setup.cleanup.assert_not_awaited();exp.setup.reconfigure.assert_not_awaited()
