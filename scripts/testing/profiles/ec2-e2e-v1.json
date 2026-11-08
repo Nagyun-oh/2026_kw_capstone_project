@@ -1,6 +1,6 @@
 {
   "version": "ec2-e2e-v1",
-  "revision": 2,
+  "revision": 3,
   "status": "CONFIRMED_ENGINEERING_CONTRACT",
   "executable": true,
   "execution_profile": "scripts/testing/run_ec2_e2e.py",
@@ -25,6 +25,7 @@
     "probe_interval_seconds": 10,
     "final_observation_seconds": 60,
     "lag_confirmation_interval_seconds": 10,
+    "lag_measurement_interval_seconds": 60,
     "lag_zero_consecutive_samples": 2,
     "pilot_rate": 1,
     "pilot_seconds": 60
@@ -68,6 +69,7 @@
   "notes": [
     "고정 계약을 검증하는 run_ec2_e2e.py 전용 경로로 실행한다. 실제 구현·예비 측정 검증 상태는 EC2 목차에 기록한다. 기존 run_e2e.py의 EC2 실행 경로는 계속 차단한다.",
     "PC HTTP·브라우저 지연과 EC2 서버 내부 지연을 분리한다.",
-    "목표 요청률의 실제 송신·서버 도착 여부와 발생기 자원을 확인해야 한다."
+    "목표 요청률의 실제 송신·서버 도착 여부와 발생기 자원을 확인해야 한다.",
+    "개정 3(2026/11/07): 부하 중 Kafka lag 조회(kafka-consumer-groups CLI)는 lag_measurement_interval_seconds(60초)마다만 실행한다. DG_TRACE·DB 수집 주기와 적체 해소 확인의 10초 lag 확인은 그대로다. 측정 도구 부담 근거는 docs/testing/ec2/트러블슈팅_6(상세본).md."
   ]
 }

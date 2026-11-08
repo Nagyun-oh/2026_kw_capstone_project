@@ -75,6 +75,10 @@ class EC2Experiment(Experiment):
         self.cleanup_ok=False
         self.load_started=False
         self.drain_elapsed=None
+        # 계약 개정 3: 부하 중 lag 조회는 이 간격마다만 실행하고, 적체 해소 확인(drain)에서는 매번 실행한다.
+        self.lag_interval=contract['workload']['lag_measurement_interval_seconds']
+        self.force_lag=False
+        self.last_lag_at=None
 
     async def send_probe(self,phase,sequence):
         try:
@@ -124,9 +128,16 @@ class EC2Experiment(Experiment):
             precise_cross_domain_reference=width<=self.contract['clock_policy']['precision_reference_width_ms'],
             role='diagnostic_only; server_latency_uses_server_clock; browser_latency_uses_pc_monotonic'))
 
+    def should_collect_lag(self):
+        if self.force_lag or not self.keys or self.last_lag_at is None:
+            return True
+        return time.perf_counter()-self.last_lag_at>=self.lag_interval
+
     async def collect(self):
         async with self.collection_lock:
             snap=await super().collect()
+            if snap is not None:
+                self.last_lag_at=time.perf_counter()
             completed={t['requestId'] for t in self.traces if t['stage']=='AI_RESULT_COMMITTED'}
             pending=[c for c in self.clients if c['requestId'] not in completed]
             oldest=max(((epoch_ms()-c['sent_ms'])/1000 for c in pending),default=0)
@@ -147,6 +158,13 @@ class EC2Experiment(Experiment):
                 pass
 
     async def drain(self,*,recovery=False):
+        self.force_lag=True
+        try:
+            return await self._drain(recovery=recovery)
+        finally:
+            self.force_lag=False
+
+    async def _drain(self,*,recovery=False):
         started=time.perf_counter()
         zeros=0
         while time.perf_counter()-started<60:

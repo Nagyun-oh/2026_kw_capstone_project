@@ -196,13 +196,17 @@ class Experiment:
         if value['collection_status'] != 'COLLECTED':
             raise RuntimeError('원격 수집 불완전: ' + ','.join(value['errors']))
 
+    def should_collect_lag(self):
+        """이번 pipeline 수집에 Kafka lag 조회를 포함할지. 로컬·기본은 항상 포함한다."""
+        return True
+
     async def pipeline_inputs(self):
         if self.environment.name == 'ec2':
             if self.remote_collector is None:
                 raise RuntimeError('원격 수집 어댑터 설정이 필요합니다.')
             value = await asyncio.to_thread(self.remote_collector.collect, self.manifest['id'],
                 self.manifest['started_at'], {c['requestId'] for c in self.clients},
-                mode='pipeline', expected_keys=self.keys)
+                mode='pipeline', expected_keys=self.keys, include_lag=self.should_collect_lag())
             self.record_remote_collection(value)
             return value['lag'], value['database'], value['traces']
         started = now()
@@ -222,12 +226,14 @@ class Experiment:
     async def collect(self):
         started = now()
         snap, self.database, traces = await self.pipeline_inputs()
-        if not self.keys:
-            self.keys = partition_keys(snap)
-        if not lag_complete(snap, self.keys):
-            raise RuntimeError('필수 Kafka group·partition 표본 누락')
-        self.snapshots.append(snap)
-        self.guard.collected('kafka_lag', True)
+        # snap이 None이면 이번 수집에서 lag 조회를 의도적으로 생략한 것이다(EC2 부하 중 주기 분리).
+        if snap is not None:
+            if not self.keys:
+                self.keys = partition_keys(snap)
+            if not lag_complete(snap, self.keys):
+                raise RuntimeError('필수 Kafka group·partition 표본 누락')
+            self.snapshots.append(snap)
+            self.guard.collected('kafka_lag', True)
         save(self.output / 'database.json', self.database)
         if self.page:
             policies = {r['alertId']: ['AI', 'WAF'] if r['kind'] == 'probe' else

@@ -1,0 +1,681 @@
+{
+  "schema": "dualguard-ec2-measurement-overhead-v1",
+  "note": "측정 구간 120초 기준. kafka_lag CLI 실행 구간과 docker stats·/proc/stat·DG_TRACE를 대조",
+  "runs": [
+    {
+      "id": "20261107T165926+0900-ec2-e2e-rps5-r17",
+      "kafka_lag_cli": {
+        "runs": 8,
+        "mean_seconds": 4.58,
+        "covered_seconds": 36.7,
+        "covered_fraction": 0.306
+      },
+      "kafka_cpu_percent": {
+        "near_cli_median": 27.6,
+        "otherwise_median": 3.1,
+        "near_cli": [
+          75.46,
+          70.9,
+          3.01,
+          2.5,
+          3.37,
+          115.5,
+          2.45,
+          51.8
+        ],
+        "otherwise": [
+          3.47,
+          3.17,
+          3.11,
+          2.36,
+          3.18,
+          2.22
+        ]
+      },
+      "db_cpu_percent": {
+        "near_cli_median": 17.1,
+        "otherwise_median": 14.1
+      },
+      "host": {
+        "busy_avg": 67.5,
+        "busy_max": 92.3,
+        "steal_avg": 1.0,
+        "samples": 13
+      },
+      "generator_cpu_avg": 10.9,
+      "container_cpu_avg": {
+        "kafka": 24.5,
+        "db": 22.6,
+        "ai": 22.3,
+        "backend": 15.1,
+        "waf": 6.3,
+        "juiceshop": 2.6,
+        "fluent-bit": 0.6,
+        "frontend": 0.1,
+        "zookeeper": 0.1
+      },
+      "container_cpu_avg_sum": 94.3,
+      "latency_by_window": {
+        "in": {
+          "ai_segment": {
+            "count": 185,
+            "avg_ms": 301.54683783783787,
+            "p50_ms": 295.168,
+            "p95_ms": 464.2783999999999,
+            "p99_ms": 627.9415199999996,
+            "max_ms": 745.317
+          },
+          "log_ingest": {
+            "count": 185,
+            "avg_ms": 333.7968918918919,
+            "p50_ms": 332.393,
+            "p95_ms": 535.468,
+            "p99_ms": 600.27104,
+            "max_ms": 617.4699999999999
+          }
+        },
+        "out": {
+          "ai_segment": {
+            "count": 415,
+            "avg_ms": 240.64673975903614,
+            "p50_ms": 240.533,
+            "p95_ms": 380.44379999999995,
+            "p99_ms": 449.60962000000023,
+            "max_ms": 552.04
+          },
+          "log_ingest": {
+            "count": 415,
+            "avg_ms": 308.23440722891564,
+            "p50_ms": 312.88,
+            "p95_ms": 519.4874,
+            "p99_ms": 541.4039200000001,
+            "max_ms": 625.2990000000001
+          }
+        }
+      },
+      "sha256": {
+        "collection-commands.jsonl": "e7c53c43b66be5619daab975f395669ce5b5743c726e69eaa6a2a2a606dd12ab",
+        "docker-stats.jsonl": "f5c07619ed89c02e9bd281fd43936f6fc66b2896466fff68af27303f1ebe5e48",
+        "host-resources.jsonl": "5be7a2534d16412deb88591cca6f53049e4f63dede47ea039fee5ba2eba2bfe7",
+        "pipeline-events.jsonl": "015563a75a3a540bebf6ba8c0c69a7c12efbe1131d2a0fccfaa506700c09b2c8",
+        "client-requests.jsonl": "f105407c130692048cf98e7b0ec1e5d963cd37f36e79260f0f8595fd2c99b7bc"
+      }
+    },
+    {
+      "id": "20261107T170458+0900-ec2-e2e-rps5-r18",
+      "kafka_lag_cli": {
+        "runs": 8,
+        "mean_seconds": 4.61,
+        "covered_seconds": 36.9,
+        "covered_fraction": 0.307
+      },
+      "kafka_cpu_percent": {
+        "near_cli_median": 100.3,
+        "otherwise_median": 2.7,
+        "near_cli": [
+          2.67,
+          103.53,
+          57.98,
+          2.99,
+          145.03,
+          148.26,
+          97.1,
+          137.65
+        ],
+        "otherwise": [
+          2.75,
+          2.57,
+          2.9,
+          2.3,
+          2.5,
+          36.4
+        ]
+      },
+      "db_cpu_percent": {
+        "near_cli_median": 8.1,
+        "otherwise_median": 8.2
+      },
+      "host": {
+        "busy_avg": 62.8,
+        "busy_max": 90.2,
+        "steal_avg": 0.5,
+        "samples": 13
+      },
+      "generator_cpu_avg": 10.0,
+      "container_cpu_avg": {
+        "kafka": 53.2,
+        "ai": 26.1,
+        "db": 13.1,
+        "backend": 11.2,
+        "waf": 6.6,
+        "juiceshop": 2.2,
+        "fluent-bit": 0.6,
+        "zookeeper": 0.1,
+        "frontend": 0.0
+      },
+      "container_cpu_avg_sum": 113.0,
+      "latency_by_window": {
+        "in": {
+          "ai_segment": {
+            "count": 190,
+            "avg_ms": 298.1773684210526,
+            "p50_ms": 296.1725,
+            "p95_ms": 502.6827999999999,
+            "p99_ms": 576.67077,
+            "max_ms": 636.4309999999999
+          },
+          "log_ingest": {
+            "count": 190,
+            "avg_ms": 325.0380578947368,
+            "p50_ms": 333.628,
+            "p95_ms": 530.6642499999998,
+            "p99_ms": 557.4596699999995,
+            "max_ms": 643.15
+          }
+        },
+        "out": {
+          "ai_segment": {
+            "count": 410,
+            "avg_ms": 239.27779024390244,
+            "p50_ms": 236.5615,
+            "p95_ms": 399.4134999999998,
+            "p99_ms": 586.4115999999999,
+            "max_ms": 671.606
+          },
+          "log_ingest": {
+            "count": 410,
+            "avg_ms": 307.8588512195122,
+            "p50_ms": 317.528,
+            "p95_ms": 515.46385,
+            "p99_ms": 534.82181,
+            "max_ms": 610.577
+          }
+        }
+      },
+      "sha256": {
+        "collection-commands.jsonl": "f6ff6b209fcc9c7558e07fb9b22e2affd5aae6dbe60633309bf3f0d1212b9bc7",
+        "docker-stats.jsonl": "b00e53430a71ab7a0cfc228ee347c3ba1730e1df43b846d5d25e7c6aebd393be",
+        "host-resources.jsonl": "d3dcdbd286f9c849b3ae621828729bc08eaed5a3d5b4f43790f7428ea4b8ebe9",
+        "pipeline-events.jsonl": "c49deac97d8d62a8a045769aa4ef5d3fc9099b85019cc2e8064160338c1408e3",
+        "client-requests.jsonl": "becd2ae644b5ea6e24a73a75336800503c9a669796ba229ee86a1f670e013c8f"
+      }
+    },
+    {
+      "id": "20261107T171013+0900-ec2-e2e-rps5-r19",
+      "kafka_lag_cli": {
+        "runs": 8,
+        "mean_seconds": 4.58,
+        "covered_seconds": 36.6,
+        "covered_fraction": 0.305
+      },
+      "kafka_cpu_percent": {
+        "near_cli_median": 131.7,
+        "otherwise_median": 3.0,
+        "near_cli": [
+          58.05,
+          128.8,
+          137.87,
+          134.69,
+          86.72,
+          128.62,
+          136.12,
+          188.38
+        ],
+        "otherwise": [
+          2.87,
+          2.72,
+          3.01,
+          67.76,
+          102.8,
+          3.16,
+          2.5
+        ]
+      },
+      "db_cpu_percent": {
+        "near_cli_median": 9.1,
+        "otherwise_median": 9.2
+      },
+      "host": {
+        "busy_avg": 65.3,
+        "busy_max": 92.6,
+        "steal_avg": 0.9,
+        "samples": 14
+      },
+      "generator_cpu_avg": 8.7,
+      "container_cpu_avg": {
+        "kafka": 78.9,
+        "ai": 27.3,
+        "db": 11.4,
+        "backend": 11.3,
+        "waf": 6.6,
+        "juiceshop": 2.3,
+        "fluent-bit": 0.6,
+        "zookeeper": 0.1,
+        "frontend": 0.1
+      },
+      "container_cpu_avg_sum": 138.7,
+      "latency_by_window": {
+        "in": {
+          "ai_segment": {
+            "count": 180,
+            "avg_ms": 297.36799444444443,
+            "p50_ms": 293.7615,
+            "p95_ms": 470.22745,
+            "p99_ms": 595.8800800000001,
+            "max_ms": 730.836
+          },
+          "log_ingest": {
+            "count": 180,
+            "avg_ms": 329.68392222222224,
+            "p50_ms": 338.02549999999997,
+            "p95_ms": 534.5149,
+            "p99_ms": 610.8181000000004,
+            "max_ms": 653.62
+          }
+        },
+        "out": {
+          "ai_segment": {
+            "count": 420,
+            "avg_ms": 250.30587142857144,
+            "p50_ms": 246.80349999999999,
+            "p95_ms": 437.8504,
+            "p99_ms": 552.61513,
+            "max_ms": 692.316
+          },
+          "log_ingest": {
+            "count": 420,
+            "avg_ms": 304.0292523809524,
+            "p50_ms": 310.99,
+            "p95_ms": 514.0386999999998,
+            "p99_ms": 533.16177,
+            "max_ms": 560.038
+          }
+        }
+      },
+      "sha256": {
+        "collection-commands.jsonl": "901d0ae4fa3e9986e4b3c1cc59db9c311e5c35e5096270b3787ac6a7871d3639",
+        "docker-stats.jsonl": "2d82873bdecca4f51e42ca0df26fd6efd26b2182dd70e41d039ecdaec7484136",
+        "host-resources.jsonl": "ef7b410285ba0ef40db782bc1a7e10ff9c72e24cd9d34e06a732372c430c42f8",
+        "pipeline-events.jsonl": "2cc9e8b9c0cbeed862b536e1fa4f5bfc771734b45268b01f74c3472731479a70",
+        "client-requests.jsonl": "e5fb30a4950e51d7208052d5d1bc815627c02ebf3e4371896b3af4c205f66cc9"
+      }
+    },
+    {
+      "id": "20261107T175904+0900-ec2-e2e-rps5-r21",
+      "kafka_lag_cli": {
+        "runs": 8,
+        "mean_seconds": 4.69,
+        "covered_seconds": 37.5,
+        "covered_fraction": 0.313
+      },
+      "kafka_cpu_percent": {
+        "near_cli_median": 80.4,
+        "otherwise_median": 6.6,
+        "near_cli": [
+          127.73,
+          123.26,
+          31.71,
+          80.36,
+          44.73,
+          32.74,
+          88.22
+        ],
+        "otherwise": [
+          3.54,
+          5.29,
+          127.54,
+          62.63,
+          4.52,
+          6.56,
+          6.99
+        ]
+      },
+      "db_cpu_percent": {
+        "near_cli_median": 16.7,
+        "otherwise_median": 15.9
+      },
+      "host": {
+        "busy_avg": 73.7,
+        "busy_max": 97.4,
+        "steal_avg": 7.4,
+        "samples": 13
+      },
+      "generator_cpu_avg": 10.9,
+      "container_cpu_avg": {
+        "kafka": 53.3,
+        "ai": 42.7,
+        "db": 16.8,
+        "backend": 9.9,
+        "waf": 9.8,
+        "juiceshop": 2.9,
+        "fluent-bit": 1.2,
+        "frontend": 0.1,
+        "zookeeper": 0.1
+      },
+      "container_cpu_avg_sum": 136.9,
+      "latency_by_window": {
+        "in": {
+          "ai_segment": {
+            "count": 187,
+            "avg_ms": 254.9907860962567,
+            "p50_ms": 253.99699999999999,
+            "p95_ms": 375.3105,
+            "p99_ms": 405.8813399999998,
+            "max_ms": 445.575
+          },
+          "log_ingest": {
+            "count": 187,
+            "avg_ms": 106.93778074866312,
+            "p50_ms": 104.608,
+            "p95_ms": 161.5529,
+            "p99_ms": 189.5133799999999,
+            "max_ms": 212.95
+          }
+        },
+        "out": {
+          "ai_segment": {
+            "count": 413,
+            "avg_ms": 233.78397578692494,
+            "p50_ms": 228.369,
+            "p95_ms": 353.206,
+            "p99_ms": 465.30096,
+            "max_ms": 694.386
+          },
+          "log_ingest": {
+            "count": 413,
+            "avg_ms": 104.13919612590799,
+            "p50_ms": 102.212,
+            "p95_ms": 175.13039999999998,
+            "p99_ms": 212.32835999999998,
+            "max_ms": 259.28200000000004
+          }
+        }
+      },
+      "sha256": {
+        "collection-commands.jsonl": "6aab331e9566a8c0fd0fb1e8a8751e2cdcfc336fb62351997cc788423ec7217b",
+        "docker-stats.jsonl": "2a71667488f6b3119ba1deff67baf66564f909334df7cd8ecc85a71f8e28bab4",
+        "host-resources.jsonl": "01adf1d5389cbc365c7aac79d1eb0f53fb32e255510485f152ade3acf3ad1c8a",
+        "pipeline-events.jsonl": "bd15c7ffe9f283e7f2a7b734825c8b3aa930cb26d8802727943e6779d9789db7",
+        "client-requests.jsonl": "cb1732cf7a9b03dcef51e85cc05cbd0cabeac37fb0ba01f9759dfc4f29246483"
+      }
+    },
+    {
+      "id": "20261107T180436+0900-ec2-e2e-rps5-r22",
+      "kafka_lag_cli": {
+        "runs": 8,
+        "mean_seconds": 5.23,
+        "covered_seconds": 41.8,
+        "covered_fraction": 0.349
+      },
+      "kafka_cpu_percent": {
+        "near_cli_median": 97.7,
+        "otherwise_median": 4.2,
+        "near_cli": [
+          118.94,
+          110.27,
+          142.38,
+          62.79,
+          96.1,
+          73.88,
+          45.46,
+          99.22
+        ],
+        "otherwise": [
+          5.0,
+          3.37,
+          3.56,
+          5.41,
+          3.59,
+          4.74
+        ]
+      },
+      "db_cpu_percent": {
+        "near_cli_median": 19.6,
+        "otherwise_median": 17.7
+      },
+      "host": {
+        "busy_avg": 70.7,
+        "busy_max": 93.3,
+        "steal_avg": 6.2,
+        "samples": 13
+      },
+      "generator_cpu_avg": 10.3,
+      "container_cpu_avg": {
+        "kafka": 55.3,
+        "ai": 34.9,
+        "db": 23.8,
+        "waf": 8.1,
+        "backend": 8.0,
+        "juiceshop": 2.5,
+        "fluent-bit": 1.1,
+        "zookeeper": 0.2,
+        "frontend": 0.1
+      },
+      "container_cpu_avg_sum": 134.0,
+      "latency_by_window": {
+        "in": {
+          "ai_segment": {
+            "count": 209,
+            "avg_ms": 267.811009569378,
+            "p50_ms": 253.78,
+            "p95_ms": 418.8856,
+            "p99_ms": 554.6053599999997,
+            "max_ms": 609.4300000000001
+          },
+          "log_ingest": {
+            "count": 209,
+            "avg_ms": 109.77448803827751,
+            "p50_ms": 108.435,
+            "p95_ms": 172.25819999999996,
+            "p99_ms": 199.9571199999999,
+            "max_ms": 230.47
+          }
+        },
+        "out": {
+          "ai_segment": {
+            "count": 391,
+            "avg_ms": 228.8357877237852,
+            "p50_ms": 223.81300000000002,
+            "p95_ms": 352.274,
+            "p99_ms": 408.5051,
+            "max_ms": 502.865
+          },
+          "log_ingest": {
+            "count": 391,
+            "avg_ms": 99.86719437340153,
+            "p50_ms": 97.443,
+            "p95_ms": 156.0775,
+            "p99_ms": 188.1207000000001,
+            "max_ms": 275.166
+          }
+        }
+      },
+      "sha256": {
+        "collection-commands.jsonl": "93391b12ca5c5800bb847af1262d3035819a25ac6ac318bb2b493bfd6037031c",
+        "docker-stats.jsonl": "05ac758f9890ca8140243b95f035811a2cef03f47cbc321626d8747088eeba6f",
+        "host-resources.jsonl": "f410c22900e787b77b204e6e5503850bbf6962d83bbb3faea87854206223b79d",
+        "pipeline-events.jsonl": "9556cfee48baea14d479ce226b1947d1c077b2d8df033d759ca4293b951c31d2",
+        "client-requests.jsonl": "b58b91bd7a0580c060ad98154428a699e8428f4c92e3de973c1056e6adf9ee52"
+      }
+    },
+    {
+      "id": "20261107T181012+0900-ec2-e2e-rps5-r23",
+      "kafka_lag_cli": {
+        "runs": 8,
+        "mean_seconds": 4.72,
+        "covered_seconds": 37.8,
+        "covered_fraction": 0.315
+      },
+      "kafka_cpu_percent": {
+        "near_cli_median": 78.9,
+        "otherwise_median": 5.3,
+        "near_cli": [
+          27.24,
+          37.25,
+          119.56,
+          138.61,
+          130.71,
+          3.3,
+          42.3,
+          115.54
+        ],
+        "otherwise": [
+          133.92,
+          5.28,
+          4.16,
+          4.62,
+          3.32,
+          64.27,
+          6.01
+        ]
+      },
+      "db_cpu_percent": {
+        "near_cli_median": 12.8,
+        "otherwise_median": 16.9
+      },
+      "host": {
+        "busy_avg": 67.7,
+        "busy_max": 93.7,
+        "steal_avg": 2.7,
+        "samples": 13
+      },
+      "generator_cpu_avg": 9.3,
+      "container_cpu_avg": {
+        "kafka": 55.7,
+        "ai": 28.8,
+        "db": 22.0,
+        "waf": 8.2,
+        "backend": 8.1,
+        "juiceshop": 2.0,
+        "fluent-bit": 0.9,
+        "zookeeper": 0.1,
+        "frontend": 0.1
+      },
+      "container_cpu_avg_sum": 126.0,
+      "latency_by_window": {
+        "in": {
+          "ai_segment": {
+            "count": 189,
+            "avg_ms": 257.33997354497353,
+            "p50_ms": 249.561,
+            "p95_ms": 374.0096,
+            "p99_ms": 439.24620000000033,
+            "max_ms": 539.549
+          },
+          "log_ingest": {
+            "count": 189,
+            "avg_ms": 107.49416402116402,
+            "p50_ms": 103.036,
+            "p95_ms": 177.7672,
+            "p99_ms": 220.74720000000022,
+            "max_ms": 366.867
+          }
+        },
+        "out": {
+          "ai_segment": {
+            "count": 411,
+            "avg_ms": 223.5696082725061,
+            "p50_ms": 221.171,
+            "p95_ms": 356.836,
+            "p99_ms": 409.88139999999976,
+            "max_ms": 452.39
+          },
+          "log_ingest": {
+            "count": 411,
+            "avg_ms": 100.11275425790754,
+            "p50_ms": 99.135,
+            "p95_ms": 151.2975,
+            "p99_ms": 195.8676999999999,
+            "max_ms": 313.43
+          }
+        }
+      },
+      "sha256": {
+        "collection-commands.jsonl": "7316f28c7a7059b1fc5fd421dc97c5555201c68970684a846601c323603e8f13",
+        "docker-stats.jsonl": "ee3dfe8b2f3cb1449e3033988fd05bdd06c1f6c6ec1c08df1071a9298ab9523a",
+        "host-resources.jsonl": "906ed11ac6b91c7f6d3be48cddb43082611d2fa55226e2608a58650492690feb",
+        "pipeline-events.jsonl": "784b2ff3af9fd7464622deb649498a44120889590ac6fd5e5af7ec88ee97e255",
+        "client-requests.jsonl": "fc19bffddf5fca718c1f97941419d8c442f0a9bbc69ab2699d859bff43f13695"
+      }
+    }
+  ],
+  "pooled_latency_by_window": {
+    "flush_0.5": {
+      "in": {
+        "ai_segment": {
+          "count": 555,
+          "avg_ms": 299.0380252252252,
+          "p50_ms": 295.168,
+          "p95_ms": 474.9549999999999,
+          "p99_ms": 608.8302600000001,
+          "max_ms": 745.317
+        },
+        "log_ingest": {
+          "count": 555,
+          "avg_ms": 329.46443603603603,
+          "p50_ms": 334.45200000000006,
+          "p95_ms": 535.0369,
+          "p99_ms": 598.46644,
+          "max_ms": 653.62
+        }
+      },
+      "out": {
+        "ai_segment": {
+          "count": 1245,
+          "avg_ms": 243.45442329317268,
+          "p50_ms": 241.602,
+          "p95_ms": 402.685,
+          "p99_ms": 552.23824,
+          "max_ms": 692.316
+        },
+        "log_ingest": {
+          "count": 1245,
+          "avg_ms": 306.6921236947791,
+          "p50_ms": 313.698,
+          "p95_ms": 516.479,
+          "p99_ms": 537.7242,
+          "max_ms": 625.2990000000001
+        }
+      }
+    },
+    "flush_0.1": {
+      "in": {
+        "ai_segment": {
+          "count": 585,
+          "avg_ms": 260.32997094017094,
+          "p50_ms": 252.511,
+          "p95_ms": 389.94399999999996,
+          "p99_ms": 460.31399999999843,
+          "max_ms": 609.4300000000001
+        },
+        "log_ingest": {
+          "count": 585,
+          "avg_ms": 108.13099145299145,
+          "p50_ms": 105.627,
+          "p95_ms": 173.54199999999972,
+          "p99_ms": 207.53979999999987,
+          "max_ms": 366.867
+        }
+      },
+      "out": {
+        "ai_segment": {
+          "count": 1215,
+          "avg_ms": 228.73636543209878,
+          "p50_ms": 224.21099999999998,
+          "p95_ms": 354.1924,
+          "p99_ms": 419.50081999999975,
+          "max_ms": 694.386
+        },
+        "log_ingest": {
+          "count": 1215,
+          "avg_ms": 101.40238930041153,
+          "p50_ms": 99.926,
+          "p95_ms": 160.305,
+          "p99_ms": 200.77891999999997,
+          "max_ms": 313.43
+        }
+      }
+    }
+  },
+  "latency_window_rule": "요청의 LOG_COMMITTED 시각이 kafka_lag CLI 실행 구간 안이면 in. ai_segment=LOG_COMMITTED→AI_RESULT_COMMITTED, log_ingest=WAF ingress→LOG_COMMITTED"
+}
