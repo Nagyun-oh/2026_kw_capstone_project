@@ -50,10 +50,10 @@ DualGuard(저장소 제목: "웹 서버 보안 아키텍처 설계 및 구현")�
 
 | 영역 | 기술 | 버전 | 확인 위치 |
 | --- | --- | --- | --- |
-| 백엔드 | Java | 17(빌드 `eclipse-temurin:17-jdk-jammy`, 실행 `17-jre-jammy`) | [build.gradle](../../backend/build.gradle), [Dockerfile](../../backend/Dockerfile) |
+| 백엔드 | Java | 17(빌드 `gradle:8.14.4-jdk17-jammy`(temurin 17 기반), 실행 `eclipse-temurin:17-jre-jammy`) | [build.gradle](../../backend/build.gradle), [Dockerfile](../../backend/Dockerfile) |
 | 백엔드 | Spring Boot(Web·Security·Data JPA·WebSocket·Validation·Actuator), Spring Kafka, Spring Security Messaging | Boot 3.5.11, dependency-management 1.1.7. 스타터·Kafka 버전은 Boot BOM 관리 | build.gradle |
 | 백엔드 | springdoc-openapi(Swagger UI), Micrometer Prometheus, MySQL Connector/J, Lombok | springdoc 2.8.17, 나머지 BOM 관리 | build.gradle |
-| 백엔드 | Gradle Wrapper | 8.14.4 | `backend/gradle/wrapper/gradle-wrapper.properties` |
+| 백엔드 | Gradle Wrapper | 8.14.4(이미지 빌드는 같은 버전의 Gradle 이미지 사용, 두 버전을 같이 올린다) | `backend/gradle/wrapper/gradle-wrapper.properties` |
 | 프론트 | React, react-dom, Create React App(`react-scripts`) | 19.2.4, 19.2.4, 5.0.1 | [package-lock.json](../../frontend/package-lock.json) 설치 버전 |
 | 프론트 | axios, @stomp/stompjs, sockjs-client, react-toastify | 1.18.0, 7.3.0, 1.6.1, 11.0.5 | package-lock.json |
 | 프론트 | 빌드·제공 이미지 | `node:22-alpine` → `nginx:stable-alpine` | [Dockerfile](../../frontend/Dockerfile) |
