@@ -46,7 +46,7 @@ def fixture(path=FIXTURE):
 
 
 def client_record(phase, kind, sequence, headers, status, duration_ms, sent_ms, ended_ms, c0=None, *, clock=None,
-                  client_clock_resolution_ms=0):
+                  client_clock_resolution_ms=0, background_window_mismatch='raise'):
     headers = {k.lower(): str(v) for k, v in headers.items()}
     request_id = headers.get('x-request-id', '')
     try:
@@ -65,20 +65,30 @@ def client_record(phase, kind, sequence, headers, status, duration_ms, sent_ms, 
     if clock is None:
         if not sent_ms - 100 <= start * 1000 <= ended_ms + 100:
             raise ValueError('WAF·발생기 시계 차이가 허용 관측 오차 100ms를 넘었습니다.')
-    else:
-        from ec2_watch import ingress_in_clock_interval
+    window = None
+    if clock is not None:
+        from ec2_watch import clock_window_excess
+        if background_window_mismatch not in ('raise', 'record'):
+            raise ValueError('지원하지 않는 시계 불일치 처리 방식')
         calibrations = [clock, *clock.get('previous_calibrations', [])]
-        if not any(ingress_in_clock_interval(start*1000,sent_ms,ended_ms,item,
-                       ingress_resolution_ms=1,client_resolution_ms=client_clock_resolution_ms)
-                   for item in calibrations):
-            raise ClockObservationError('WAF 시각이 EC2 보정 구간 밖이거나 보정이 오래됐습니다.')
-    return dict(phase=phase, kind=kind, sequence=int(sequence), requestId=request_id,
-                ingress=start, status=int(status), duration_ms=duration_ms,
-                sent_ms=sent_ms, ended_ms=ended_ms, c0=c0,
-                clock_resolution_ms=dict(ingress=1,client=client_clock_resolution_ms))
+        excesses = [e for e in (clock_window_excess(start*1000,sent_ms,ended_ms,item,
+                        ingress_resolution_ms=1,client_resolution_ms=client_clock_resolution_ms)
+                    for item in calibrations) if e is not None]
+        if not excesses or min(excesses) > 0:
+            # 계약 개정 6: k6 일반 요청의 순수한 구간 이탈만 진단으로 기록한다. 보정 만료·probe는 계속 중단한다.
+            if not (excesses and kind == 'background' and background_window_mismatch == 'record'):
+                raise ClockObservationError('WAF 시각이 EC2 보정 구간 밖이거나 보정이 오래됐습니다.')
+            window = dict(status='OUTSIDE', excess_ms=round(min(excesses), 3), calibrations=len(excesses))
+    record = dict(phase=phase, kind=kind, sequence=int(sequence), requestId=request_id,
+                  ingress=start, status=int(status), duration_ms=duration_ms,
+                  sent_ms=sent_ms, ended_ms=ended_ms, c0=c0,
+                  clock_resolution_ms=dict(ingress=1,client=client_clock_resolution_ms))
+    if window:
+        record['clock_window'] = window
+    return record
 
 
-def parse_points(path, *, partial=False, clock=None):
+def parse_points(path, *, partial=False, clock=None, background_window_mismatch='raise'):
     rows = []
     text = Path(path).read_text(encoding='utf-8')
     lines = text.splitlines()
@@ -92,7 +102,7 @@ def parse_points(path, *, partial=False, clock=None):
         rows.append(client_record(tags['phase'], tags['kind'], tags['sequence'],
                     {'x-request-id': tags['request_id'], 'x-dualguard-request-start': tags['ingress']},
                     tags['status'], point['data']['value'], float(tags['sent_at_ms']), float(tags['ended_at_ms']),
-                    clock=clock,client_clock_resolution_ms=1))
+                    clock=clock,client_clock_resolution_ms=1,background_window_mismatch=background_window_mismatch))
     return rows
 
 
@@ -142,8 +152,17 @@ def parse_database(text):
     return rows
 
 
-def database_sql(run_id):
+def database_sql(run_id, log_id_floor=None):
+    """실험 회차의 로그·탐지·알림 행을 읽는 읽기 전용 쿼리. 시각(created_at)에 의존하지 않는다.
+
+    log_id_floor: 회차 시작 전 network_logs 최대 id. 주면 그보다 큰 id만 읽어(기본 키 범위) 테이블 전체의
+    raw_log JSON 해석을 피한다. 조인은 인덱스 조회가 되도록 일반 동등 비교를 먼저 두고, 정확 일치(BINARY)는
+    추가 조건으로 유지한다(2026/11/08 EC2 실행 계획 확인: 전체 스캔·탐지 테이블 반복 스캔 제거).
+    """
     run_hex = run_id.encode('utf-8').hex()
+    if log_id_floor is not None and (type(log_id_floor) is not int or log_id_floor < 0):
+        raise ValueError('로그 id 하한 형식 오류')
+    floor = '' if log_id_floor is None else f'n.id > {log_id_floor} AND '
     return f"""START TRANSACTION READ ONLY;
 SELECT JSON_OBJECT(
  'requestId',n.request_id,'logId',n.id,
@@ -154,11 +173,12 @@ SELECT JSON_OBJECT(
  'alertId',a.alert_id,'revision',a.revision,
  'aiDetected',a.ai_detected,'wafDetected',a.waf_detected,
  'aiRows',(SELECT COUNT(*) FROM detected_threats t WHERE t.log_id=n.id AND t.threat_type='AI Detection'),
- 'wafRows',(SELECT COUNT(*) FROM waf_detections w WHERE BINARY w.request_id=BINARY n.request_id)
+ 'wafRows',(SELECT COUNT(*) FROM waf_detections w
+   WHERE w.request_id=n.request_id AND BINARY w.request_id=BINARY n.request_id)
 )
 FROM network_logs n LEFT JOIN request_alerts a
- ON BINARY a.alert_key=BINARY CONCAT('request:',n.request_id)
-WHERE BINARY JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(n.raw_log),n.raw_log,'{{}}'),'$.test_run'))
+ ON a.alert_key=CONCAT('request:',n.request_id) AND BINARY a.alert_key=BINARY CONCAT('request:',n.request_id)
+WHERE {floor}BINARY JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(n.raw_log),n.raw_log,'{{}}'),'$.test_run'))
  = BINARY CONVERT(0x{run_hex} USING utf8mb4)
 ORDER BY n.id;
 ROLLBACK;

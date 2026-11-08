@@ -31,6 +31,8 @@ class ClockRecheckTests(unittest.IsolatedAsyncioTestCase):
         r.clock_observation_rechecks=0
         r.phase_name='measurement'
         r.manifest={}
+        # 기존(개정 5 이전) 중단 동작을 검증한다. 개정 6의 진단 기록 경로는 test_ec2_load에서 따로 본다.
+        r.contract={'clock_policy':{'k6_background_window_mismatch':'abort'}}
         r.check_abort=Mock()
         r.event=Mock()
         async def calibrate(label):
@@ -137,6 +139,16 @@ class ClockRecheckTests(unittest.IsolatedAsyncioTestCase):
         local.clock_calibration=None
         with patch('run_e2e.parse_points',side_effect=ClockObservationError('시각')):
             with self.assertRaises(ClockObservationError):await local.read_client_points(Path('unused'))
+        # 개정 6 진단 경로도 시계 오류만 재보정하고 JSON 손상은 그대로 실패시킨다.
+        r.contract={'clock_policy':{'k6_background_window_mismatch':'diagnostic'}}
+        r.seen_clients=set()
+        r.refresh_clock_observation=AsyncMock(return_value=True)
+        with patch('run_ec2_e2e.parse_points',side_effect=[ClockObservationError('보정 만료'),['ok']]):
+            self.assertEqual(await r.read_client_points(Path('unused')),['ok'])
+        r.refresh_clock_observation=AsyncMock()
+        with patch('run_ec2_e2e.parse_points',side_effect=ValueError('JSON 손상')):
+            with self.assertRaises(ValueError):await r.read_client_points(Path('unused'))
+        r.refresh_clock_observation.assert_not_awaited()
 
 
 if __name__=='__main__':unittest.main()

@@ -40,7 +40,7 @@ def response(config, *, rows=None):
         started_at=SINCE,ended_at=SINCE,lag_text=lag_text(),
         database_text='\n'.join(json.dumps(r) for r in ([db] if rows is None else rows)),
         trace_text='DG_TRACE '+json.dumps(trace()) if rows is None or config['request_ids'] else '',
-        trace_enabled=True,errors=[],missing_services=[],
+        trace_enabled=True,errors=[],missing_services=[],log_id_floor='36475',
         resources=dict(at=SINCE,containers=[dict(Name='backend',CPUPerc='150.2%',MemPerc='8.5%',MemUsage='100MiB / 1GiB')],
             states=[dict(service='backend',image_id='sha256:test',state='running',health=None,restart_count=0,started_at=SINCE)]),
         commands=[dict(check=k,status='OK',exit_code=0,elapsed_ms=3) for k in (
@@ -153,6 +153,32 @@ class RemoteCollectionTests(unittest.TestCase):
         self.assertIn('TRACE_NOT_ENABLED',result['errors'])
         self.assertNotIn('private-error',json.dumps(result))
 
+    def test_check_collection_returns_log_id_floor_and_later_queries_use_it(self):
+        config=worker_request('run',SINCE,[],'check')
+        self.assertEqual(parse_collection(response(config),config)['log_id_floor'],36475)
+        for bad in (None,'-1','12 OR 1=1',36475):
+            value=response(config);value['log_id_floor']=bad
+            result=parse_collection(value,config)
+            self.assertIn('LOG_ID_FLOOR_UNAVAILABLE',result['errors'])
+            self.assertNotIn('log_id_floor',result)
+        self.assertIn('n.id > 36475 AND',worker_request('run',SINCE,[RID],'pipeline',log_id_floor=36475)['database_sql'])
+        self.assertNotIn('n.id >',config['database_sql'])
+        pipeline=worker_request('run',SINCE,[],'pipeline')
+        self.assertNotIn('LOG_ID_FLOOR_UNAVAILABLE',parse_collection(response(pipeline),pipeline)['errors'])
+
+    def test_failure_classification_codes_pass_but_any_other_text_is_dropped(self):
+        config=worker_request('run',SINCE,[],'pipeline')
+        value=response(config)
+        value['commands'][2].update(status='COMMAND_FAILED',exit_code=1,error_codes=['2013/HY000'])
+        value['commands'][3].update(error_codes=["Lost connection to MySQL server at 'private-host'"])
+        value['commands'][4].update(error_codes=['OTHER']*6)
+        result=parse_collection(value,config)
+        commands={c['check']:c for c in result['commands']}
+        self.assertEqual(commands['database']['error_codes'],['2013/HY000'])
+        self.assertNotIn('error_codes',commands['trace_enabled'])
+        self.assertNotIn('error_codes',commands['pipeline_traces'])
+        self.assertNotIn('private-host',json.dumps(result))
+
     def test_unrelated_trace_returned_by_remote_is_rejected(self):
         config=worker_request('run',SINCE,[],'check')
         value=response(config,rows=[])
@@ -189,6 +215,35 @@ class RemoteCollectionTests(unittest.TestCase):
             self.assertIsNone(runner.run('db',['fake']))
         self.assertEqual(runner.commands[0]['status'],'UNAVAILABLE')
         self.assertNotIn('private-error',json.dumps(runner.commands))
+
+    def failed_query(self, stderr, **options):
+        runner=Runner()
+        proc=Mock(pid=4321,returncode=1)
+        proc.poll.return_value=1
+        proc.wait.return_value=1
+        selector=Mock()
+        selector.get_map.return_value={}
+        def popen(argv,**kwargs):
+            if kwargs['stderr'] not in (subprocess.DEVNULL,subprocess.STDOUT):
+                kwargs['stderr'].write(stderr)
+            return proc
+        with patch('ec2_collection_worker.subprocess.Popen',side_effect=popen), \
+                patch('ec2_collection_worker.selectors.DefaultSelector') as selectors:
+            selectors.return_value.__enter__.return_value=selector
+            self.assertIsNone(runner.run('database',['fake'],**options))
+        return runner.commands[0]
+
+    def test_failed_database_query_keeps_only_error_classification(self):
+        message=b"ERROR 2013 (HY000): Lost connection to MySQL server at 'private-host', system error: 110\n"
+        item=self.failed_query(message,classify_errors=True)
+        self.assertEqual((item['status'],item['exit_code'],item['error_codes']),('COMMAND_FAILED',1,['2013/HY000']))
+        self.assertNotIn('private-host',json.dumps(item))
+        self.assertNotIn('Lost connection',json.dumps(item))
+        self.assertEqual(self.failed_query(b'',classify_errors=True)['error_codes'],['NO_STDERR'])
+        self.assertEqual(self.failed_query(b'private detail',classify_errors=True)['error_codes'],['OTHER'])
+        self.assertEqual(self.failed_query(b'Error response from daemon: private',classify_errors=True)['error_codes'],
+                         ['DOCKER_DAEMON'])
+        self.assertNotIn('error_codes',self.failed_query(message))
 
     def test_worker_timeout_terminates_only_its_own_query_process_group(self):
         runner=Runner()
@@ -254,6 +309,16 @@ class RemoteCollectionTests(unittest.TestCase):
         self.assertTrue(logs[2]['merge_stderr'])
         self.assertIsNone(logs[2]['transform']('ordinary private-body'))
         self.assertEqual(result['trace_text'],'')
+        # check 수집은 같은 앱 계정으로 최대 로그 id만 읽는다(기본 키 조회, 숫자 외 출력은 버림).
+        floor=next(c for c in calls if c[0]=='log_id_floor')
+        self.assertEqual(floor[1],db[1])
+        self.assertIn('SELECT COALESCE(MAX(id),0) FROM network_logs;',floor[2]['input_text'])
+        self.assertIn('MAX_EXECUTION_TIME=3000',floor[2]['input_text'])
+        self.assertEqual(floor[2]['transform']('36475'),'36475')
+        self.assertIsNone(floor[2]['transform']('private text'))
+        calls.clear();runner.commands.clear()
+        collect(worker_request('run',SINCE,[RID],'pipeline'),runner)
+        self.assertNotIn('log_id_floor',[c[0] for c in calls])
 
     def test_lag_can_be_skipped_only_in_pipeline_collection(self):
         self.assertTrue(worker_request('run',SINCE,[RID],'pipeline')['include_lag'])

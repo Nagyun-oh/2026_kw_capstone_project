@@ -44,7 +44,7 @@ class SSHSettings:
         return options + ['-i', str(self.identity_file), 'ubuntu@'+self.host, 'python3 -']
 
 
-def worker_request(run_id, since, request_ids=(), mode='check', include_lag=True):
+def worker_request(run_id, since, request_ids=(), mode='check', include_lag=True, log_id_floor=None):
     if (not isinstance(run_id, str) or not re.fullmatch(r'[A-Za-z0-9_+.-]{1,160}', run_id)
             or run_id in ('.', '..') or mode not in MODES):
         raise ValueError('수집 실험 ID·모드 형식을 확인하세요.')
@@ -60,8 +60,9 @@ def worker_request(run_id, since, request_ids=(), mode='check', include_lag=True
     ids = list(request_ids)
     if len(ids) > 2000 or any(not isinstance(rid, str) or not REQUEST_ID.fullmatch(rid) for rid in ids):
         raise ValueError('요청 ID는 최대 2000개의 WAF 생성 32자리 ID여야 합니다.')
+    # log_id_floor는 회차 시작 전 network_logs 최대 id다. 주면 DB 수집이 기본 키 범위만 읽는다.
     return dict(mode=mode, run_id=run_id, since=since, request_ids=sorted(set(ids)), include_lag=include_lag,
-                database_sql='SET SESSION MAX_EXECUTION_TIME=3000;\n'+database_sql(run_id))
+                database_sql='SET SESSION MAX_EXECUTION_TIME=3000;\n'+database_sql(run_id, log_id_floor))
 
 
 def worker_script(config):
@@ -102,8 +103,14 @@ def parse_collection(value, config, expected_keys=()):
         raise ValueError('원격 명령 실행 근거가 없습니다.')
     safe_commands=[]
     for item in commands:
-        safe_commands.append({k:item.get(k) for k in ('check', 'started_at', 'ended_at', 'timeout_seconds',
+        safe=({k:item.get(k) for k in ('check', 'started_at', 'ended_at', 'timeout_seconds',
             'status', 'exit_code', 'bytes_read', 'lines_read', 'elapsed_ms')})
+        # 실패 원인 분류 코드만 받는다(MySQL 오류 번호/SQLSTATE 또는 고정 표시). 그 밖의 값은 버린다.
+        codes=item.get('error_codes')
+        if (isinstance(codes,list) and 0<len(codes)<=5 and all(isinstance(c,str) and
+                re.fullmatch(r'\d{4}/[0-9A-Z]{5}|DOCKER_DAEMON|SUDO|NO_STDERR|OTHER',c) for c in codes)):
+            safe['error_codes']=codes
+        safe_commands.append(safe)
         if item.get('status') != 'OK':
             errors.append('COMMAND_'+str(item.get('check'))+'_'+str(item.get('status')))
     result = dict(schema=SCHEMA, mode=config['mode'], run_id=config['run_id'],
@@ -115,6 +122,11 @@ def parse_collection(value, config, expected_keys=()):
             errors.append('APP_SHA_UNAVAILABLE')
         else:
             result['app_sha']=head
+        floor=value.get('log_id_floor')
+        if not isinstance(floor,str) or not re.fullmatch(r'\d{1,19}',floor.strip()):
+            errors.append('LOG_ID_FLOOR_UNAVAILABLE')
+        else:
+            result['log_id_floor']=int(floor.strip())
     if value.get('missing_services'):
         errors.append('MISSING_SERVICES')
     if config['mode'] in ('pipeline', 'check'):
@@ -160,8 +172,9 @@ class SSHCollection:
         self.settings, self.run = settings, run or subprocess.run
         self.last_record = None
 
-    def collect(self, run_id, since, request_ids=(), *, mode='pipeline', expected_keys=(), include_lag=True):
-        config=worker_request(run_id,since,request_ids,mode,include_lag)
+    def collect(self, run_id, since, request_ids=(), *, mode='pipeline', expected_keys=(), include_lag=True,
+                log_id_floor=None):
+        config=worker_request(run_id,since,request_ids,mode,include_lag,log_id_floor)
         started=time.perf_counter()
         record=dict(check='ssh_'+mode, started_at=now(), timeout_seconds=80, status='UNAVAILABLE', exit_code=None)
         result=None
