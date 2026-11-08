@@ -1,18 +1,20 @@
 # Java 17로 백엔드를 빌드하는 단계
-FROM eclipse-temurin:17-jdk-jammy AS build
+# Gradle이 설치된 공식 이미지(eclipse-temurin:17-jdk-jammy 기반)를 써서
+# 빌드할 때 Gradle 배포 파일을 내려받지 않는다(2026/11/08 다운로드 504로 배포 실패).
+# 버전은 gradle/wrapper/gradle-wrapper.properties와 같게 유지한다.
+FROM gradle:8.14.4-jdk17-jammy AS build
 
 # 이미지 내부의 작업 디렉토리
 WORKDIR /workspace
 
-# 빌드에 필요한 Gradle 파일 복사
-COPY gradlew build.gradle settings.gradle ./
-COPY gradle/ gradle/
+# 빌드에 필요한 Gradle 설정 파일 복사
+COPY build.gradle settings.gradle ./
 
 # 애플리케이션 소스 코드 복사
 COPY src/main src/main
 
-# Windows 줄바꿈을 Linux 형식을 정리한 뒤 JAR 빌드
-RUN sed -i 's/\r$//' gradlew && sh ./gradlew --no-daemon bootJar
+# JAR 빌드
+RUN gradle --no-daemon bootJar
 
 # Java 실행 환경만 포함한 별도 단계
 FROM eclipse-temurin:17-jre-jammy AS runtime
