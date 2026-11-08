@@ -297,7 +297,7 @@ nano .env.aws
 | APP_ALERTS_POLLDELAYMS | 요청 알림 발행기의 DB 조회 대기 간격. AWS 기본값은 250ms이며, 값 변경 시 backend 컨테이너를 재생성한다 |
 | APP_AIOUTBOX_POLLDELAYMS | AI 요청 outbox 발행기의 DB 조회 대기 간격. AWS 기본값은 250ms(애플리케이션 기본 500ms)이며, 값 변경 시 backend 컨테이너를 재생성한다 |
 | APP_AIOUTBOX_WAKEUPENABLED / APP_ALERTS_WAKEUPENABLED | 선택. 기본 `true`. 저장 트랜잭션 커밋 직후 AI outbox·알림 발행기를 바로 실행한다. `compose.aws.yaml`이 두 값을 backend에 전달하므로, 문제가 있으면 `.env.aws`에서 `false`로 두고 backend 컨테이너를 재생성하면 주기 조회만 사용한다 |
-| AI_UVICORN_WORKERS | 선택. 기본 `2`. AI 컨테이너의 uvicorn 프로세스 수다. 프로세스마다 모델과 Kafka 소비자 1개를 띄우며 메모리를 약 630MiB씩 쓴다. `ai-request-topic`은 backend `AiRequestTopicConfig`가 파티션 2개로 선언해 두 소비자가 나눠 읽는다. 되돌리려면 `1`로 두고 ai 컨테이너를 재생성한다. 파티션은 줄일 수 없지만 소비자 하나가 두 파티션을 모두 읽으므로 동작에는 문제가 없다. AI 프로세스당 추론 스레드는 `OMP_NUM_THREADS=1`로 고정한다(트러블슈팅_8 2부) |
+| AI_UVICORN_WORKERS | 선택. 기본 `1`. AI 컨테이너의 uvicorn 프로세스 수다. 프로세스마다 모델과 Kafka 소비자 1개를 띄우며 메모리를 약 630MiB씩 쓴다. `ai-request-topic`은 backend `AiRequestTopicConfig`가 파티션 2개로 선언해, `2`로 두면 두 소비자가 나눠 읽고 `1`이면 소비자 하나가 두 파티션을 모두 읽는다. 2026/11/08 `2`로 운영 실험했지만 2 vCPU 서버 CPU가 이미 묶여 있어 지연이 줄지 않아 기본값을 `1`로 되돌렸다(트러블슈팅_8 2부). 값을 바꾸면 ai 컨테이너를 재생성한다. AI 프로세스당 추론 스레드는 `OMP_NUM_THREADS=1`로 고정한다(t3.large의 기본값과 같음) |
 
 CD가 사용하는 `IMAGE_REGISTRY_PREFIX`와 `IMAGE_TAG`가 이미 있으면 유지한다. JWT 키는 새 인증 구성에서 사용하지 않는다. 환경변수 파일에 비밀번호를 넣을 때는 따옴표로 감싸 Compose의 값 해석을 확인하고, 실제 값을 명령 인자·로그·Git에 남기지 않는다.
 
