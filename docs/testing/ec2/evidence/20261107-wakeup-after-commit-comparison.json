@@ -1,0 +1,1909 @@
+{
+  "schema": "dualguard-ts5-wakeup-comparison-v1",
+  "groups": {
+    "base_r21_r23": {
+      "ids": [
+        "20261107T175904+0900-ec2-e2e-rps5-r21",
+        "20261107T180436+0900-ec2-e2e-rps5-r22",
+        "20261107T181012+0900-ec2-e2e-rps5-r23"
+      ],
+      "rounds": [
+        {
+          "id": "20261107T175904+0900-ec2-e2e-rps5-r21",
+          "started_at": "2026-11-07T08:59:04.682147+00:00",
+          "ended_at": "2026-11-07T09:04:17.977810+00:00",
+          "outbox_mean_ms": 151.841845,
+          "outbox_count": 600,
+          "host_cpu_busy_avg": 73.7,
+          "container_cpu_avg": {
+            "waf": 9.8,
+            "fluent-bit": 1.2,
+            "backend": 9.9,
+            "frontend": 0.1,
+            "db": 16.8,
+            "ai": 42.7,
+            "kafka": 53.3,
+            "juiceshop": 2.9,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 24.053382399997645,
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+            "images": [
+              "ai sha256:7c0b2dc018c10e6e464094fe2f41670436ee9bbfa1da8118cc461e5b9fca5919",
+              "backend sha256:6fffda63b4b7f2747257452d59266bde3ba174986b7048f9b6b8683d7729de18",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:0a8492064f304524434404369a25d7d6e6633c9088e889d5d71f9a9657d5a00f",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "ba7e65a0d14c7857365708d5861d044a1599c36ebe81b474297e4709f152b5d5",
+            "metrics.json": "c9ce925f2e2190448ae51876cbf13dfe7e4481066b824ceebecfde240581d47d",
+            "pipeline-events.jsonl": "bd15c7ffe9f283e7f2a7b734825c8b3aa930cb26d8802727943e6779d9789db7"
+          }
+        },
+        {
+          "id": "20261107T180436+0900-ec2-e2e-rps5-r22",
+          "started_at": "2026-11-07T09:04:36.690293+00:00",
+          "ended_at": "2026-11-07T09:09:53.577636+00:00",
+          "outbox_mean_ms": 151.86159333333333,
+          "outbox_count": 600,
+          "host_cpu_busy_avg": 70.7,
+          "container_cpu_avg": {
+            "waf": 8.1,
+            "fluent-bit": 1.1,
+            "backend": 8.0,
+            "frontend": 0.1,
+            "db": 23.8,
+            "ai": 34.9,
+            "kafka": 55.3,
+            "juiceshop": 2.5,
+            "zookeeper": 0.2
+          },
+          "final_drain_seconds": 24.414108199998736,
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+            "images": [
+              "ai sha256:7c0b2dc018c10e6e464094fe2f41670436ee9bbfa1da8118cc461e5b9fca5919",
+              "backend sha256:6fffda63b4b7f2747257452d59266bde3ba174986b7048f9b6b8683d7729de18",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:0a8492064f304524434404369a25d7d6e6633c9088e889d5d71f9a9657d5a00f",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "98ffe095aa9a7c2c3d2f88eb933c48e7a0ba5112592cea674cddda9cf228e5ee",
+            "metrics.json": "5d9c80fb33e71b17c958cf203e054049fe9e1f63d2b5d0872a2084ff7be2e4ec",
+            "pipeline-events.jsonl": "9556cfee48baea14d479ce226b1947d1c077b2d8df033d759ca4293b951c31d2"
+          }
+        },
+        {
+          "id": "20261107T181012+0900-ec2-e2e-rps5-r23",
+          "started_at": "2026-11-07T09:10:13.141461+00:00",
+          "ended_at": "2026-11-07T09:15:19.060314+00:00",
+          "outbox_mean_ms": 152.26086999999998,
+          "outbox_count": 600,
+          "host_cpu_busy_avg": 67.7,
+          "container_cpu_avg": {
+            "waf": 8.2,
+            "fluent-bit": 0.9,
+            "backend": 8.1,
+            "frontend": 0.1,
+            "db": 22.0,
+            "ai": 28.8,
+            "kafka": 55.7,
+            "juiceshop": 2.0,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 23.033763200000976,
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+            "images": [
+              "ai sha256:7c0b2dc018c10e6e464094fe2f41670436ee9bbfa1da8118cc461e5b9fca5919",
+              "backend sha256:6fffda63b4b7f2747257452d59266bde3ba174986b7048f9b6b8683d7729de18",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:0a8492064f304524434404369a25d7d6e6633c9088e889d5d71f9a9657d5a00f",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "4a40f7d15aef991698fa35ed49aaa6b3bb720757e288e2aac60d9eccc16a1983",
+            "metrics.json": "9e7fbb21fb819ac2324f2e05cf0f81e4de97d006d64f291588a094c1e3b84e3b",
+            "pipeline-events.jsonl": "784b2ff3af9fd7464622deb649498a44120889590ac6fd5e5af7ec88ee97e255"
+          }
+        }
+      ],
+      "probe_breakdown": {
+        "AI 1. WAF 접수 → 로그 커밋": {
+          "count": 36,
+          "avg_ms": 160.92318958706326,
+          "p50_ms": 159.26837921142578,
+          "p95_ms": 227.01925039291382,
+          "p99_ms": 250.8527278900146,
+          "max_ms": 261.8279457092285
+        },
+        "AI 2. 로그 커밋 → AI 결과 커밋": {
+          "count": 36,
+          "avg_ms": 306.6115445560879,
+          "p50_ms": 314.2263889312744,
+          "p95_ms": 432.6663613319397,
+          "p99_ms": 553.3310770988462,
+          "max_ms": 609.398365020752
+        },
+        "AI 3. AI 결과 커밋 → 알림 전송 시작": {
+          "count": 36,
+          "avg_ms": 121.43557601504855,
+          "p50_ms": 102.18167304992676,
+          "p95_ms": 226.46671533584595,
+          "p99_ms": 251.8593668937683,
+          "max_ms": 253.74317169189453
+        },
+        "AI 4. 네트워크 잔여": {
+          "count": 36,
+          "avg_ms": 106.41993150885456,
+          "p50_ms": 76.60001451222342,
+          "p95_ms": 280.01430772383173,
+          "p99_ms": 287.1032072840535,
+          "max_ms": 289.44589938328136
+        },
+        "AI 5. 브라우저 수신 → 화면 표시": {
+          "count": 36,
+          "avg_ms": 87.35503888864413,
+          "p50_ms": 103.16274999786401,
+          "p95_ms": 124.54859999979817,
+          "p99_ms": 131.8954299984398,
+          "max_ms": 135.1567999990948
+        },
+        "AI 합계. 요청 → 화면 표시": {
+          "count": 36,
+          "avg_ms": 782.7452805556984,
+          "p50_ms": 817.4097999999503,
+          "p95_ms": 1133.2859750009447,
+          "p99_ms": 1204.3721550011467,
+          "max_ms": 1241.401000002952
+        },
+        "WAF 1. WAF 접수 → WAF 탐지 커밋": {
+          "count": 36,
+          "avg_ms": 153.75352568096585,
+          "p50_ms": 145.09689807891846,
+          "p95_ms": 243.5513138771057,
+          "p99_ms": 261.1436367034912,
+          "max_ms": 268.2793140411377
+        },
+        "WAF 2. WAF 탐지 커밋 → 알림 전송 시작": {
+          "count": 36,
+          "avg_ms": 127.52850850423177,
+          "p50_ms": 118.42608451843262,
+          "p95_ms": 231.95695877075195,
+          "p99_ms": 234.89998579025269,
+          "max_ms": 235.78643798828125
+        },
+        "WAF 3. 네트워크 잔여": {
+          "count": 36,
+          "avg_ms": 104.91148525973888,
+          "p50_ms": 71.11001862722333,
+          "p95_ms": 282.4662011771579,
+          "p99_ms": 287.6047551726515,
+          "max_ms": 290.21751151958597
+        },
+        "WAF 4. 브라우저 수신 → 화면 표시": {
+          "count": 36,
+          "avg_ms": 2.7511305553263004,
+          "p50_ms": 2.360649999900488,
+          "p95_ms": 6.138374999864027,
+          "p99_ms": 10.579690000486151,
+          "max_ms": 10.91660000020056
+        },
+        "WAF 합계. 요청 → 화면 표시": {
+          "count": 36,
+          "avg_ms": 388.9446500002628,
+          "p50_ms": 385.32144999953744,
+          "p95_ms": 622.2940250017928,
+          "p99_ms": 633.0279650017474,
+          "max_ms": 635.8490000020538
+        }
+      },
+      "probe_incomplete": [],
+      "latency": {
+        "http": {
+          "count": 1764,
+          "avg_ms": 19.087101020408166,
+          "p50_ms": 16.819,
+          "p95_ms": 34.92714499999997,
+          "p99_ms": 59.65733599999994,
+          "max_ms": 306.7251
+        },
+        "log_ingest": {
+          "count": 1800,
+          "avg_ms": 103.58918944994609,
+          "p50_ms": 101.86243057250977,
+          "p95_ms": 165.31937122344968,
+          "p99_ms": 206.84518575668332,
+          "max_ms": 366.8670654296875
+        },
+        "ai_segment": {
+          "count": 1800,
+          "avg_ms": 239.0042859978146,
+          "p50_ms": 234.3834638595581,
+          "p95_ms": 367.81078577041626,
+          "p99_ms": 445.6058979034424,
+          "max_ms": 694.3860054016113
+        },
+        "ai_server": {
+          "count": 1800,
+          "avg_ms": 342.5934754477607,
+          "p50_ms": 334.118127822876,
+          "p95_ms": 496.07867002487177,
+          "p99_ms": 598.0678224563599,
+          "max_ms": 824.9719142913818
+        },
+        "waf_server": {
+          "count": 36,
+          "avg_ms": 153.7530024846395,
+          "p50_ms": 145.09642124176025,
+          "p95_ms": 243.5505986213684,
+          "p99_ms": 261.14323139190674,
+          "max_ms": 268.2790756225586
+        },
+        "AI_receive": {
+          "count": 36,
+          "avg_ms": 695.3902416670543,
+          "p50_ms": 712.7194999993662,
+          "p95_ms": 1020.260899999812,
+          "p99_ms": 1089.1526200008227,
+          "max_ms": 1125.5109000012453
+        },
+        "WAF_receive": {
+          "count": 36,
+          "avg_ms": 386.1935194449365,
+          "p50_ms": 383.59789999958593,
+          "p95_ms": 620.0157000021136,
+          "p99_ms": 629.340565001803,
+          "max_ms": 632.7965000018594
+        },
+        "AI_dom": {
+          "count": 36,
+          "avg_ms": 782.7452805556984,
+          "p50_ms": 817.4097999999503,
+          "p95_ms": 1133.2859750009447,
+          "p99_ms": 1204.3721550011467,
+          "max_ms": 1241.401000002952
+        },
+        "WAF_dom": {
+          "count": 36,
+          "avg_ms": 388.9446500002628,
+          "p50_ms": 385.32144999953744,
+          "p95_ms": 622.2940250017928,
+          "p99_ms": 633.0279650017474,
+          "max_ms": 635.8490000020538
+        }
+      },
+      "outbox_publication_mean_ms": 152.0,
+      "outbox_publication_count": 1800,
+      "sql": {
+        "outbox_claim_select": {
+          "count": 3320,
+          "elapsed_seconds": 440.8,
+          "calls_per_second": 7.531,
+          "mean_ms": 0.731
+        },
+        "alert_pending_select": {
+          "count": 1745,
+          "elapsed_seconds": 440.8,
+          "calls_per_second": 3.958,
+          "mean_ms": 0.651
+        }
+      },
+      "sends_per_probe_alert": {
+        "single": 7,
+        "multiple": 29,
+        "max": 2
+      }
+    },
+    "off_r24_r26": {
+      "ids": [
+        "20261107T200524+0900-ec2-e2e-rps5-r24",
+        "20261107T201042+0900-ec2-e2e-rps5-r25",
+        "20261107T201616+0900-ec2-e2e-rps5-r26"
+      ],
+      "rounds": [
+        {
+          "id": "20261107T200524+0900-ec2-e2e-rps5-r24",
+          "started_at": "2026-11-07T11:05:25.173241+00:00",
+          "ended_at": "2026-11-07T11:10:25.362426+00:00",
+          "outbox_mean_ms": 166.66652499999998,
+          "outbox_count": 600,
+          "host_cpu_busy_avg": 75.4,
+          "container_cpu_avg": {
+            "waf": 6.1,
+            "backend": 26.6,
+            "frontend": 0.1,
+            "fluent-bit": 0.9,
+            "db": 16.5,
+            "ai": 26.7,
+            "kafka": 42.8,
+            "juiceshop": 1.9,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 20.405735399999685,
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "3c1564e7acdbdc359231bbc1a891cdb96e9b024dcd3bd7797aa67541f6fe1711",
+            "metrics.json": "0ba4bb3f0e47390ec089466c6b1e5c41ef4c9243be9a6906c15797e20f106033",
+            "pipeline-events.jsonl": "22306bda6883cd9283424831901410c5c0baa2dd8cc4e27fd422a3b6b1a2b5df"
+          }
+        },
+        {
+          "id": "20261107T201042+0900-ec2-e2e-rps5-r25",
+          "started_at": "2026-11-07T11:10:43.156095+00:00",
+          "ended_at": "2026-11-07T11:15:57.884399+00:00",
+          "outbox_mean_ms": 156.95931,
+          "outbox_count": 600,
+          "host_cpu_busy_avg": 75.5,
+          "container_cpu_avg": {
+            "waf": 6.2,
+            "backend": 25.9,
+            "frontend": 0.2,
+            "fluent-bit": 0.9,
+            "db": 22.5,
+            "ai": 35.3,
+            "kafka": 50.5,
+            "juiceshop": 3.6,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 23.673132700001588,
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "79f3ccd1c029d122dec4f6b6f8c9d95705947663e1728d81d4c7cdcabc010c88",
+            "metrics.json": "e115e2fa9f272c8601080a1ca6ecf51f19a6ec4aa4fcce76b24ce0dc7f8758c7",
+            "pipeline-events.jsonl": "8fa22739f202fdb5618e263d587024a0c5d7939f8940a921813ffaba345375a7"
+          }
+        },
+        {
+          "id": "20261107T201616+0900-ec2-e2e-rps5-r26",
+          "started_at": "2026-11-07T11:16:16.531993+00:00",
+          "ended_at": "2026-11-07T11:21:39.377959+00:00",
+          "outbox_mean_ms": 157.56865166666668,
+          "outbox_count": 600,
+          "host_cpu_busy_avg": 75.1,
+          "container_cpu_avg": {
+            "waf": 9.5,
+            "backend": 14.5,
+            "frontend": 0.1,
+            "fluent-bit": 1.1,
+            "db": 15.4,
+            "ai": 39.1,
+            "kafka": 49.8,
+            "juiceshop": 2.6,
+            "zookeeper": 0.2
+          },
+          "final_drain_seconds": 21.804596100002527,
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "8ca4a2da7c14639b73c92f82854d67aab7c1af95e9cf754de03233601aef24e2",
+            "metrics.json": "9ddcee94c88cc9e50d6523796922e64c577d22bd752d38223af7e333e561694d",
+            "pipeline-events.jsonl": "ad7c258f15af24c4fa51e798a5c7021b9cd3fff182d87ef34a322e7a58789a19"
+          }
+        }
+      ],
+      "probe_breakdown": {
+        "AI 1. WAF 접수 → 로그 커밋": {
+          "count": 36,
+          "avg_ms": 201.1495100127326,
+          "p50_ms": 181.01251125335693,
+          "p95_ms": 341.64029359817505,
+          "p99_ms": 507.957565784454,
+          "max_ms": 584.7594738006592
+        },
+        "AI 2. 로그 커밋 → AI 결과 커밋": {
+          "count": 36,
+          "avg_ms": 418.2826479276021,
+          "p50_ms": 379.0779113769531,
+          "p95_ms": 650.5550742149353,
+          "p99_ms": 798.5711455345153,
+          "max_ms": 829.6558856964111
+        },
+        "AI 3. AI 결과 커밋 → 알림 전송 시작": {
+          "count": 36,
+          "avg_ms": 123.25412697262234,
+          "p50_ms": 132.58755207061768,
+          "p95_ms": 230.00001907348633,
+          "p99_ms": 263.05834054946894,
+          "max_ms": 275.91419219970703
+        },
+        "AI 4. 네트워크 잔여": {
+          "count": 36,
+          "avg_ms": 108.8413845313375,
+          "p50_ms": 75.21980323872413,
+          "p95_ms": 281.1480882546675,
+          "p99_ms": 307.5345946803281,
+          "max_ms": 318.95245073974365
+        },
+        "AI 5. 브라우저 수신 → 화면 표시": {
+          "count": 36,
+          "avg_ms": 92.98658611128809,
+          "p50_ms": 102.91430000143009,
+          "p95_ms": 130.7095250012935,
+          "p99_ms": 133.44768000042677,
+          "max_ms": 134.1565000002447
+        },
+        "AI 합계. 요청 → 화면 표시": {
+          "count": 36,
+          "avg_ms": 944.5142555555826,
+          "p50_ms": 914.7790999977587,
+          "p95_ms": 1378.0040000019653,
+          "p99_ms": 1574.1327700005058,
+          "max_ms": 1594.6917000001122
+        },
+        "WAF 1. WAF 접수 → WAF 탐지 커밋": {
+          "count": 36,
+          "avg_ms": 204.62165276209512,
+          "p50_ms": 186.4997148513794,
+          "p95_ms": 336.0525369644165,
+          "p99_ms": 406.6577076911925,
+          "max_ms": 442.9183006286621
+        },
+        "WAF 2. WAF 탐지 커밋 → 알림 전송 시작": {
+          "count": 36,
+          "avg_ms": 133.06519058015613,
+          "p50_ms": 127.80416011810303,
+          "p95_ms": 240.83364009857178,
+          "p99_ms": 264.46731090545654,
+          "max_ms": 269.4859504699707
+        },
+        "WAF 3. 네트워크 잔여": {
+          "count": 36,
+          "avg_ms": 109.14249276861989,
+          "p50_ms": 79.67542349251744,
+          "p95_ms": 266.242866076027,
+          "p99_ms": 311.18760351964727,
+          "max_ms": 332.569618261914
+        },
+        "WAF 4. 브라우저 수신 → 화면 표시": {
+          "count": 36,
+          "avg_ms": 2.0715583333286407,
+          "p50_ms": 2.2389499990822515,
+          "p95_ms": 3.2625250014461926,
+          "p99_ms": 3.7057500017908747,
+          "max_ms": 3.7775000018882565
+        },
+        "WAF 합계. 요청 → 화면 표시": {
+          "count": 36,
+          "avg_ms": 448.90089444419976,
+          "p50_ms": 427.7212999986659,
+          "p95_ms": 689.5519250010693,
+          "p99_ms": 783.5093550018426,
+          "max_ms": 824.4001000020944
+        }
+      },
+      "probe_incomplete": [],
+      "latency": {
+        "http": {
+          "count": 1764,
+          "avg_ms": 20.70841162131519,
+          "p50_ms": 17.734650000000002,
+          "p95_ms": 39.407169999999994,
+          "p99_ms": 77.39887099999983,
+          "max_ms": 173.4598
+        },
+        "log_ingest": {
+          "count": 1800,
+          "avg_ms": 117.9136339823405,
+          "p50_ms": 115.01502990722656,
+          "p95_ms": 196.75782918930054,
+          "p99_ms": 294.8011612892151,
+          "max_ms": 584.758996963501
+        },
+        "ai_segment": {
+          "count": 1800,
+          "avg_ms": 268.3252841896481,
+          "p50_ms": 252.96998023986816,
+          "p95_ms": 457.68723487854004,
+          "p99_ms": 666.5930461883545,
+          "max_ms": 1080.85298538208
+        },
+        "ai_server": {
+          "count": 1800,
+          "avg_ms": 386.2389181719886,
+          "p50_ms": 365.9224510192871,
+          "p95_ms": 623.467981815338,
+          "p99_ms": 846.9669604301451,
+          "max_ms": 1272.4180221557617
+        },
+        "waf_server": {
+          "count": 36,
+          "avg_ms": 204.62110969755383,
+          "p50_ms": 186.4989995956421,
+          "p95_ms": 336.0518217086792,
+          "p99_ms": 406.65730237960804,
+          "max_ms": 442.918062210083
+        },
+        "AI_receive": {
+          "count": 36,
+          "avg_ms": 851.5276694442946,
+          "p50_ms": 799.8408999992535,
+          "p95_ms": 1276.4366000001246,
+          "p99_ms": 1477.829290002228,
+          "max_ms": 1500.8805000034044
+        },
+        "WAF_receive": {
+          "count": 36,
+          "avg_ms": 446.8293361108711,
+          "p50_ms": 426.2775499992131,
+          "p95_ms": 687.2607499990409,
+          "p99_ms": 780.8975750012903,
+          "max_ms": 821.625500000664
+        },
+        "AI_dom": {
+          "count": 36,
+          "avg_ms": 944.5142555555826,
+          "p50_ms": 914.7790999977587,
+          "p95_ms": 1378.0040000019653,
+          "p99_ms": 1574.1327700005058,
+          "max_ms": 1594.6917000001122
+        },
+        "WAF_dom": {
+          "count": 36,
+          "avg_ms": 448.90089444419976,
+          "p50_ms": 427.7212999986659,
+          "p95_ms": 689.5519250010693,
+          "p99_ms": 783.5093550018426,
+          "max_ms": 824.4001000020944
+        }
+      },
+      "outbox_publication_mean_ms": 160.4,
+      "outbox_publication_count": 1800,
+      "sql": {
+        "outbox_claim_select": {
+          "count": 3313,
+          "elapsed_seconds": 447.2,
+          "calls_per_second": 7.408,
+          "mean_ms": 0.716
+        },
+        "alert_pending_select": {
+          "count": 1767,
+          "elapsed_seconds": 447.2,
+          "calls_per_second": 3.951,
+          "mean_ms": 0.635
+        }
+      },
+      "sends_per_probe_alert": {
+        "single": 4,
+        "multiple": 32,
+        "max": 2
+      }
+    },
+    "on_r27_r29": {
+      "ids": [
+        "20261107T202514+0900-ec2-e2e-rps5-r27",
+        "20261107T203047+0900-ec2-e2e-rps5-r28",
+        "20261107T203607+0900-ec2-e2e-rps5-r29"
+      ],
+      "rounds": [
+        {
+          "id": "20261107T202514+0900-ec2-e2e-rps5-r27",
+          "started_at": "2026-11-07T11:25:14.459317+00:00",
+          "ended_at": "2026-11-07T11:30:28.643892+00:00",
+          "outbox_mean_ms": 44.18444,
+          "outbox_count": 600,
+          "host_cpu_busy_avg": 75.2,
+          "container_cpu_avg": {
+            "waf": 6.7,
+            "backend": 29.0,
+            "frontend": 0.1,
+            "fluent-bit": 0.9,
+            "db": 24.6,
+            "ai": 30.5,
+            "kafka": 36.9,
+            "juiceshop": 1.8,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 22.36378980000154,
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "157cf552aaecde94e786237043aa5b525838b2ad1be8303adb6bf30a6310b4dd",
+            "metrics.json": "ba2a9294b24436180c2dd52058a56fd1497f8e42980936a53b6aed39e573ef1d",
+            "pipeline-events.jsonl": "04f805f8a32b35d33ddb28112a0f80d3e092540cbf019dc45e8e312812db7b3f"
+          }
+        },
+        {
+          "id": "20261107T203047+0900-ec2-e2e-rps5-r28",
+          "started_at": "2026-11-07T11:30:47.402457+00:00",
+          "ended_at": "2026-11-07T11:35:49.895822+00:00",
+          "outbox_mean_ms": 31.92863,
+          "outbox_count": 600,
+          "host_cpu_busy_avg": 74.2,
+          "container_cpu_avg": {
+            "waf": 5.0,
+            "backend": 22.4,
+            "frontend": 0.1,
+            "fluent-bit": 0.9,
+            "db": 20.9,
+            "ai": 33.9,
+            "kafka": 35.6,
+            "juiceshop": 3.3,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 21.835182599999825,
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "4b473835ec9ba33e51ae1359445c0fffb7a01ea2c0b14a9b7ec70e33907c7313",
+            "metrics.json": "d51c12842a776b4391faacdc66feb3cc4806e260d1d73f04ec72914647205320",
+            "pipeline-events.jsonl": "32cb7d8ee3d6c5b78530cd3d54d353a2ae3a597d2b246a24914f8c035abe2cd2"
+          }
+        },
+        {
+          "id": "20261107T203607+0900-ec2-e2e-rps5-r29",
+          "started_at": "2026-11-07T11:36:07.859351+00:00",
+          "ended_at": "2026-11-07T11:41:14.410422+00:00",
+          "outbox_mean_ms": 31.353098333333335,
+          "outbox_count": 600,
+          "host_cpu_busy_avg": 73.9,
+          "container_cpu_avg": {
+            "waf": 7.9,
+            "backend": 18.2,
+            "frontend": 0.1,
+            "fluent-bit": 1.0,
+            "db": 22.5,
+            "ai": 38.9,
+            "kafka": 35.1,
+            "juiceshop": 2.4,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 24.949320899999293,
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "b2d1af9f956bf0f3cedf5fec096590fd8cac4013b2bd7afd0302faac69c28191",
+            "metrics.json": "1cce38bb6336e2b718583cb8dede3c00f0882077d5c40ad4c4e7dfd2bb958769",
+            "pipeline-events.jsonl": "3b615e74e6788503736820ce5816bacf1a7ffc31a37351355ae6cbcacf29dccd"
+          }
+        }
+      ],
+      "probe_breakdown": {
+        "AI 1. WAF 접수 → 로그 커밋": {
+          "count": 36,
+          "avg_ms": 208.72612131966486,
+          "p50_ms": 180.20200729370117,
+          "p95_ms": 361.5489602088928,
+          "p99_ms": 652.5032162666315,
+          "max_ms": 798.2082366943359
+        },
+        "AI 2. 로그 커밋 → AI 결과 커밋": {
+          "count": 36,
+          "avg_ms": 321.42730553944904,
+          "p50_ms": 265.2149200439453,
+          "p95_ms": 684.6885681152344,
+          "p99_ms": 878.3166050910946,
+          "max_ms": 966.6054248809814
+        },
+        "AI 3. AI 결과 커밋 → 알림 전송 시작": {
+          "count": 36,
+          "avg_ms": 8.167578114403618,
+          "p50_ms": 7.134079933166504,
+          "p95_ms": 17.135024070739746,
+          "p99_ms": 24.778044223785397,
+          "max_ms": 25.88963508605957
+        },
+        "AI 4. 네트워크 잔여": {
+          "count": 36,
+          "avg_ms": 111.42414780483199,
+          "p50_ms": 79.4727413867804,
+          "p95_ms": 282.4381346035807,
+          "p99_ms": 293.6312673075008,
+          "max_ms": 295.8312703194679
+        },
+        "AI 5. 브라우저 수신 → 화면 표시": {
+          "count": 36,
+          "avg_ms": 103.7143027777145,
+          "p50_ms": 102.88175000096089,
+          "p95_ms": 121.19289999645844,
+          "p99_ms": 129.7820400004639,
+          "max_ms": 131.13710000106948
+        },
+        "AI 합계. 요청 → 화면 표시": {
+          "count": 36,
+          "avg_ms": 753.459455556064,
+          "p50_ms": 665.3079000025173,
+          "p95_ms": 1329.6813749993817,
+          "p99_ms": 1544.4859099992755,
+          "max_ms": 1571.7723999987356
+        },
+        "WAF 1. WAF 접수 → WAF 탐지 커밋": {
+          "count": 36,
+          "avg_ms": 201.27197106679282,
+          "p50_ms": 175.7974624633789,
+          "p95_ms": 379.3107271194458,
+          "p99_ms": 546.8845129013059,
+          "max_ms": 610.0573539733887
+        },
+        "WAF 2. WAF 탐지 커밋 → 알림 전송 시작": {
+          "count": 36,
+          "avg_ms": 7.853183481428358,
+          "p50_ms": 5.247950553894043,
+          "p95_ms": 14.690101146697998,
+          "p99_ms": 50.594305992126394,
+          "max_ms": 68.15695762634277
+        },
+        "WAF 3. 네트워크 잔여": {
+          "count": 36,
+          "avg_ms": 111.0136232302668,
+          "p50_ms": 77.99293481184577,
+          "p95_ms": 281.0490024239698,
+          "p99_ms": 293.15421266692283,
+          "max_ms": 296.71836194756906
+        },
+        "WAF 4. 브라우저 수신 → 화면 표시": {
+          "count": 36,
+          "avg_ms": 1.95874722258951,
+          "p50_ms": 2.1343999997043284,
+          "p95_ms": 2.7045000006182818,
+          "p99_ms": 2.775145001032797,
+          "max_ms": 2.8127000005042646
+        },
+        "WAF 합계. 요청 → 화면 표시": {
+          "count": 36,
+          "avg_ms": 322.0975250010775,
+          "p50_ms": 284.1699000018707,
+          "p95_ms": 568.3181250005873,
+          "p99_ms": 693.3333200006018,
+          "max_ms": 704.724700000952
+        }
+      },
+      "probe_incomplete": [],
+      "latency": {
+        "http": {
+          "count": 1764,
+          "avg_ms": 19.969566383219956,
+          "p50_ms": 16.808500000000002,
+          "p95_ms": 38.50618499999999,
+          "p99_ms": 68.3915029999999,
+          "max_ms": 182.3051
+        },
+        "log_ingest": {
+          "count": 1800,
+          "avg_ms": 113.69636019070943,
+          "p50_ms": 105.44753074645996,
+          "p95_ms": 206.78892135620114,
+          "p99_ms": 340.59730291366577,
+          "max_ms": 798.2079982757568
+        },
+        "ai_segment": {
+          "count": 1800,
+          "avg_ms": 131.2942459848192,
+          "p50_ms": 88.57905864715576,
+          "p95_ms": 368.6765074729918,
+          "p99_ms": 740.1087379455562,
+          "max_ms": 1303.7850856781006
+        },
+        "ai_server": {
+          "count": 1800,
+          "avg_ms": 244.99060617552863,
+          "p50_ms": 190.05155563354492,
+          "p95_ms": 568.1188225746153,
+          "p99_ms": 1057.5916886329649,
+          "max_ms": 1544.6128845214844
+        },
+        "waf_server": {
+          "count": 36,
+          "avg_ms": 201.27144787046643,
+          "p50_ms": 175.7969856262207,
+          "p95_ms": 379.31007146835327,
+          "p99_ms": 546.8841910362241,
+          "max_ms": 610.0571155548096
+        },
+        "AI_receive": {
+          "count": 36,
+          "avg_ms": 649.7451527783495,
+          "p50_ms": 568.672699999297,
+          "p95_ms": 1218.8735250010723,
+          "p99_ms": 1423.9432749989646,
+          "max_ms": 1440.6352999976662
+        },
+        "WAF_receive": {
+          "count": 36,
+          "avg_ms": 320.13877777848796,
+          "p50_ms": 281.89634999944246,
+          "p95_ms": 565.772549999565,
+          "p99_ms": 691.2564950012893,
+          "max_ms": 702.6421000009577
+        },
+        "AI_dom": {
+          "count": 36,
+          "avg_ms": 753.459455556064,
+          "p50_ms": 665.3079000025173,
+          "p95_ms": 1329.6813749993817,
+          "p99_ms": 1544.4859099992755,
+          "max_ms": 1571.7723999987356
+        },
+        "WAF_dom": {
+          "count": 36,
+          "avg_ms": 322.0975250010775,
+          "p50_ms": 284.1699000018707,
+          "p95_ms": 568.3181250005873,
+          "p99_ms": 693.3333200006018,
+          "max_ms": 704.724700000952
+        }
+      },
+      "outbox_publication_mean_ms": 35.8,
+      "outbox_publication_count": 1800,
+      "sql": {
+        "outbox_claim_select": {
+          "count": 5266,
+          "elapsed_seconds": 440.2,
+          "calls_per_second": 11.963,
+          "mean_ms": 0.669
+        },
+        "alert_pending_select": {
+          "count": 1816,
+          "elapsed_seconds": 440.2,
+          "calls_per_second": 4.125,
+          "mean_ms": 0.584
+        }
+      },
+      "sends_per_probe_alert": {
+        "single": 0,
+        "multiple": 36,
+        "max": 2
+      }
+    }
+  },
+  "condition_differences": {
+    "app_sha": [
+      "e50029b18424e829da4f9d2236b131fb5fe0b0b5",
+      "d45960f2d0739f2fdd6beb1857dacebd1112caea"
+    ],
+    "images": [
+      [
+        "ai sha256:7c0b2dc018c10e6e464094fe2f41670436ee9bbfa1da8118cc461e5b9fca5919",
+        "backend sha256:6fffda63b4b7f2747257452d59266bde3ba174986b7048f9b6b8683d7729de18",
+        "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+        "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+        "frontend sha256:0a8492064f304524434404369a25d7d6e6633c9088e889d5d71f9a9657d5a00f",
+        "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+        "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+        "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+        "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+      ],
+      [
+        "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+        "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+        "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+        "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+        "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+        "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+        "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+        "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+        "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+      ]
+    ]
+  },
+  "configuration_samples": [
+    {
+      "at": "2026-11-07T11:01:36.467601+00:00",
+      "action": "baseline",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T10:42:22.222256993Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false
+    },
+    {
+      "label": "external_rate_before_off",
+      "external_logs_per_second": 0.0,
+      "at": "2026-11-07T11:02:20.567388+00:00"
+    },
+    {
+      "at": "2026-11-07T11:02:47.079014+00:00",
+      "action": "off",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "false",
+        "APP_ALERTS_WAKEUPENABLED": "false"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:02:23.21814522Z",
+      "backend_restart_count": 0,
+      "backend_recreated": true,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false
+    },
+    {
+      "at": "2026-11-07T11:05:20.702534+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "false",
+        "APP_ALERTS_WAKEUPENABLED": "false"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:02:23.21814522Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 24,
+      "phase": "before",
+      "group": "off"
+    },
+    {
+      "at": "2026-11-07T11:10:22.509097+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "false",
+        "APP_ALERTS_WAKEUPENABLED": "false"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:02:23.21814522Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 24,
+      "phase": "after",
+      "group": "off"
+    },
+    {
+      "at": "2026-11-07T11:10:38.693425+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "false",
+        "APP_ALERTS_WAKEUPENABLED": "false"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:02:23.21814522Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 25,
+      "phase": "before",
+      "group": "off"
+    },
+    {
+      "at": "2026-11-07T11:15:55.326290+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "false",
+        "APP_ALERTS_WAKEUPENABLED": "false"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:02:23.21814522Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 25,
+      "phase": "after",
+      "group": "off"
+    },
+    {
+      "at": "2026-11-07T11:16:12.028304+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "false",
+        "APP_ALERTS_WAKEUPENABLED": "false"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:02:23.21814522Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 26,
+      "phase": "before",
+      "group": "off"
+    },
+    {
+      "at": "2026-11-07T11:21:36.977692+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "false",
+        "APP_ALERTS_WAKEUPENABLED": "false"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:02:23.21814522Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 26,
+      "phase": "after",
+      "group": "off"
+    },
+    {
+      "at": "2026-11-07T11:22:05.698418+00:00",
+      "action": "on",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": true,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false
+    },
+    {
+      "label": "external_rate_before_on",
+      "external_logs_per_second": 0.0,
+      "at": "2026-11-07T11:25:08.289816+00:00"
+    },
+    {
+      "at": "2026-11-07T11:25:10.004391+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 27,
+      "phase": "before",
+      "group": "on"
+    },
+    {
+      "at": "2026-11-07T11:30:25.817306+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 27,
+      "phase": "after",
+      "group": "on"
+    },
+    {
+      "at": "2026-11-07T11:30:42.958349+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 28,
+      "phase": "before",
+      "group": "on"
+    },
+    {
+      "at": "2026-11-07T11:35:47.411448+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 28,
+      "phase": "after",
+      "group": "on"
+    },
+    {
+      "at": "2026-11-07T11:36:03.415226+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 29,
+      "phase": "before",
+      "group": "on"
+    },
+    {
+      "at": "2026-11-07T11:41:11.916264+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 29,
+      "phase": "after",
+      "group": "on"
+    }
+  ],
+  "controller_run_ids": [
+    "20261107T200524+0900-ec2-e2e-rps5-r24",
+    "20261107T201042+0900-ec2-e2e-rps5-r25",
+    "20261107T201616+0900-ec2-e2e-rps5-r26",
+    "20261107T202514+0900-ec2-e2e-rps5-r27",
+    "20261107T203047+0900-ec2-e2e-rps5-r28",
+    "20261107T203607+0900-ec2-e2e-rps5-r29"
+  ]
+}

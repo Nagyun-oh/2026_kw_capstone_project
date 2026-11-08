@@ -24,7 +24,7 @@ def validate_contract(policy):
             w['warmup_seconds_per_repetition']!=30 or w['repetitions_per_rate']!=3 or
             w['pilot_seconds']!=60 or w['pilot_rate']!=1 or w['probe_interval_seconds']!=10 or
             w['final_observation_seconds']!=60 or w['lag_zero_consecutive_samples']!=2 or
-            w['lag_confirmation_interval_seconds']!=10):
+            w['lag_confirmation_interval_seconds']!=10 or w.get('lag_measurement_interval_seconds')!=60):
         raise ValueError('EC2_WORKLOAD_CONTRACT_CHANGED')
     for key in ('ai_server_e2e_p95_ms','waf_server_e2e_p95_ms'):
         if policy['initial_targets'].get(key)!=3000: raise ValueError('EC2_SLO_CONTRACT_CHANGED')

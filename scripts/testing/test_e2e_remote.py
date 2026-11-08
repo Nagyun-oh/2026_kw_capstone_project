@@ -255,6 +255,44 @@ class RemoteCollectionTests(unittest.TestCase):
         self.assertIsNone(logs[2]['transform']('ordinary private-body'))
         self.assertEqual(result['trace_text'],'')
 
+    def test_lag_can_be_skipped_only_in_pipeline_collection(self):
+        self.assertTrue(worker_request('run',SINCE,[RID],'pipeline')['include_lag'])
+        self.assertFalse(worker_request('run',SINCE,[RID],'pipeline',False)['include_lag'])
+        for mode in ('check','resources'):
+            with self.assertRaises(ValueError): worker_request('run',SINCE,[RID],mode,False)
+        with self.assertRaises(ValueError): worker_request('run',SINCE,[RID],'pipeline','no')
+
+    def test_skipped_lag_is_not_a_failure_but_unrequested_lag_is_rejected(self):
+        config=worker_request('run',SINCE,[RID],'pipeline',False)
+        value=response(config)
+        value['lag_text']=None
+        result=parse_collection(value,config)
+        self.assertEqual(result['collection_status'],'COLLECTED')
+        self.assertIsNone(result['lag'])
+        self.assertEqual(result['traces'][0]['requestId'],RID)
+        unexpected=parse_collection(response(config),config)
+        self.assertEqual(unexpected['collection_status'],'INCOMPLETE')
+        self.assertIn('LAG_NOT_REQUESTED',unexpected['errors'])
+
+    def test_worker_runs_lag_cli_only_when_requested(self):
+        for include_lag in (True,False):
+            config=worker_request('run',SINCE,[RID],'pipeline',include_lag)
+            runner=Mock(commands=[])
+            labels=[]
+            def run(label,argv,**kwargs):
+                labels.append(label)
+                runner.commands.append(dict(check=label,status='OK',lines_read=1))
+                if label=='containers_discover':
+                    return '\n'.join(json.dumps(dict(service=s,id=str(i+1)*64)) for i,s in enumerate(('backend','db','kafka')))
+                if label=='trace_enabled': return 'true'
+                return ''
+            runner.run.side_effect=run
+            result=collect(config,runner)
+            self.assertEqual('kafka_lag' in labels,include_lag)
+            self.assertIn('database',labels)
+            self.assertIn('pipeline_traces',labels)
+            if not include_lag: self.assertIsNone(result['lag_text'])
+
     def test_dry_run_never_reserves_files_runs_ssh_or_load(self):
         with patch('run_ec2_collection.reserve') as reserve,patch('e2e_remote.subprocess.run') as run, \
                 contextlib.redirect_stdout(io.StringIO()):
@@ -305,6 +343,36 @@ class RunnerIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(resources['containers'][0]['Name'],'backend')
         exp.cmd.assert_not_called()
         self.assertEqual(exp.remote_collector.collect.call_count,2)
+
+    async def test_collect_without_lag_keeps_traces_and_does_not_record_lag_sample(self):
+        exp=object.__new__(Experiment)
+        exp.environment=select_environment('ec2')
+        exp.manifest=dict(id='run',started_at=SINCE)
+        exp.clients=[dict(requestId=RID,phase='measurement')]
+        exp.keys={('log-group','log-topic',0)}
+        exp.snapshots=[]
+        exp.traces,exp.trace_keys,exp.browser_events=[],set(),[]
+        exp.previous_counts,exp.previous_progress_at={},0
+        exp.page=None
+        exp.output=Path(tempfile.mkdtemp())
+        exp.guard=Mock()
+        exp.append=Mock()
+        exp.should_collect_lag=lambda:False
+        config=worker_request('run',SINCE,[RID],'pipeline',False)
+        value=response(config)
+        value['lag_text']=None
+        parsed=parse_collection(value,config)
+        parsed['transport']=dict(status='OK')
+        exp.remote_collector=Mock()
+        exp.remote_collector.collect.return_value=parsed
+        snap=await exp.collect()
+        self.assertIsNone(snap)
+        self.assertEqual(exp.snapshots,[])
+        self.assertEqual(exp.remote_collector.collect.call_args.kwargs['include_lag'],False)
+        self.assertEqual(exp.traces[0]['requestId'],RID)
+        collected=[c.args for c in exp.guard.collected.call_args_list]
+        self.assertNotIn(('kafka_lag',True),collected)
+        self.assertIn(('pipeline',True),collected)
 
     async def test_incomplete_remote_result_cannot_be_used_as_normal_pipeline(self):
         exp=object.__new__(Experiment)

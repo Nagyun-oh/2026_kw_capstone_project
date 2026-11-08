@@ -44,10 +44,14 @@ class SSHSettings:
         return options + ['-i', str(self.identity_file), 'ubuntu@'+self.host, 'python3 -']
 
 
-def worker_request(run_id, since, request_ids=(), mode='check'):
+def worker_request(run_id, since, request_ids=(), mode='check', include_lag=True):
     if (not isinstance(run_id, str) or not re.fullmatch(r'[A-Za-z0-9_+.-]{1,160}', run_id)
             or run_id in ('.', '..') or mode not in MODES):
         raise ValueError('수집 실험 ID·모드 형식을 확인하세요.')
+    # lag 조회(kafka-consumer-groups CLI)는 JVM을 새로 띄워 측정 대상 CPU를 쓴다.
+    # 부하 중 pipeline 수집에서만 생략할 수 있고, check 수집은 항상 lag를 포함한다.
+    if type(include_lag) is not bool or (not include_lag and mode != 'pipeline'):
+        raise ValueError('lag 생략은 pipeline 수집에서만 허용됩니다.')
     if (not isinstance(since, str) or len(since) > 40 or epoch(since) is None
             or not re.fullmatch(r'[0-9T:.+Z-]+', since)):
         raise ValueError('로그 시작 시각은 오프셋이 있는 ISO 형식이어야 합니다.')
@@ -56,7 +60,7 @@ def worker_request(run_id, since, request_ids=(), mode='check'):
     ids = list(request_ids)
     if len(ids) > 2000 or any(not isinstance(rid, str) or not REQUEST_ID.fullmatch(rid) for rid in ids):
         raise ValueError('요청 ID는 최대 2000개의 WAF 생성 32자리 ID여야 합니다.')
-    return dict(mode=mode, run_id=run_id, since=since, request_ids=sorted(set(ids)),
+    return dict(mode=mode, run_id=run_id, since=since, request_ids=sorted(set(ids)), include_lag=include_lag,
                 database_sql='SET SESSION MAX_EXECUTION_TIME=3000;\n'+database_sql(run_id))
 
 
@@ -115,7 +119,11 @@ def parse_collection(value, config, expected_keys=()):
         errors.append('MISSING_SERVICES')
     if config['mode'] in ('pipeline', 'check'):
         text=value.get('lag_text')
-        if not isinstance(text,str):
+        if not config.get('include_lag', True):
+            # 요청하지 않은 lag는 수집 실패가 아니다. 결과의 lag는 None으로 둔다.
+            if text is not None:
+                errors.append('LAG_NOT_REQUESTED')
+        elif not isinstance(text,str):
             errors.append('LAG_UNAVAILABLE')
         else:
             snap=dict(at=value.get('ended_at'), started_at=value.get('started_at'), code=0, rows=parse_lag(text))
@@ -152,8 +160,8 @@ class SSHCollection:
         self.settings, self.run = settings, run or subprocess.run
         self.last_record = None
 
-    def collect(self, run_id, since, request_ids=(), *, mode='pipeline', expected_keys=()):
-        config=worker_request(run_id,since,request_ids,mode)
+    def collect(self, run_id, since, request_ids=(), *, mode='pipeline', expected_keys=(), include_lag=True):
+        config=worker_request(run_id,since,request_ids,mode,include_lag)
         started=time.perf_counter()
         record=dict(check='ssh_'+mode, started_at=now(), timeout_seconds=80, status='UNAVAILABLE', exit_code=None)
         result=None

@@ -1,0 +1,1779 @@
+{
+  "schema": "dualguard-measurement-overhead-rev3-comparison-v1",
+  "groups": {
+    "rev2_r27_r29": {
+      "ids": [
+        "20261107T202514+0900-ec2-e2e-rps5-r27",
+        "20261107T203047+0900-ec2-e2e-rps5-r28",
+        "20261107T203607+0900-ec2-e2e-rps5-r29"
+      ],
+      "rounds": [
+        {
+          "id": "20261107T202514+0900-ec2-e2e-rps5-r27",
+          "lag_cli": {
+            "runs_in_window": 8,
+            "mean_seconds": 6.37
+          },
+          "progress_rows": 11,
+          "progress_rows_with_lag": 11,
+          "kafka_cpu": {
+            "avg": 36.9,
+            "max": 138.7,
+            "near_cli_median": 35.7,
+            "otherwise_median": 4.0
+          },
+          "host_cpu": {
+            "busy_avg": 75.2,
+            "busy_max": 98.8,
+            "samples": 13
+          },
+          "container_cpu_avg": {
+            "ai": 30.5,
+            "backend": 29.0,
+            "db": 24.6,
+            "fluent-bit": 0.9,
+            "frontend": 0.1,
+            "juiceshop": 1.8,
+            "kafka": 36.9,
+            "waf": 6.7,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 22.36378980000154,
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 24,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 2,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 11,
+              "unknown_samples": 0
+            }
+          ],
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "contract_revision": 2,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "157cf552aaecde94e786237043aa5b525838b2ad1be8303adb6bf30a6310b4dd",
+            "metrics.json": "ba2a9294b24436180c2dd52058a56fd1497f8e42980936a53b6aed39e573ef1d",
+            "collection-commands.jsonl": "70684930472cd58097edf801b615070fdfc436f3b38c2cced7f57b9a1feef372",
+            "docker-stats.jsonl": "b5ccc01281c0d442905fdc77a686c1cd1c9c4676e455acd8746d607f41f14d4a",
+            "host-resources.jsonl": "a99c54638a34cd463bb610a72575f0b7c88599e37c34eb178f6ff3fdc14d8bf6"
+          }
+        },
+        {
+          "id": "20261107T203047+0900-ec2-e2e-rps5-r28",
+          "lag_cli": {
+            "runs_in_window": 8,
+            "mean_seconds": 5.01
+          },
+          "progress_rows": 11,
+          "progress_rows_with_lag": 11,
+          "kafka_cpu": {
+            "avg": 35.6,
+            "max": 131.3,
+            "near_cli_median": 3.5,
+            "otherwise_median": 3.5
+          },
+          "host_cpu": {
+            "busy_avg": 74.2,
+            "busy_max": 92.4,
+            "samples": 13
+          },
+          "container_cpu_avg": {
+            "ai": 33.9,
+            "backend": 22.4,
+            "db": 20.9,
+            "fluent-bit": 0.9,
+            "frontend": 0.1,
+            "juiceshop": 3.3,
+            "kafka": 35.6,
+            "waf": 5.0,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 21.835182599999825,
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 1,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 24,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 3,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 11,
+              "unknown_samples": 0
+            }
+          ],
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "contract_revision": 2,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "4b473835ec9ba33e51ae1359445c0fffb7a01ea2c0b14a9b7ec70e33907c7313",
+            "metrics.json": "d51c12842a776b4391faacdc66feb3cc4806e260d1d73f04ec72914647205320",
+            "collection-commands.jsonl": "16d002d8196be7732b30d5cdb815bb8156c6c110de269c6de4ad499da8e24b49",
+            "docker-stats.jsonl": "e0d96c6431d25b538e060f4f0d55a3b9b530f0c84787fc3ef42538e220825a34",
+            "host-resources.jsonl": "5597b846c3b959a3a20063c0d0aab2ec41f3d414c568e9e5a1d7ae8059511dd6"
+          }
+        },
+        {
+          "id": "20261107T203607+0900-ec2-e2e-rps5-r29",
+          "lag_cli": {
+            "runs_in_window": 8,
+            "mean_seconds": 5.17
+          },
+          "progress_rows": 11,
+          "progress_rows_with_lag": 11,
+          "kafka_cpu": {
+            "avg": 35.1,
+            "max": 130.5,
+            "near_cli_median": 26.8,
+            "otherwise_median": 3.5
+          },
+          "host_cpu": {
+            "busy_avg": 73.9,
+            "busy_max": 90.1,
+            "samples": 13
+          },
+          "container_cpu_avg": {
+            "ai": 38.9,
+            "backend": 18.2,
+            "db": 22.5,
+            "fluent-bit": 1.0,
+            "frontend": 0.1,
+            "juiceshop": 2.4,
+            "kafka": 35.1,
+            "waf": 7.9,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 24.949320899999293,
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 1,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 22,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 2,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 11,
+              "unknown_samples": 0
+            }
+          ],
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "contract_revision": 2,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "b2d1af9f956bf0f3cedf5fec096590fd8cac4013b2bd7afd0302faac69c28191",
+            "metrics.json": "1cce38bb6336e2b718583cb8dede3c00f0882077d5c40ad4c4e7dfd2bb958769",
+            "collection-commands.jsonl": "be6802f7b82378a5867857ac9cec784bec6144906ecde4b308f5c28701e728c1",
+            "docker-stats.jsonl": "3653e14c06ce4e85f9dc80f183dba00612dc60f62a0c42dfc11f341bf1b9598c",
+            "host-resources.jsonl": "061032c12db3cff1de31d419e2c3e353585d1934d1fa637e9320415f4cc027bb"
+          }
+        }
+      ],
+      "latency": {
+        "http": {
+          "count": 1764,
+          "avg_ms": 19.969566383219956,
+          "p50_ms": 16.808500000000002,
+          "p95_ms": 38.50618499999999,
+          "p99_ms": 68.3915029999999,
+          "max_ms": 182.3051
+        },
+        "log_ingest": {
+          "count": 1800,
+          "avg_ms": 113.69636019070943,
+          "p50_ms": 105.44753074645996,
+          "p95_ms": 206.78892135620114,
+          "p99_ms": 340.59730291366577,
+          "max_ms": 798.2079982757568
+        },
+        "ai_segment": {
+          "count": 1800,
+          "avg_ms": 131.2942459848192,
+          "p50_ms": 88.57905864715576,
+          "p95_ms": 368.6765074729918,
+          "p99_ms": 740.1087379455562,
+          "max_ms": 1303.7850856781006
+        },
+        "ai_server": {
+          "count": 1800,
+          "avg_ms": 244.99060617552863,
+          "p50_ms": 190.05155563354492,
+          "p95_ms": 568.1188225746153,
+          "p99_ms": 1057.5916886329649,
+          "max_ms": 1544.6128845214844
+        },
+        "waf_server": {
+          "count": 36,
+          "avg_ms": 201.27144787046643,
+          "p50_ms": 175.7969856262207,
+          "p95_ms": 379.31007146835327,
+          "p99_ms": 546.8841910362241,
+          "max_ms": 610.0571155548096
+        },
+        "AI_receive": {
+          "count": 36,
+          "avg_ms": 649.7451527783495,
+          "p50_ms": 568.672699999297,
+          "p95_ms": 1218.8735250010723,
+          "p99_ms": 1423.9432749989646,
+          "max_ms": 1440.6352999976662
+        },
+        "WAF_receive": {
+          "count": 36,
+          "avg_ms": 320.13877777848796,
+          "p50_ms": 281.89634999944246,
+          "p95_ms": 565.772549999565,
+          "p99_ms": 691.2564950012893,
+          "max_ms": 702.6421000009577
+        },
+        "AI_dom": {
+          "count": 36,
+          "avg_ms": 753.459455556064,
+          "p50_ms": 665.3079000025173,
+          "p95_ms": 1329.6813749993817,
+          "p99_ms": 1544.4859099992755,
+          "max_ms": 1571.7723999987356
+        },
+        "WAF_dom": {
+          "count": 36,
+          "avg_ms": 322.0975250010775,
+          "p50_ms": 284.1699000018707,
+          "p95_ms": 568.3181250005873,
+          "p99_ms": 693.3333200006018,
+          "max_ms": 704.724700000952
+        }
+      }
+    },
+    "rev2_warm_r28_r29": {
+      "ids": [
+        "20261107T203047+0900-ec2-e2e-rps5-r28",
+        "20261107T203607+0900-ec2-e2e-rps5-r29"
+      ],
+      "rounds": [
+        {
+          "id": "20261107T203047+0900-ec2-e2e-rps5-r28",
+          "lag_cli": {
+            "runs_in_window": 8,
+            "mean_seconds": 5.01
+          },
+          "progress_rows": 11,
+          "progress_rows_with_lag": 11,
+          "kafka_cpu": {
+            "avg": 35.6,
+            "max": 131.3,
+            "near_cli_median": 3.5,
+            "otherwise_median": 3.5
+          },
+          "host_cpu": {
+            "busy_avg": 74.2,
+            "busy_max": 92.4,
+            "samples": 13
+          },
+          "container_cpu_avg": {
+            "ai": 33.9,
+            "backend": 22.4,
+            "db": 20.9,
+            "fluent-bit": 0.9,
+            "frontend": 0.1,
+            "juiceshop": 3.3,
+            "kafka": 35.6,
+            "waf": 5.0,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 21.835182599999825,
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 1,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 24,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 3,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 11,
+              "unknown_samples": 0
+            }
+          ],
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "contract_revision": 2,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "4b473835ec9ba33e51ae1359445c0fffb7a01ea2c0b14a9b7ec70e33907c7313",
+            "metrics.json": "d51c12842a776b4391faacdc66feb3cc4806e260d1d73f04ec72914647205320",
+            "collection-commands.jsonl": "16d002d8196be7732b30d5cdb815bb8156c6c110de269c6de4ad499da8e24b49",
+            "docker-stats.jsonl": "e0d96c6431d25b538e060f4f0d55a3b9b530f0c84787fc3ef42538e220825a34",
+            "host-resources.jsonl": "5597b846c3b959a3a20063c0d0aab2ec41f3d414c568e9e5a1d7ae8059511dd6"
+          }
+        },
+        {
+          "id": "20261107T203607+0900-ec2-e2e-rps5-r29",
+          "lag_cli": {
+            "runs_in_window": 8,
+            "mean_seconds": 5.17
+          },
+          "progress_rows": 11,
+          "progress_rows_with_lag": 11,
+          "kafka_cpu": {
+            "avg": 35.1,
+            "max": 130.5,
+            "near_cli_median": 26.8,
+            "otherwise_median": 3.5
+          },
+          "host_cpu": {
+            "busy_avg": 73.9,
+            "busy_max": 90.1,
+            "samples": 13
+          },
+          "container_cpu_avg": {
+            "ai": 38.9,
+            "backend": 18.2,
+            "db": 22.5,
+            "fluent-bit": 1.0,
+            "frontend": 0.1,
+            "juiceshop": 2.4,
+            "kafka": 35.1,
+            "waf": 7.9,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 24.949320899999293,
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 1,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 22,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 2,
+              "known_samples": 11,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 11,
+              "unknown_samples": 0
+            }
+          ],
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+            "contract_revision": 2,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "b2d1af9f956bf0f3cedf5fec096590fd8cac4013b2bd7afd0302faac69c28191",
+            "metrics.json": "1cce38bb6336e2b718583cb8dede3c00f0882077d5c40ad4c4e7dfd2bb958769",
+            "collection-commands.jsonl": "be6802f7b82378a5867857ac9cec784bec6144906ecde4b308f5c28701e728c1",
+            "docker-stats.jsonl": "3653e14c06ce4e85f9dc80f183dba00612dc60f62a0c42dfc11f341bf1b9598c",
+            "host-resources.jsonl": "061032c12db3cff1de31d419e2c3e353585d1934d1fa637e9320415f4cc027bb"
+          }
+        }
+      ],
+      "latency": {
+        "http": {
+          "count": 1176,
+          "avg_ms": 19.75993137755102,
+          "p50_ms": 16.81065,
+          "p95_ms": 36.9979,
+          "p99_ms": 64.435525,
+          "max_ms": 182.3051
+        },
+        "log_ingest": {
+          "count": 1200,
+          "avg_ms": 105.03019372622173,
+          "p50_ms": 100.05342960357666,
+          "p95_ms": 172.31032848358151,
+          "p99_ms": 263.95730733871454,
+          "max_ms": 383.49080085754395
+        },
+        "ai_segment": {
+          "count": 1200,
+          "avg_ms": 112.63427098592122,
+          "p50_ms": 85.11698246002197,
+          "p95_ms": 269.5593714714048,
+          "p99_ms": 595.7403635978698,
+          "max_ms": 804.6660423278809
+        },
+        "ai_server": {
+          "count": 1200,
+          "avg_ms": 217.66446471214294,
+          "p50_ms": 184.5310926437378,
+          "p95_ms": 442.35241413116455,
+          "p99_ms": 749.0953683853146,
+          "max_ms": 1072.817087173462
+        },
+        "waf_server": {
+          "count": 24,
+          "avg_ms": 177.78857549031576,
+          "p50_ms": 170.74298858642578,
+          "p95_ms": 263.40624094009394,
+          "p99_ms": 289.699912071228,
+          "max_ms": 296.3268756866455
+        },
+        "AI_receive": {
+          "count": 24,
+          "avg_ms": 568.3700250004525,
+          "p50_ms": 541.5829000012309,
+          "p95_ms": 820.2367549987683,
+          "p99_ms": 935.8554019994335,
+          "max_ms": 967.667299999448
+        },
+        "WAF_receive": {
+          "count": 24,
+          "avg_ms": 297.8733375008839,
+          "p50_ms": 280.65274999971734,
+          "p95_ms": 421.8545150015416,
+          "p99_ms": 456.3220160014316,
+          "max_ms": 466.3088000015705
+        },
+        "AI_dom": {
+          "count": 24,
+          "avg_ms": 670.8221791674683,
+          "p50_ms": 648.8882999983616,
+          "p95_ms": 929.963070001031,
+          "p99_ms": 1021.0042950037314,
+          "max_ms": 1045.067700004438
+        },
+        "WAF_dom": {
+          "count": 24,
+          "avg_ms": 299.76980000143766,
+          "p50_ms": 282.40569999979925,
+          "p95_ms": 423.77872499746445,
+          "p99_ms": 458.49880699650384,
+          "max_ms": 468.56799999659415
+        }
+      }
+    },
+    "rev3_r30_r32": {
+      "ids": [
+        "20261107T215657+0900-ec2-e2e-rps5-r30",
+        "20261107T220223+0900-ec2-e2e-rps5-r31",
+        "20261107T220805+0900-ec2-e2e-rps5-r32"
+      ],
+      "rounds": [
+        {
+          "id": "20261107T215657+0900-ec2-e2e-rps5-r30",
+          "lag_cli": {
+            "runs_in_window": 2,
+            "mean_seconds": 4.26
+          },
+          "progress_rows": 14,
+          "progress_rows_with_lag": 5,
+          "kafka_cpu": {
+            "avg": 23.2,
+            "max": 113.0,
+            "near_cli_median": 2.7,
+            "otherwise_median": 3.7
+          },
+          "host_cpu": {
+            "busy_avg": 61.3,
+            "busy_max": 88.9,
+            "samples": 13
+          },
+          "container_cpu_avg": {
+            "ai": 26.3,
+            "backend": 13.4,
+            "db": 23.8,
+            "fluent-bit": 0.9,
+            "frontend": 0.1,
+            "juiceshop": 2.1,
+            "kafka": 23.2,
+            "waf": 5.8,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 20.524704600000405,
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 4,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 1,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 5,
+              "unknown_samples": 0
+            }
+          ],
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "369d570e56dea06822dc76368df65a0b81dff6ed47df0a9e98d9d41482253097",
+            "contract_revision": 3,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "377d32cd1bf73b48c6e64c5e7cfbd7fa22898e7c7bbf451b98445fe6b7c1a066",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "3c035c2ff6aabc8d7d870f8330466bed50ee56076cf837d7f06d0f9044acc620",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "2c7f687f911e34f8dc41de6696d2d05b8cbc21ee2249e772525cff6f3fdc1eb8",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "f7360d00b07ccde2289a0fb5d1610acd8e66d7fb509c598269a1ccc1d955af9b",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "3a3256a2e9942ea631021c1c1b4a5a5dffb349412a1a5426c733f47438d5c63b",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "56e9e8d88983940371b203771bbbb6c1a1592e9ecdf8b3a62f8131d222d2fdfa",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "5a6790e49ed3e63712ab1737ef12fc29cbf08d93d8661673a45d3fbb09851ca6",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "83b8570f70d1cd24cceaef51a96135f741afb70385d0bba49eb24989975550d1",
+            "metrics.json": "757fb545714ea0ff7e028b4fc4b41602f0293d0269893064995602d4c7ea8804",
+            "collection-commands.jsonl": "37c7138e382a8b40c21b19fc29a9d34d1b265b4a8d50ea7cdd559bf4b6dfcf30",
+            "docker-stats.jsonl": "0b1fcb7aae7891b02e5395791e3915026c9c2fc6733dcf5ab95020e55266c26a",
+            "host-resources.jsonl": "8dc39e610400a702ac687bbc860c0919af6619552bfe521e1383d3c5c17fa093"
+          }
+        },
+        {
+          "id": "20261107T220223+0900-ec2-e2e-rps5-r31",
+          "lag_cli": {
+            "runs_in_window": 2,
+            "mean_seconds": 4.82
+          },
+          "progress_rows": 14,
+          "progress_rows_with_lag": 6,
+          "kafka_cpu": {
+            "avg": 28.0,
+            "max": 144.2,
+            "near_cli_median": 144.2,
+            "otherwise_median": 3.8
+          },
+          "host_cpu": {
+            "busy_avg": 64.2,
+            "busy_max": 95.2,
+            "samples": 13
+          },
+          "container_cpu_avg": {
+            "ai": 30.1,
+            "backend": 14.8,
+            "db": 24.3,
+            "fluent-bit": 1.0,
+            "frontend": 0.1,
+            "juiceshop": 2.3,
+            "kafka": 28.0,
+            "waf": 6.6,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 34.697927100001834,
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 6,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 23,
+              "known_samples": 6,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 1,
+              "known_samples": 6,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 6,
+              "unknown_samples": 0
+            }
+          ],
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "369d570e56dea06822dc76368df65a0b81dff6ed47df0a9e98d9d41482253097",
+            "contract_revision": 3,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "377d32cd1bf73b48c6e64c5e7cfbd7fa22898e7c7bbf451b98445fe6b7c1a066",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "3c035c2ff6aabc8d7d870f8330466bed50ee56076cf837d7f06d0f9044acc620",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "2c7f687f911e34f8dc41de6696d2d05b8cbc21ee2249e772525cff6f3fdc1eb8",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "f7360d00b07ccde2289a0fb5d1610acd8e66d7fb509c598269a1ccc1d955af9b",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "3a3256a2e9942ea631021c1c1b4a5a5dffb349412a1a5426c733f47438d5c63b",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "56e9e8d88983940371b203771bbbb6c1a1592e9ecdf8b3a62f8131d222d2fdfa",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "5a6790e49ed3e63712ab1737ef12fc29cbf08d93d8661673a45d3fbb09851ca6",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "ef1c33ed717c5675c53025ff6aff75536f24623e6d83f6da4d004d4d88882c6d",
+            "metrics.json": "a75b6ed8765ce8d73f18ddc157a29c9dd41f84650d7ed8144c48bf71cebe0f97",
+            "collection-commands.jsonl": "3004f0dccdadf1b1cca250cb5eec31723b2aad8b3280f742145c7ecd3e8252f5",
+            "docker-stats.jsonl": "b81c3890331afd74dce938526e55c9d891ec5581602899f56e5c30e5188cf84a",
+            "host-resources.jsonl": "614296b77f6d9fcd7c1b1c7e098d630254b87ea43df1af897015015d4cf75046"
+          }
+        },
+        {
+          "id": "20261107T220805+0900-ec2-e2e-rps5-r32",
+          "lag_cli": {
+            "runs_in_window": 2,
+            "mean_seconds": 5.83
+          },
+          "progress_rows": 14,
+          "progress_rows_with_lag": 6,
+          "kafka_cpu": {
+            "avg": 35.7,
+            "max": 145.3,
+            "near_cli_median": 75.4,
+            "otherwise_median": 5.5
+          },
+          "host_cpu": {
+            "busy_avg": 66.0,
+            "busy_max": 98.6,
+            "samples": 13
+          },
+          "container_cpu_avg": {
+            "ai": 34.2,
+            "backend": 9.6,
+            "db": 20.0,
+            "fluent-bit": 1.1,
+            "frontend": 0.1,
+            "juiceshop": 2.5,
+            "kafka": 35.7,
+            "waf": 6.7,
+            "zookeeper": 0.1
+          },
+          "final_drain_seconds": 36.04309160000412,
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 1,
+              "known_samples": 6,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 10,
+              "known_samples": 6,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 3,
+              "known_samples": 6,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 6,
+              "unknown_samples": 0
+            }
+          ],
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "369d570e56dea06822dc76368df65a0b81dff6ed47df0a9e98d9d41482253097",
+            "contract_revision": 3,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "377d32cd1bf73b48c6e64c5e7cfbd7fa22898e7c7bbf451b98445fe6b7c1a066",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "3c035c2ff6aabc8d7d870f8330466bed50ee56076cf837d7f06d0f9044acc620",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "2c7f687f911e34f8dc41de6696d2d05b8cbc21ee2249e772525cff6f3fdc1eb8",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "f7360d00b07ccde2289a0fb5d1610acd8e66d7fb509c598269a1ccc1d955af9b",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "3a3256a2e9942ea631021c1c1b4a5a5dffb349412a1a5426c733f47438d5c63b",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "56e9e8d88983940371b203771bbbb6c1a1592e9ecdf8b3a62f8131d222d2fdfa",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "5a6790e49ed3e63712ab1737ef12fc29cbf08d93d8661673a45d3fbb09851ca6",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "d45960f2d0739f2fdd6beb1857dacebd1112caea",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "ae46b3a8705daa831fc9415b25b0e064ff2dfbcac41ea54f48c9b4b1360610bf",
+            "metrics.json": "6fe6320eb762db32330a3f105f364b3d3cd81aa4e305b982fce900d83e0df5c3",
+            "collection-commands.jsonl": "439e7a355c6d61a28bb78b436da09fea6f7c209b84c91037106fc02bd7dca8b0",
+            "docker-stats.jsonl": "b866fd1c4b6add7ce2165d13d62a2b09b95b0c16b0c4131eaf9df4cde5e9a2c7",
+            "host-resources.jsonl": "00747a540f8a534d305810dd9a54c35d970115dfe5b4e1216220fb7f697c34fc"
+          }
+        }
+      ],
+      "latency": {
+        "http": {
+          "count": 1764,
+          "avg_ms": 25.177409977324263,
+          "p50_ms": 22.3851,
+          "p95_ms": 46.144909999999975,
+          "p99_ms": 74.51512899999994,
+          "max_ms": 133.2824
+        },
+        "log_ingest": {
+          "count": 1800,
+          "avg_ms": 101.66033665339152,
+          "p50_ms": 99.38263893127441,
+          "p95_ms": 170.52528858184812,
+          "p99_ms": 242.58143186569214,
+          "max_ms": 474.7188091278076
+        },
+        "ai_segment": {
+          "count": 1800,
+          "avg_ms": 100.22506886058383,
+          "p50_ms": 79.40006256103516,
+          "p95_ms": 229.80246543884272,
+          "p99_ms": 395.8788561820984,
+          "max_ms": 556.07008934021
+        },
+        "ai_server": {
+          "count": 1800,
+          "avg_ms": 201.88540551397534,
+          "p50_ms": 179.67748641967773,
+          "p95_ms": 381.9516897201538,
+          "p99_ms": 589.4466233253479,
+          "max_ms": 978.4080982208252
+        },
+        "waf_server": {
+          "count": 36,
+          "avg_ms": 178.59284083048502,
+          "p50_ms": 158.67936611175537,
+          "p95_ms": 326.8634080886841,
+          "p99_ms": 512.8030896186826,
+          "max_ms": 569.4730281829834
+        },
+        "AI_receive": {
+          "count": 36,
+          "avg_ms": 568.992688888304,
+          "p50_ms": 538.7346999996225,
+          "p95_ms": 865.8498999957374,
+          "p99_ms": 998.0024899992711,
+          "max_ms": 1055.0981999986107
+        },
+        "WAF_receive": {
+          "count": 36,
+          "avg_ms": 300.76716111094964,
+          "p50_ms": 279.86869999949704,
+          "p95_ms": 550.3641500017693,
+          "p99_ms": 628.193779999492,
+          "max_ms": 660.4312999988906
+        },
+        "AI_dom": {
+          "count": 36,
+          "avg_ms": 680.4311611107955,
+          "p50_ms": 638.0445000031614,
+          "p95_ms": 984.1025249988888,
+          "p99_ms": 1109.4361649978962,
+          "max_ms": 1172.0504999975674
+        },
+        "WAF_dom": {
+          "count": 36,
+          "avg_ms": 303.91082500015426,
+          "p50_ms": 286.6352499986533,
+          "p95_ms": 552.7502499953698,
+          "p99_ms": 629.266219997953,
+          "max_ms": 661.5665999997873
+        }
+      }
+    }
+  },
+  "verdict": {
+    "lag_cli_at_most_3": true,
+    "kafka_avg_at_most_10": false,
+    "host_cpu_lower": true,
+    "p8_pass": true
+  },
+  "condition_differences": {
+    "contract_sha256": [
+      "b611f71cae62671b7c3302552d68b66c7854c170551e4600400a37946c2726ec",
+      "369d570e56dea06822dc76368df65a0b81dff6ed47df0a9e98d9d41482253097"
+    ],
+    "contract_revision": [
+      2,
+      3
+    ],
+    "runner_files_sha256": [
+      {
+        "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+        "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+        "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+        "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+        "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+        "e2e_remote.py": "e948920c856e85b2897f980c5c66ac9c4ab2027e71d474563b4fb9e0b486afb0",
+        "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+        "ec2_collection_worker.py": "c02453372b13599bc644c04b2c5a4fb9b60a72a7ef6d0ca300392a817e40d283",
+        "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+        "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+        "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+        "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+        "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+        "ec2_load_policy.py": "cc3197070488368a9d174bddbf48058f2e5749f3ea570a93ab0dbf7ee0a25763",
+        "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+        "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+        "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+        "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+        "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+        "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+        "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+        "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+        "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+        "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+        "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+        "run_e2e.py": "a037caaee1eb65676fd1a5cf1d26767876e73c4b337050efa820eb06afd32ef5",
+        "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+        "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+        "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+        "run_ec2_e2e.py": "8dbc031d75b7c995c1b796e6fc35077815cfb12041af32581e9f93ac789f3f96",
+        "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+        "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+        "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+        "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+        "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+        "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+        "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+        "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+        "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+        "test_e2e_remote.py": "1b3909056990d533b65fe6cc03aee12d8584005cf283d747e73a85472dc11913",
+        "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+        "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+        "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+        "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+        "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+        "test_ec2_load.py": "aa47fc110b673557a1cb255d3e43712ab89c28116bb70400f839cb0c4ca156cb",
+        "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+        "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+        "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+        "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+        "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+        "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+        "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+      },
+      {
+        "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+        "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+        "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+        "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+        "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+        "e2e_remote.py": "377d32cd1bf73b48c6e64c5e7cfbd7fa22898e7c7bbf451b98445fe6b7c1a066",
+        "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+        "ec2_collection_worker.py": "3c035c2ff6aabc8d7d870f8330466bed50ee56076cf837d7f06d0f9044acc620",
+        "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+        "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+        "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+        "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+        "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+        "ec2_load_policy.py": "2c7f687f911e34f8dc41de6696d2d05b8cbc21ee2249e772525cff6f3fdc1eb8",
+        "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+        "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+        "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+        "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+        "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+        "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+        "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+        "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+        "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+        "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+        "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+        "run_e2e.py": "f7360d00b07ccde2289a0fb5d1610acd8e66d7fb509c598269a1ccc1d955af9b",
+        "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+        "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+        "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+        "run_ec2_e2e.py": "3a3256a2e9942ea631021c1c1b4a5a5dffb349412a1a5426c733f47438d5c63b",
+        "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+        "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+        "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+        "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+        "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+        "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+        "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+        "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+        "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+        "test_e2e_remote.py": "56e9e8d88983940371b203771bbbb6c1a1592e9ecdf8b3a62f8131d222d2fdfa",
+        "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+        "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+        "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+        "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+        "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+        "test_ec2_load.py": "5a6790e49ed3e63712ab1737ef12fc29cbf08d93d8661673a45d3fbb09851ca6",
+        "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+        "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+        "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+        "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+        "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+        "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+        "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+      }
+    ]
+  },
+  "controller_samples": [
+    {
+      "at": "2026-11-07T12:56:11.149438+00:00",
+      "action": "baseline",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false
+    },
+    {
+      "label": "external_rate",
+      "external_logs_per_second": 0.0,
+      "at": "2026-11-07T12:56:51.948819+00:00"
+    },
+    {
+      "at": "2026-11-07T12:56:53.367125+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 30,
+      "phase": "before"
+    },
+    {
+      "at": "2026-11-07T13:02:02.719859+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 30,
+      "phase": "after"
+    },
+    {
+      "at": "2026-11-07T13:02:19.206926+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 31,
+      "phase": "before"
+    },
+    {
+      "at": "2026-11-07T13:07:45.399311+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 31,
+      "phase": "after"
+    },
+    {
+      "at": "2026-11-07T13:08:01.489450+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 32,
+      "phase": "before"
+    },
+    {
+      "at": "2026-11-07T13:13:26.023679+00:00",
+      "action": "trial",
+      "confirmed": true,
+      "wakeup_flags": {
+        "APP_AIOUTBOX_WAKEUPENABLED": "true",
+        "APP_ALERTS_WAKEUPENABLED": "true"
+      },
+      "poll_ms": 250,
+      "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+      "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+      "backend_started_at": "2026-11-07T11:21:39.31227495Z",
+      "backend_restart_count": 0,
+      "backend_recreated": false,
+      "health": "UP",
+      "frontend_auth_http": 401,
+      "frontend_restarted": false,
+      "round": 32,
+      "phase": "after"
+    }
+  ],
+  "controller_run_ids": [
+    "20261107T215657+0900-ec2-e2e-rps5-r30",
+    "20261107T220223+0900-ec2-e2e-rps5-r31",
+    "20261107T220805+0900-ec2-e2e-rps5-r32"
+  ]
+}
