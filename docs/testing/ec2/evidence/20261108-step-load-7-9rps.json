@@ -1,0 +1,1389 @@
+{
+  "schema": "dualguard-step-load-comparison-v1",
+  "knee_criteria": {
+    "scope": "step_mode_sending_window",
+    "completion_ratio_below": 0.95,
+    "pending_slope_per_input_rps_above": 0.05,
+    "server_p95_ms_above": 3000,
+    "drain_seconds_above": 60
+  },
+  "groups": {
+    "5rps_r33_r35": {
+      "rate": 5,
+      "ids": [
+        "20261108T112814+0900-ec2-e2e-rps5-r33",
+        "20261108T113334+0900-ec2-e2e-rps5-r34",
+        "20261108T113848+0900-ec2-e2e-rps5-r35"
+      ],
+      "rounds": [
+        {
+          "id": "20261108T112814+0900-ec2-e2e-rps5-r33",
+          "rate": 5,
+          "state": "COMPLETED",
+          "verdict": "PASS",
+          "reasons": [
+            "확정 EC2 서버 지연·정합성·알림·적체 해소 기준 충족"
+          ],
+          "counts": {
+            "http": 600,
+            "db": 600,
+            "probes": 12
+          },
+          "cleanup_ok": true,
+          "configuration_restored": true,
+          "final_drain_seconds": 19.565202800000407,
+          "knee": {
+            "status": "EVALUATED",
+            "knee": false,
+            "reasons": [
+              "한계 신호 없음"
+            ],
+            "input_eps": 4.808,
+            "completion_eps": 4.858,
+            "completion_ratio": 1.01,
+            "pending_slope_per_second": 0.001,
+            "pending_max": 9,
+            "pending_at_send_end": 0,
+            "backlog_clear_seconds_after_send": 15.0,
+            "server_p95_ms": 383.0,
+            "recomputed_offline": true
+          },
+          "server_cpu": {
+            "avg": 59.3,
+            "max": 84.1,
+            "samples": 15
+          },
+          "server_cpu_delta": {
+            "avg": 58.5,
+            "max": 84.1
+          },
+          "server_steal_avg": 3.9,
+          "generator_cpu": {
+            "avg": 12.1,
+            "max": 18.9
+          },
+          "server_mem_available_min_mib": 4863,
+          "container_cpu_avg": {
+            "ai": 20.5,
+            "backend": 18.3,
+            "db": 16.3,
+            "fluent-bit": 1.0,
+            "frontend": 0.1,
+            "juiceshop": 3.1,
+            "kafka": 28.4,
+            "waf": 6.6,
+            "zookeeper": 0.2
+          },
+          "container_cpu_max": {
+            "ai": 25.1,
+            "backend": 41.5,
+            "db": 34.3,
+            "fluent-bit": 1.6,
+            "frontend": 0.6,
+            "juiceshop": 16.6,
+            "kafka": 170.0,
+            "waf": 20.0,
+            "zookeeper": 1.1
+          },
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 20,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 5,
+              "unknown_samples": 0
+            }
+          ],
+          "guard": {
+            "abort": null,
+            "http_points": 630,
+            "collection_failures": {
+              "ec2_resources": 0,
+              "browser": 0,
+              "kafka_lag": 0,
+              "pipeline": 0
+            },
+            "stopped_owned_process": false,
+            "resource_baseline_confirmed": true
+          },
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "369d570e56dea06822dc76368df65a0b81dff6ed47df0a9e98d9d41482253097",
+            "contract_revision": 3,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "377d32cd1bf73b48c6e64c5e7cfbd7fa22898e7c7bbf451b98445fe6b7c1a066",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "3c035c2ff6aabc8d7d870f8330466bed50ee56076cf837d7f06d0f9044acc620",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "2c7f687f911e34f8dc41de6696d2d05b8cbc21ee2249e772525cff6f3fdc1eb8",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "f7360d00b07ccde2289a0fb5d1610acd8e66d7fb509c598269a1ccc1d955af9b",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "3a3256a2e9942ea631021c1c1b4a5a5dffb349412a1a5426c733f47438d5c63b",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "56e9e8d88983940371b203771bbbb6c1a1592e9ecdf8b3a62f8131d222d2fdfa",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "5a6790e49ed3e63712ab1737ef12fc29cbf08d93d8661673a45d3fbb09851ca6",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "1b6d818cd01f382ba1f6a00699a6c84e6a421ab6",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "66f58f20e2e42e9afac50cc824ce521b4fb5d07645e800e581e32d91f19e2bed",
+            "metrics.json": "f6f9e1588adb136e742d6cb6817e3befd8a7a3016cb1bbd63b9c1bdd1f676363"
+          }
+        },
+        {
+          "id": "20261108T113334+0900-ec2-e2e-rps5-r34",
+          "rate": 5,
+          "state": "COMPLETED",
+          "verdict": "PASS",
+          "reasons": [
+            "확정 EC2 서버 지연·정합성·알림·적체 해소 기준 충족"
+          ],
+          "counts": {
+            "http": 600,
+            "db": 600,
+            "probes": 12
+          },
+          "cleanup_ok": true,
+          "configuration_restored": true,
+          "final_drain_seconds": 19.553454100000636,
+          "knee": {
+            "status": "EVALUATED",
+            "knee": false,
+            "reasons": [
+              "한계 신호 없음"
+            ],
+            "input_eps": 4.79,
+            "completion_eps": 4.83,
+            "completion_ratio": 1.008,
+            "pending_slope_per_second": 0.001,
+            "pending_max": 11,
+            "pending_at_send_end": 0,
+            "backlog_clear_seconds_after_send": 14.6,
+            "server_p95_ms": 374.5,
+            "recomputed_offline": true
+          },
+          "server_cpu": {
+            "avg": 59.3,
+            "max": 78.9,
+            "samples": 14
+          },
+          "server_cpu_delta": {
+            "avg": 58.9,
+            "max": 78.9
+          },
+          "server_steal_avg": 4.4,
+          "generator_cpu": {
+            "avg": 20.5,
+            "max": 30.9
+          },
+          "server_mem_available_min_mib": 4839,
+          "container_cpu_avg": {
+            "ai": 37.8,
+            "backend": 16.1,
+            "db": 13.8,
+            "fluent-bit": 1.0,
+            "frontend": 0.1,
+            "juiceshop": 2.1,
+            "kafka": 28.7,
+            "waf": 4.8,
+            "zookeeper": 0.1
+          },
+          "container_cpu_max": {
+            "ai": 85.5,
+            "backend": 56.5,
+            "db": 26.5,
+            "fluent-bit": 1.4,
+            "frontend": 0.5,
+            "juiceshop": 9.3,
+            "kafka": 157.7,
+            "waf": 14.4,
+            "zookeeper": 0.3
+          },
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 16,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 1,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 5,
+              "unknown_samples": 0
+            }
+          ],
+          "guard": {
+            "abort": null,
+            "http_points": 630,
+            "collection_failures": {
+              "ec2_resources": 0,
+              "browser": 0,
+              "kafka_lag": 0,
+              "pipeline": 0
+            },
+            "stopped_owned_process": false,
+            "resource_baseline_confirmed": true
+          },
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "369d570e56dea06822dc76368df65a0b81dff6ed47df0a9e98d9d41482253097",
+            "contract_revision": 3,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "377d32cd1bf73b48c6e64c5e7cfbd7fa22898e7c7bbf451b98445fe6b7c1a066",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "3c035c2ff6aabc8d7d870f8330466bed50ee56076cf837d7f06d0f9044acc620",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "2c7f687f911e34f8dc41de6696d2d05b8cbc21ee2249e772525cff6f3fdc1eb8",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "f7360d00b07ccde2289a0fb5d1610acd8e66d7fb509c598269a1ccc1d955af9b",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "3a3256a2e9942ea631021c1c1b4a5a5dffb349412a1a5426c733f47438d5c63b",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "56e9e8d88983940371b203771bbbb6c1a1592e9ecdf8b3a62f8131d222d2fdfa",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "5a6790e49ed3e63712ab1737ef12fc29cbf08d93d8661673a45d3fbb09851ca6",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "1b6d818cd01f382ba1f6a00699a6c84e6a421ab6",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "85f77067bcc6190fb648f6236ed2db64ea10462fc2f253df6ee1e455a5dea4fe",
+            "metrics.json": "3680305845a2939b2fa66a489006e1e475296b1d61dbf7eda9a7af60459041b3"
+          }
+        },
+        {
+          "id": "20261108T113848+0900-ec2-e2e-rps5-r35",
+          "rate": 5,
+          "state": "COMPLETED",
+          "verdict": "PASS",
+          "reasons": [
+            "확정 EC2 서버 지연·정합성·알림·적체 해소 기준 충족"
+          ],
+          "counts": {
+            "http": 600,
+            "db": 600,
+            "probes": 12
+          },
+          "cleanup_ok": true,
+          "configuration_restored": true,
+          "final_drain_seconds": 19.445155100000193,
+          "knee": {
+            "status": "EVALUATED",
+            "knee": false,
+            "reasons": [
+              "한계 신호 없음"
+            ],
+            "input_eps": 4.803,
+            "completion_eps": 4.852,
+            "completion_ratio": 1.01,
+            "pending_slope_per_second": -0.007,
+            "pending_max": 7,
+            "pending_at_send_end": 0,
+            "backlog_clear_seconds_after_send": 14.7,
+            "server_p95_ms": 305.3,
+            "recomputed_offline": true
+          },
+          "server_cpu": {
+            "avg": 57.6,
+            "max": 87.6,
+            "samples": 15
+          },
+          "server_cpu_delta": {
+            "avg": 56.7,
+            "max": 87.6
+          },
+          "server_steal_avg": 4.9,
+          "generator_cpu": {
+            "avg": 11.1,
+            "max": 18.7
+          },
+          "server_mem_available_min_mib": 4863,
+          "container_cpu_avg": {
+            "ai": 22.6,
+            "backend": 18.1,
+            "db": 25.0,
+            "fluent-bit": 0.9,
+            "frontend": 0.0,
+            "juiceshop": 2.1,
+            "kafka": 33.3,
+            "waf": 5.7,
+            "zookeeper": 0.1
+          },
+          "container_cpu_max": {
+            "ai": 27.7,
+            "backend": 68.6,
+            "db": 104.2,
+            "fluent-bit": 1.1,
+            "frontend": 0.4,
+            "juiceshop": 6.3,
+            "kafka": 144.8,
+            "waf": 16.6,
+            "zookeeper": 0.2
+          },
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 22,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 1,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 5,
+              "unknown_samples": 0
+            }
+          ],
+          "guard": {
+            "abort": null,
+            "http_points": 630,
+            "collection_failures": {
+              "ec2_resources": 0,
+              "browser": 0,
+              "kafka_lag": 0,
+              "pipeline": 0
+            },
+            "stopped_owned_process": false,
+            "resource_baseline_confirmed": true
+          },
+          "conditions": {
+            "rate": 5,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "369d570e56dea06822dc76368df65a0b81dff6ed47df0a9e98d9d41482253097",
+            "contract_revision": 3,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "c8584e2b905077d034c8d0c534cea63bc5fc35f87bb84433d66b133056608f06",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "377d32cd1bf73b48c6e64c5e7cfbd7fa22898e7c7bbf451b98445fe6b7c1a066",
+              "e2e_workload.js": "148bd9ce0e2ceef589ce4da144f4e0f0b880b9115503ba63e6085516b2647edf",
+              "ec2_collection_worker.py": "3c035c2ff6aabc8d7d870f8330466bed50ee56076cf837d7f06d0f9044acc620",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "2c7f687f911e34f8dc41de6696d2d05b8cbc21ee2249e772525cff6f3fdc1eb8",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "f7360d00b07ccde2289a0fb5d1610acd8e66d7fb509c598269a1ccc1d955af9b",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "3a3256a2e9942ea631021c1c1b4a5a5dffb349412a1a5426c733f47438d5c63b",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "56e9e8d88983940371b203771bbbb6c1a1592e9ecdf8b3a62f8131d222d2fdfa",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "29c8f07cc3c89b2474780875036c4f9d91f7ed14701887716dcff63a4759698c",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "5a6790e49ed3e63712ab1737ef12fc29cbf08d93d8661673a45d3fbb09851ca6",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "1b6d818cd01f382ba1f6a00699a6c84e6a421ab6",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "fbf7996fedcace8098ea2d765214ffa0a1816c092821df533625ebc433b68ec2",
+            "metrics.json": "5432230e7329e095920cf8ffd3daa1f3ddd7adfb4a2e75a335c83b829a47e38b"
+          }
+        }
+      ],
+      "latency": {
+        "ai_server": {
+          "count": 1800,
+          "avg_ms": 187.53726389673022,
+          "p50_ms": 168.75910758972168,
+          "p95_ms": 348.2520937919616,
+          "p99_ms": 520.0120425224303,
+          "max_ms": 849.1780757904053
+        },
+        "waf_server": {
+          "count": 36,
+          "avg_ms": 181.71262078815036,
+          "p50_ms": 170.94600200653076,
+          "p95_ms": 298.02238941192627,
+          "p99_ms": 393.4492588043211,
+          "max_ms": 438.5030269622803
+        },
+        "log_ingest": {
+          "count": 1800,
+          "avg_ms": 99.54600638813443,
+          "p50_ms": 96.47858142852783,
+          "p95_ms": 158.9872360229492,
+          "p99_ms": 231.8149495124817,
+          "max_ms": 615.401029586792
+        },
+        "ai_segment": {
+          "count": 1800,
+          "avg_ms": 87.99125750859578,
+          "p50_ms": 69.97716426849365,
+          "p95_ms": 194.25574541091913,
+          "p99_ms": 330.8988499641418,
+          "max_ms": 526.4239311218262
+        },
+        "http": {
+          "count": 1764,
+          "avg_ms": 16.12279688208617,
+          "p50_ms": 13.441949999999999,
+          "p95_ms": 28.774094999999996,
+          "p99_ms": 57.53976999999987,
+          "max_ms": 326.182
+        },
+        "AI_dom": {
+          "count": 36,
+          "avg_ms": 635.8707277777537,
+          "p50_ms": 621.5376000000106,
+          "p95_ms": 821.2519000001066,
+          "p99_ms": 923.7599449998924,
+          "max_ms": 942.8213999999571
+        },
+        "WAF_dom": {
+          "count": 36,
+          "avg_ms": 294.39511944444047,
+          "p50_ms": 257.23134999998365,
+          "p95_ms": 473.18990000007943,
+          "p99_ms": 506.85155999949524,
+          "max_ms": 517.6638999992065
+        }
+      }
+    },
+    "step_7rps": {
+      "rate": 7,
+      "ids": [
+        "20261108T120533+0900-ec2-step-rps7-r01"
+      ],
+      "rounds": [
+        {
+          "id": "20261108T120533+0900-ec2-step-rps7-r01",
+          "rate": 7,
+          "state": "COMPLETED",
+          "verdict": "PASS",
+          "reasons": [
+            "확정 EC2 서버 지연·정합성·알림·적체 해소 기준 충족"
+          ],
+          "counts": {
+            "http": 840,
+            "db": 840,
+            "probes": 12
+          },
+          "cleanup_ok": true,
+          "configuration_restored": true,
+          "final_drain_seconds": 36.1760865999986,
+          "knee": {
+            "status": "EVALUATED",
+            "knee": false,
+            "reasons": [
+              "한계 신호 없음"
+            ],
+            "input_eps": 6.683,
+            "completion_eps": 6.756,
+            "completion_ratio": 1.011,
+            "pending_slope_per_second": 0.038,
+            "pending_max": 24,
+            "pending_at_send_end": 0,
+            "backlog_clear_seconds_after_send": 15.2,
+            "server_p95_ms": 408.0,
+            "recomputed_offline": null
+          },
+          "server_cpu": {
+            "avg": 63.6,
+            "max": 90.3,
+            "samples": 14
+          },
+          "server_cpu_delta": {
+            "avg": 63.1,
+            "max": 90.3
+          },
+          "server_steal_avg": 4.4,
+          "generator_cpu": {
+            "avg": 12.1,
+            "max": 23.6
+          },
+          "server_mem_available_min_mib": 4789,
+          "container_cpu_avg": {
+            "ai": 30.2,
+            "backend": 14.1,
+            "db": 21.2,
+            "fluent-bit": 1.2,
+            "frontend": 0.1,
+            "juiceshop": 2.9,
+            "kafka": 28.1,
+            "waf": 8.6,
+            "zookeeper": 0.1
+          },
+          "container_cpu_max": {
+            "ai": 38.0,
+            "backend": 42.9,
+            "db": 86.3,
+            "fluent-bit": 1.9,
+            "frontend": 0.6,
+            "juiceshop": 7.2,
+            "kafka": 157.5,
+            "waf": 22.0,
+            "zookeeper": 0.2
+          },
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 6,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 1,
+              "known_samples": 6,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 6,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 6,
+              "unknown_samples": 0
+            }
+          ],
+          "guard": {
+            "abort": null,
+            "http_points": 870,
+            "collection_failures": {
+              "ec2_resources": 0,
+              "browser": 0,
+              "kafka_lag": 0,
+              "pipeline": 0
+            },
+            "stopped_owned_process": false,
+            "resource_baseline_confirmed": true
+          },
+          "conditions": {
+            "rate": 7,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "565f1301b45ed196d2b95cf3037ff463044166898271bb68ac40fda4851d1fef",
+            "contract_revision": 4,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "ef9aa6f6000f2ebc1db1b3aad65f1eea0744d2f6d769721520801e947edb6e2c",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "377d32cd1bf73b48c6e64c5e7cfbd7fa22898e7c7bbf451b98445fe6b7c1a066",
+              "e2e_workload.js": "10e16438264cac52f65fb54d4afebdaccb4575e117145d5da6defe4383a780a5",
+              "ec2_collection_worker.py": "3c035c2ff6aabc8d7d870f8330466bed50ee56076cf837d7f06d0f9044acc620",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "b96c5cc12e06c9ab1dff98ea50ec83e46d43a371be12a29e1fdd00b4c2a7e83e",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "f7360d00b07ccde2289a0fb5d1610acd8e66d7fb509c598269a1ccc1d955af9b",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "131e038d0750a22f04ed13191b476568b9d0ee5695a717a8b83815479fbc9d8d",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "56e9e8d88983940371b203771bbbb6c1a1592e9ecdf8b3a62f8131d222d2fdfa",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "1536dfae7630129affd9670a74bfeb16f784a172d7f2c716e8bddd1c5653bda0",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "ad52941c8da0883caa226c77d2021468c338bde07e9e16c1f2b1a11bc1dbb447",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "1b6d818cd01f382ba1f6a00699a6c84e6a421ab6",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "d929fe0aaa631f1cca24125bf458eca1a0ea524eff1d2f69018b69f5e353a7e4",
+            "metrics.json": "d56b5b0861acc54e23cbc16797a34718efce2d5dc6e0b0f7c977eb2c62bdb865"
+          }
+        }
+      ],
+      "latency": {
+        "ai_server": {
+          "count": 840,
+          "avg_ms": 209.94592536063422,
+          "p50_ms": 177.21498012542725,
+          "p95_ms": 407.9545617103576,
+          "p99_ms": 971.6482758522035,
+          "max_ms": 1192.176103591919
+        },
+        "waf_server": {
+          "count": 12,
+          "avg_ms": 187.44430939356485,
+          "p50_ms": 202.8064727783203,
+          "p95_ms": 270.06106376647944,
+          "p99_ms": 293.7584972381592,
+          "max_ms": 299.6828556060791
+        },
+        "log_ingest": {
+          "count": 840,
+          "avg_ms": 101.54392265138172,
+          "p50_ms": 99.59101676940918,
+          "p95_ms": 167.22463369369507,
+          "p99_ms": 239.4545602798462,
+          "max_ms": 355.1521301269531
+        },
+        "ai_segment": {
+          "count": 840,
+          "avg_ms": 108.4020027092525,
+          "p50_ms": 71.34497165679932,
+          "p95_ms": 253.72675657272333,
+          "p99_ms": 736.6341924667361,
+          "max_ms": 1033.3709716796875
+        },
+        "http": {
+          "count": 828,
+          "avg_ms": 18.529481884057972,
+          "p50_ms": 15.89465,
+          "p95_ms": 33.91185,
+          "p99_ms": 61.392166000000046,
+          "max_ms": 246.2595
+        },
+        "AI_dom": {
+          "count": 12,
+          "avg_ms": 600.1481083332388,
+          "p50_ms": 554.4778500002394,
+          "p95_ms": 874.7949049997256,
+          "p99_ms": 1081.0268209996868,
+          "max_ms": 1132.5847999996768
+        },
+        "WAF_dom": {
+          "count": 12,
+          "avg_ms": 331.22430833335176,
+          "p50_ms": 288.7813500001357,
+          "p95_ms": 667.400374999761,
+          "p99_ms": 669.9055150002641,
+          "max_ms": 670.5318000003899
+        }
+      }
+    },
+    "step_9rps": {
+      "rate": 9,
+      "ids": [
+        "20261108T121152+0900-ec2-step-rps9-r01"
+      ],
+      "rounds": [
+        {
+          "id": "20261108T121152+0900-ec2-step-rps9-r01",
+          "rate": 9,
+          "state": "COMPLETED",
+          "verdict": "PASS",
+          "reasons": [
+            "확정 EC2 서버 지연·정합성·알림·적체 해소 기준 충족"
+          ],
+          "counts": {
+            "http": 1080,
+            "db": 1080,
+            "probes": 12
+          },
+          "cleanup_ok": true,
+          "configuration_restored": true,
+          "final_drain_seconds": 23.04858360000071,
+          "knee": {
+            "status": "EVALUATED",
+            "knee": false,
+            "reasons": [
+              "한계 신호 없음"
+            ],
+            "input_eps": 8.456,
+            "completion_eps": 8.592,
+            "completion_ratio": 1.016,
+            "pending_slope_per_second": -0.002,
+            "pending_max": 25,
+            "pending_at_send_end": 0,
+            "backlog_clear_seconds_after_send": 15.7,
+            "server_p95_ms": 649.1,
+            "recomputed_offline": null
+          },
+          "server_cpu": {
+            "avg": 69.4,
+            "max": 84.5,
+            "samples": 14
+          },
+          "server_cpu_delta": {
+            "avg": 68.9,
+            "max": 84.5
+          },
+          "server_steal_avg": 3.4,
+          "generator_cpu": {
+            "avg": 12.1,
+            "max": 20.0
+          },
+          "server_mem_available_min_mib": 4809,
+          "container_cpu_avg": {
+            "ai": 36.8,
+            "backend": 12.7,
+            "db": 25.4,
+            "fluent-bit": 1.3,
+            "frontend": 0.1,
+            "juiceshop": 2.6,
+            "kafka": 25.4,
+            "waf": 8.6,
+            "zookeeper": 0.1
+          },
+          "container_cpu_max": {
+            "ai": 54.1,
+            "backend": 24.7,
+            "db": 76.5,
+            "fluent-bit": 1.8,
+            "frontend": 0.7,
+            "juiceshop": 6.6,
+            "kafka": 168.8,
+            "waf": 14.3,
+            "zookeeper": 0.2
+          },
+          "lag_maxima": [
+            {
+              "group": "ai-result-group",
+              "topic": "ai-result-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "ai-service-group",
+              "topic": "ai-request-topic",
+              "partition": 0,
+              "observed_max_lag": 23,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "log-group",
+              "topic": "log-topic",
+              "partition": 0,
+              "observed_max_lag": 2,
+              "known_samples": 5,
+              "unknown_samples": 0
+            },
+            {
+              "group": "waf-detection-group",
+              "topic": "waf-detection-topic",
+              "partition": 0,
+              "observed_max_lag": 0,
+              "known_samples": 5,
+              "unknown_samples": 0
+            }
+          ],
+          "guard": {
+            "abort": null,
+            "http_points": 1110,
+            "collection_failures": {
+              "ec2_resources": 0,
+              "browser": 0,
+              "kafka_lag": 0,
+              "pipeline": 0
+            },
+            "stopped_owned_process": false,
+            "resource_baseline_confirmed": true
+          },
+          "conditions": {
+            "rate": 9,
+            "seconds": 120,
+            "warmup_seconds": 30,
+            "fixture_sha256": "29abbd5415fbfee4904fdd66c5afe497dc0c1c16d0c58a9849f81225a4a8ea2a",
+            "contract_sha256": "565f1301b45ed196d2b95cf3037ff463044166898271bb68ac40fda4851d1fef",
+            "contract_revision": 4,
+            "runner_files_sha256": {
+              "browser_trace.js": "92ee2b6c35d74a01518e597bff860a60ee13552601d9d2c19b03c124bac9fdd6",
+              "collect_ec2_inventory.py": "b67348efa87980c5728f5fb2b68148fcf1903607093ba08a804c8e941e53d077",
+              "e2e_background.js": "ef9aa6f6000f2ebc1db1b3aad65f1eea0744d2f6d769721520801e947edb6e2c",
+              "e2e_core.py": "6e1df1f0059e0b22bdf244c2a437a2b1b8941a1bd1ba61d961cabe8fa13f5308",
+              "e2e_environment.py": "37a53aa32dd7837ff6c0fca2d04b8e3d6b207b2054a59812b47543d312d875eb",
+              "e2e_remote.py": "377d32cd1bf73b48c6e64c5e7cfbd7fa22898e7c7bbf451b98445fe6b7c1a066",
+              "e2e_workload.js": "10e16438264cac52f65fb54d4afebdaccb4575e117145d5da6defe4383a780a5",
+              "ec2_collection_worker.py": "3c035c2ff6aabc8d7d870f8330466bed50ee56076cf837d7f06d0f9044acc620",
+              "ec2_connection.py": "9fa32926e50229dd57ee970d38250d2a859359f7c99914da87e75fff153580c2",
+              "ec2_connection_worker.py": "3112495f3ef5149498722e82c3e9417f9fd3ddfd3731163f0946801edfd2aa97",
+              "ec2_db.py": "b91fc469ad977ed2d0954ea7eb421eab61096cce490555b1e4934bb184f9403d",
+              "ec2_db_queries.py": "b4e0e653ab51feb77ff74bede565d672b82670b2bcca5f85e321d6b54824fcc9",
+              "ec2_db_worker.py": "55352b51066e813477800adccb1617f64490aafd7d3b629b7bdd087b53625064",
+              "ec2_load_policy.py": "b96c5cc12e06c9ab1dff98ea50ec83e46d43a371be12a29e1fdd00b4c2a7e83e",
+              "ec2_login.py": "34c51f0486ee40b938b3342bc9f4e8f273a1a0cdf798f8ac138ed967c0bec245",
+              "ec2_watch.py": "f41f010e68307a3e9f8d0f78d1c6b3bc0bafe21c69e14544ad69b9892334d28e",
+              "ec2_watch_worker.py": "c37cf0bba468b43438b94b8b1a725642068dabe13cf32d9a726605379e2d960c",
+              "guard.py": "0d834239600a7649efe968c5ca24963d912737abc48aa76abf0abae31b767884",
+              "kafka_replay.py": "5fb292fba29cad52ef693f3ebc6597bc61f0225ed1e5aa1f1291578b3c076915",
+              "load_policy.py": "7c71023cda5a98f12c20920bfe52ea42c7003f91f35f3df7a7b49a13f0bc5f81",
+              "local_browser_login.py": "a27fc815cb669a23003f433e599dd91282231b6881326e68188342940cc80a64",
+              "metrics.py": "0b416349a1b5304e9fc07b5b22bc5137e63357138507c174bb932486d9c061e4",
+              "normal-smoke.js": "c977412aa4fa475bf70b08093cd3dc6cce17f5c53a8f5ca344dcd0045c1f7922",
+              "pipeline.py": "489b102b73c9fbe65f10b0bbbed65558b24e8ea5c895c2890b5f15de13726f6e",
+              "recheck_ec2_table.py": "9a68755d9de2755b3aeeb54ddf02f3e34b182402e607548568abd3759eafa5b2",
+              "run_e2e.py": "f7360d00b07ccde2289a0fb5d1610acd8e66d7fb509c598269a1ccc1d955af9b",
+              "run_ec2_collection.py": "c940ed1f72c9ba8e1d725edc05fc666caf33ae6adf93df6715f9129189c47fd3",
+              "run_ec2_connection.py": "bc7bbdaf9dacdc10f48610946304d8e7b6fc8850122dc6f26bdfd60018c69dd7",
+              "run_ec2_db.py": "60790e2f3f67381fee4cb9a8ed789ddda3d6eef93190cb6d497124da1f32ed16",
+              "run_ec2_e2e.py": "131e038d0750a22f04ed13191b476568b9d0ee5695a717a8b83815479fbc9d8d",
+              "run_ec2_watch.py": "d6c0e91a523963080892a2026a3af3653f22125b4564b3205d7cdabc26c36ead",
+              "run_experiment.py": "3701570c9da21be68fc8ece7f3e2a7aeba585068e6c6f8157d80864e519b8fd5",
+              "run_local_prechecks.py": "1a440d43a0d2239e0b7190d354ad3bfe2c8d4d90b2160268c1fdde523505e518",
+              "run_recovery_verification.py": "ba3552b633760f78c296202a839a5cac57417b9febad8b58c3593e944119f36c",
+              "summarize_e2e.py": "60714915e20a218da282f8cafae95e88108577b3c7654a0383b80a53fc3f6964",
+              "summarize_ec2.py": "b4c56ab10ae5466bff38ac7b69842f6b604dbe3367dae0444eb95caa0bbe2888",
+              "test_clock_recheck.py": "d94dc79f4e4a64450b49f843d5ea1ddbac977a8b2fc2117f63a7fbac4ec70716",
+              "test_e2e.py": "f2f4461c960f97a0e5ae428a90945c17b7323837cfcf8161f594c4ce0d24c4a0",
+              "test_e2e_environment.py": "f366539fde8e345c75ca0bdb148e23529d4dfb235503ccc3a7c0a89d935afbfd",
+              "test_e2e_remote.py": "56e9e8d88983940371b203771bbbb6c1a1592e9ecdf8b3a62f8131d222d2fdfa",
+              "test_e2e_runtime.py": "bd0bc49a3398cfdacd03394023bf3a16ca28942b372efd850d2e682b1f6d4976",
+              "test_e2e_workload.js": "1536dfae7630129affd9670a74bfeb16f784a172d7f2c716e8bddd1c5653bda0",
+              "test_ec2_connection.py": "2992e5a4712f27df2152200f395ad0f2ac5a53a9d7e7573799e3ffa0b06405da",
+              "test_ec2_db.py": "f57cce15d2b8e2d3bf8029af8b5a5f760957517f4d1debd61e235f9add5d7686",
+              "test_ec2_inventory.py": "a57d07ef14f10769e4dfbd84b28040f670289ddad64d5e048ee1e55f17f2d179",
+              "test_ec2_load.py": "ad52941c8da0883caa226c77d2021468c338bde07e9e16c1f2b1a11bc1dbb447",
+              "test_ec2_table_recheck.py": "710457496d64bb471a1ad0a37b8f759072b568c71f8b693fc214c91e8932e72f",
+              "test_ec2_watch.py": "b110d8d6ce1c1cd41ba58629229de62cb355a7a4a54c8b07f85ac4d795678486",
+              "test_guard.py": "bd7603986f0391dab05a042d47ec97ad3289cbcdebe629043461909395c77ad2",
+              "test_local_browser_login.py": "e9d02ba1eb3529f2ec5d018226d1d8751857346c792d9d544acbc9cf1d9cd17d",
+              "test_pipeline.py": "5b93ae81f33e79073f2dae608a92324c031fa0eab8003b0b37d5230739cf44f2",
+              "test_recovery_verification.py": "a8b9dd2040f2e1ef5b2e3311052594fa4b3ef22ab93c7434a725b66eacb6d572",
+              "test_run_experiment.py": "2230b9405ace4e11fde2d0090b265f37c60cf7867f81c7463f12c6faadca5f70"
+            },
+            "app_sha": "1b6d818cd01f382ba1f6a00699a6c84e6a421ab6",
+            "images": [
+              "ai sha256:c7193c36851d5969bd398d924e37ac56019e74bf8af393635afca0465285b23d",
+              "backend sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+              "db sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+              "fluent-bit sha256:4d5e3b6bfd717447687eb8bb09ec57edfebd66344c12e343f97686dd4b2574e4",
+              "frontend sha256:ed63476f53bcb52444d51ca44ca6327b2ac99ef11919c83241afcb754dc87a71",
+              "juiceshop sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+              "kafka sha256:06e5d17d6c5163f3084ffb3c0a5f7f87ba87f35cc4739b598500b3db45dce35b",
+              "waf sha256:88c42590d8242eb48f53af309013642793152d4a5e4a16f8a74c2bcc9c840a1b",
+              "zookeeper sha256:3ace7c3475a58afa128d0ee05bb9a06474b99b48c9d536c33144133637786f7f"
+            ],
+            "target_url": "https://security-juiceshop-kw.duckdns.org/",
+            "dashboard_url": "https://security-monitor-kw.duckdns.org/",
+            "versions": {
+              "python": "3.12.7",
+              "playwright": "1.64.1",
+              "k6": "k6.exe v2.3.0 (commit/e088784614, go1.26.8, windows/amd64)",
+              "browser": "157.0.8103.39"
+            }
+          },
+          "sha256": {
+            "manifest.json": "45d56039dc1b7d64544e518701ab4b1190c675f33b9bdc0b4b171f37ec3489e7",
+            "metrics.json": "46e9406cafadf539be852de80e730f019d952a0e68e317a785d6539191acfa80"
+          }
+        }
+      ],
+      "latency": {
+        "ai_server": {
+          "count": 1080,
+          "avg_ms": 228.94879160103974,
+          "p50_ms": 174.26514625549316,
+          "p95_ms": 649.1003870964049,
+          "p99_ms": 1044.7212195396426,
+          "max_ms": 1177.2818565368652
+        },
+        "waf_server": {
+          "count": 12,
+          "avg_ms": 209.30200815200806,
+          "p50_ms": 215.67904949188232,
+          "p95_ms": 338.620090484619,
+          "p99_ms": 398.47295761108404,
+          "max_ms": 413.4361743927002
+        },
+        "log_ingest": {
+          "count": 1080,
+          "avg_ms": 104.29798077653956,
+          "p50_ms": 98.1760025024414,
+          "p95_ms": 180.70946931838986,
+          "p99_ms": 311.8504786491394,
+          "max_ms": 502.9428005218506
+        },
+        "ai_segment": {
+          "count": 1080,
+          "avg_ms": 124.65081082450018,
+          "p50_ms": 69.46945190429688,
+          "p95_ms": 500.60929059982294,
+          "p99_ms": 822.6978540420535,
+          "max_ms": 950.8500099182129
+        },
+        "http": {
+          "count": 1068,
+          "avg_ms": 18.132522846441947,
+          "p50_ms": 15.492750000000001,
+          "p95_ms": 36.621424999999995,
+          "p99_ms": 59.18971199999998,
+          "max_ms": 178.9527
+        },
+        "AI_dom": {
+          "count": 12,
+          "avg_ms": 674.4787500003137,
+          "p50_ms": 588.2198500003142,
+          "p95_ms": 957.9155200007335,
+          "p99_ms": 988.8183040013064,
+          "max_ms": 996.5440000014496
+        },
+        "WAF_dom": {
+          "count": 12,
+          "avg_ms": 327.0188416668134,
+          "p50_ms": 302.5677000005089,
+          "p95_ms": 521.2141800006066,
+          "p99_ms": 524.1412360003596,
+          "max_ms": 524.8730000002979
+        }
+      }
+    }
+  },
+  "controller": {
+    "state": "COMPLETED",
+    "outcome": "NO_KNEE_IN_REQUESTED_STEPS",
+    "error": null,
+    "run_ids": [
+      "20261108T120533+0900-ec2-step-rps7-r01",
+      "20261108T121152+0900-ec2-step-rps9-r01"
+    ],
+    "results": [
+      {
+        "rate": 7,
+        "run_id": "20261108T120533+0900-ec2-step-rps7-r01",
+        "verdict": "PASS",
+        "reasons": [
+          "확정 EC2 서버 지연·정합성·알림·적체 해소 기준 충족"
+        ],
+        "cleanup_ok": true,
+        "configuration_restored": true,
+        "final_drain_seconds": 36.1760865999986,
+        "knee": false,
+        "knee_status": "EVALUATED",
+        "knee_reasons": [
+          "한계 신호 없음"
+        ],
+        "input_eps": 6.683,
+        "completion_eps": 6.756,
+        "completion_ratio": 1.011,
+        "pending_slope_per_second": 0.038,
+        "pending_max": 24,
+        "server_p95_ms": 408.0,
+        "backlog_clear_seconds_after_send": 15.2
+      },
+      {
+        "rate": 9,
+        "run_id": "20261108T121152+0900-ec2-step-rps9-r01",
+        "verdict": "PASS",
+        "reasons": [
+          "확정 EC2 서버 지연·정합성·알림·적체 해소 기준 충족"
+        ],
+        "cleanup_ok": true,
+        "configuration_restored": true,
+        "final_drain_seconds": 23.04858360000071,
+        "knee": false,
+        "knee_status": "EVALUATED",
+        "knee_reasons": [
+          "한계 신호 없음"
+        ],
+        "input_eps": 8.456,
+        "completion_eps": 8.592,
+        "completion_ratio": 1.016,
+        "pending_slope_per_second": -0.002,
+        "pending_max": 25,
+        "server_p95_ms": 649.1,
+        "backlog_clear_seconds_after_send": 15.7
+      }
+    ],
+    "samples": [
+      {
+        "at": "2026-11-08T03:04:36.457670+00:00",
+        "action": "baseline",
+        "confirmed": true,
+        "wakeup_flags": {
+          "APP_AIOUTBOX_WAKEUPENABLED": "true",
+          "APP_ALERTS_WAKEUPENABLED": "true"
+        },
+        "poll_ms": 250,
+        "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+        "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+        "backend_started_at": "2026-11-08T02:07:03.391647186Z",
+        "backend_restart_count": 0,
+        "backend_recreated": false,
+        "health": "UP",
+        "frontend_auth_http": 401,
+        "frontend_restarted": false
+      },
+      {
+        "label": "external_rate",
+        "external_logs_per_second": 0.0,
+        "at": "2026-11-08T03:05:24.240578+00:00"
+      },
+      {
+        "at": "2026-11-08T03:05:25.678572+00:00",
+        "action": "trial",
+        "confirmed": true,
+        "wakeup_flags": {
+          "APP_AIOUTBOX_WAKEUPENABLED": "true",
+          "APP_ALERTS_WAKEUPENABLED": "true"
+        },
+        "poll_ms": 250,
+        "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+        "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+        "backend_started_at": "2026-11-08T02:07:03.391647186Z",
+        "backend_restart_count": 0,
+        "backend_recreated": false,
+        "health": "UP",
+        "frontend_auth_http": 401,
+        "frontend_restarted": false,
+        "rate": 7,
+        "phase": "before"
+      },
+      {
+        "at": "2026-11-08T03:10:43.475236+00:00",
+        "action": "trial",
+        "confirmed": true,
+        "wakeup_flags": {
+          "APP_AIOUTBOX_WAKEUPENABLED": "true",
+          "APP_ALERTS_WAKEUPENABLED": "true"
+        },
+        "poll_ms": 250,
+        "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+        "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+        "backend_started_at": "2026-11-08T02:07:03.391647186Z",
+        "backend_restart_count": 0,
+        "backend_recreated": false,
+        "health": "UP",
+        "frontend_auth_http": 401,
+        "frontend_restarted": false,
+        "rate": 7,
+        "phase": "after"
+      },
+      {
+        "at": "2026-11-08T03:11:45.147102+00:00",
+        "action": "trial",
+        "confirmed": true,
+        "wakeup_flags": {
+          "APP_AIOUTBOX_WAKEUPENABLED": "true",
+          "APP_ALERTS_WAKEUPENABLED": "true"
+        },
+        "poll_ms": 250,
+        "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+        "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+        "backend_started_at": "2026-11-08T02:07:03.391647186Z",
+        "backend_restart_count": 0,
+        "backend_recreated": false,
+        "health": "UP",
+        "frontend_auth_http": 401,
+        "frontend_restarted": false,
+        "rate": 9,
+        "phase": "before"
+      },
+      {
+        "at": "2026-11-08T03:16:53.486275+00:00",
+        "action": "trial",
+        "confirmed": true,
+        "wakeup_flags": {
+          "APP_AIOUTBOX_WAKEUPENABLED": "true",
+          "APP_ALERTS_WAKEUPENABLED": "true"
+        },
+        "poll_ms": 250,
+        "backend_image_id": "sha256:83797518e72bad11ec2a17cbaafc1e484b743357aabd11ec8e559549e798b4be",
+        "other_env_sha256": "8fcbe07488950bcc655dbbea18452447b25ec846ab6e365e2e0baba5b35ceb37",
+        "backend_started_at": "2026-11-08T02:07:03.391647186Z",
+        "backend_restart_count": 0,
+        "backend_recreated": false,
+        "health": "UP",
+        "frontend_auth_http": 401,
+        "frontend_restarted": false,
+        "rate": 9,
+        "phase": "after"
+      }
+    ]
+  }
+}
