@@ -80,6 +80,18 @@ def build_row(path, query, body, D):
     }
 
 
+def unknown_param_names(path, query, body, D):
+    """build_row의 n_unknown_params가 센 파라미터 이름 (설명 표시용, 판정에는 쓰지 않음)."""
+    path = path or ""
+    names = ",".join(sorted({k for k, _ in parse_params(query, body)}))
+    if not names:
+        return []
+    if path not in D["path_params"]:
+        return names.split(",")
+    known = set(D["path_params"][path])
+    return [k for k in names.split(",") if k not in known]
+
+
 def to_vector(row):
     return np.array([[row[f] for f in FEATURES]], dtype=np.float32)
 

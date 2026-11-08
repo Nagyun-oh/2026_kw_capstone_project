@@ -83,6 +83,8 @@ function Dashboard({
 
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [selectedLog,setSelectedLog] = useState(null);
+  // 위협 탐지에서 연 로그면 AI 판정 근거를 함께 표시한다
+  const [selectedAiDescription, setSelectedAiDescription] = useState(null);
   const [isLogLoading,setIsLogLoading] = useState(false);
   const [logDetailError,setLogDetailError] = useState('');
   const [selectedWafThreatId, setSelectedWafThreatId] = useState(null);
@@ -102,8 +104,9 @@ function Dashboard({
   // 가장 최근 상세 조회 요청을 구분하는 번호
   const logRequestIdRef = useRef(0);
 
-  const handleViewLog = async logId => {
+  const handleViewLog = async (logId, aiDescription = null) => {
     setSelectedWafThreatId(null);
+    setSelectedAiDescription(aiDescription);
 
     // 새 요청마다 번호 증가
     const requestId = ++logRequestIdRef.current;
@@ -145,6 +148,7 @@ const handleCloseLogModal = () => {
 
   setIsLogModalOpen(false);
   setSelectedLog(null);
+  setSelectedAiDescription(null);
   setLogDetailError('');
 };
 
@@ -353,6 +357,7 @@ async function handleConfirmBlacklistRegister(request) {
       <LogDetailModal 
         isOpen={isLogModalOpen}
         log={selectedLog}
+        aiDescription={selectedAiDescription}
         loading={isLogLoading}
         error={logDetailError}
         onClose={handleCloseLogModal}

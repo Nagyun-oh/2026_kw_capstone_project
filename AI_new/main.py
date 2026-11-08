@@ -10,12 +10,13 @@ FastAPI Server for Real-Time Web Attack Detection (3-Model Soft-Voting Ensemble)
   - Spring → FastAPI (Request): method, url_path, query_params, body_content, user_agent,
     ip_address, timestamp, log_id
   - FastAPI → Spring (Response): threat_score, ip_address, reason, log_id
+    (+ decision_source, explanation — 판정 근거 설명용으로 추가한 필드. 기존 소비자는 무시해도 된다)
   - Kafka 토픽/컨슈머그룹: ai-request-topic / ai-result-topic / ai-service-group (변경 없음)
 
 ■ 실행 전제 조건:
   - models/model_bundle_tree_schema.pkl (트리 trial_36 + 스키마 trial_18 결합 배포 번들,
     build_ensemble_bundle.py 산출물. joblib(lzma) 압축, 단일 파일)
-  - models/transformer/model_bundle.pkl (트랜스포머, AI/08_export_model_bundle.py 산출물)
+  - models/transformer/model_bundle.pkl (트랜스포머, 저장소 외부 학습 파이프라인의 08_export_model_bundle.py 산출물)
   - models/attack_taxonomy.json         (트랜스포머 XAI용 공격 분류표)
 
 ■ 왜 트랜스포머는 트리/스키마와 한 파일로 합치지 않았나:
@@ -74,6 +75,7 @@ AI_CONSUMER_GROUP = "ai-service-group"
 # AI 내부 로직 — 여기서부터 3모델 앙상블로 교체됨
 from features_v2 import FEATURES, CATEGORICAL, build_feature_row, rule_hits, explain
 import schema_expert as se
+from ensemble_explainer import EnsembleExplainer
 from security_ai.serving.predictor import ModelRuntime
 from security_ai.serving.schemas import PredictRequest
 
@@ -109,6 +111,7 @@ tree_vocab = None
 schema_model = None
 schema_dict = None
 transformer_runtime: ModelRuntime | None = None
+explainer: EnsembleExplainer | None = None   # 판정 근거 분해. 준비 실패 시 None → 기존 reason 사용
 models_ready = False
 
 
@@ -127,7 +130,9 @@ class ThreatResponse(BaseModel):
     log_id: int | None = None  # 추가된 데이터 컬럼 (Spring <-> Kafka <-> AI Server 통신을 위해 필요함)
     threat_score: float   # 3모델 소프트보팅 결합 확률 (0.0 ~ 1.0)
     ip_address:   str     # 공격이면 실제 IP, 정상이면 "0.0.0.0"
-    reason:       str     # 왜 위협인지 (정상이면 "-")
+    reason:       str     # 왜 위협인지 (정상이면 "-"). 공격이면 "[규칙] …" 또는 "[모델] 피처 +기여 …"
+    decision_source: str | None = None  # "rule"(규칙 게이트만) / "model"(3모델 점수가 임계값 이상, 규칙이 함께 걸려도 포함), 정상이면 null
+    explanation: dict | None = None     # 판정 근거 분해 (ensemble_explainer.py), 정상·설명 실패면 null
 
 
 # ─────────────────────────────────────────────────────────
@@ -203,7 +208,7 @@ def soft_vote(probas, weights):
 
 @app.on_event("startup")
 def load_model() -> None:
-    global tree_model, tree_vocab, schema_model, schema_dict, transformer_runtime, models_ready
+    global tree_model, tree_vocab, schema_model, schema_dict, transformer_runtime, explainer, models_ready
 
     missing = [p for p in (TREE_SCHEMA_BUNDLE_PATH, TRANSFORMER_BUNDLE_PATH,
                             TRANSFORMER_MANIFEST_PATH, TRANSFORMER_TAXONOMY_PATH) if not p.exists()]
@@ -240,6 +245,23 @@ def load_model() -> None:
         if bundled_weights != expected or bundled_threshold != ENSEMBLE_THRESHOLD:
             print(f"[AI][경고] 번들 내 앙상블 메타데이터가 main.py 상수와 다름! "
                   f"번들={bundled_weights}/{bundled_threshold} vs 코드={expected}/{ENSEMBLE_THRESHOLD}")
+
+    # 판정 근거 분해기 (TreeSHAP). '기준값 + SHAP 합 = 모델 로짓'이 맞지 않으면(shap·sklearn 버전
+    # 불일치 등) 틀린 설명을 내보내지 않도록 끄고 기존 reason을 쓴다. 판정에는 영향이 없다.
+    try:
+        explainer = EnsembleExplainer(tree_model, schema_model, schema_dict,
+                                      ENSEMBLE_WEIGHTS, ENSEMBLE_THRESHOLD)
+        ok, gap = explainer.check_additivity(
+            tree_to_vector(build_feature_row("GET", "/", "", "", "")),
+            se.to_vector(se.build_row("/", "", "", schema_dict)))
+        if ok:
+            print(f"[AI] 판정 설명(TreeSHAP) 준비 완료 | 가법성 오차={gap:.1e}")
+        else:
+            explainer = None
+            print(f"[AI][경고] SHAP 합이 모델 출력과 다름(오차={gap:.1e}) — 판정 설명을 끄고 기존 reason 사용")
+    except Exception as e:
+        explainer = None
+        print(f"[AI][경고] 판정 설명 준비 실패 — 기존 reason 사용: {e}")
 
     manifest = json.loads(TRANSFORMER_MANIFEST_PATH.read_text(encoding="utf-8"))
     transformer_runtime = ModelRuntime(
@@ -315,10 +337,12 @@ def run_predict(req: HttpRequest) -> ThreatResponse:
     # (스키마 모델은 애초에 하나의 고정 조건으로만 학습돼서 이 문제가 없다 -- 아래 그대로 유지.)
     tree_row = build_feature_row(req.method, req.url_path, req.query_params,
                                   "", req.user_agent)
-    tree_p = float(tree_model.predict_proba(tree_to_vector(tree_row))[0][1])
+    tree_x = tree_to_vector(tree_row)
+    tree_p = float(tree_model.predict_proba(tree_x)[0][1])
 
     schema_row = se.build_row(req.url_path, req.query_params, req.body_content, schema_dict)
-    schema_p = float(schema_model.predict_proba(se.to_vector(schema_row))[0][1])
+    schema_x = se.to_vector(schema_row)
+    schema_p = float(schema_model.predict_proba(schema_x)[0][1])
 
     # ModelRuntime.predict()를 통해서 호출한다 -- 내부적으로 self._lock(RLock)으로 감싸고
     # 점수 유효성(0<=score<=1, finite)까지 검증한다. explainer.score()를 직접 부르면 이
@@ -341,11 +365,26 @@ def run_predict(req: HttpRequest) -> ThreatResponse:
         score = combined
         reason = "-"
 
+    # 3단계 — 공격 판정의 근거 분해 (판정과 점수는 위에서 끝났고 여기서 바꾸지 않는다).
+    # 설명이 실패해도 탐지 결과는 보내야 하므로 위에서 만든 기존 reason으로 대체한다.
+    decision_source, explanation = None, None
+    if is_attack:
+        decision_source = "rule" if hits else "model"
+        if explainer is not None:
+            try:
+                decision_source, reason, explanation = explainer.explain(
+                    req, tree_row, tree_x, schema_row, schema_x,
+                    [transformer_p, tree_p, schema_p], hits)
+            except Exception as e:
+                print(f"[AI][경고] log_id={req.log_id} 판정 설명 실패, 기존 reason 사용: {e}")
+
     return ThreatResponse(
         log_id=req.log_id,
         threat_score=round(score, 4),
         ip_address=req.ip_address if is_attack else "0.0.0.0",
         reason=reason,
+        decision_source=decision_source,
+        explanation=explanation,
     )
 
 
