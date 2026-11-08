@@ -297,6 +297,7 @@ nano .env.aws
 | APP_ALERTS_POLLDELAYMS | 요청 알림 발행기의 DB 조회 대기 간격. AWS 기본값은 250ms이며, 값 변경 시 backend 컨테이너를 재생성한다 |
 | APP_AIOUTBOX_POLLDELAYMS | AI 요청 outbox 발행기의 DB 조회 대기 간격. AWS 기본값은 250ms(애플리케이션 기본 500ms)이며, 값 변경 시 backend 컨테이너를 재생성한다 |
 | APP_AIOUTBOX_WAKEUPENABLED / APP_ALERTS_WAKEUPENABLED | 선택. 기본 `true`. 저장 트랜잭션 커밋 직후 AI outbox·알림 발행기를 바로 실행한다. `compose.aws.yaml`이 두 값을 backend에 전달하므로, 문제가 있으면 `.env.aws`에서 `false`로 두고 backend 컨테이너를 재생성하면 주기 조회만 사용한다 |
+| AI_UVICORN_WORKERS | 선택. 기본 `2`. AI 컨테이너의 uvicorn 프로세스 수다. 프로세스마다 모델과 Kafka 소비자 1개를 띄우며 메모리를 약 630MiB씩 쓴다. `ai-request-topic`은 backend `AiRequestTopicConfig`가 파티션 2개로 선언해 두 소비자가 나눠 읽는다. 되돌리려면 `1`로 두고 ai 컨테이너를 재생성한다. 파티션은 줄일 수 없지만 소비자 하나가 두 파티션을 모두 읽으므로 동작에는 문제가 없다. AI 프로세스당 추론 스레드는 `OMP_NUM_THREADS=1`로 고정한다(트러블슈팅_8 2부) |
 
 CD가 사용하는 `IMAGE_REGISTRY_PREFIX`와 `IMAGE_TAG`가 이미 있으면 유지한다. JWT 키는 새 인증 구성에서 사용하지 않는다. 환경변수 파일에 비밀번호를 넣을 때는 따옴표로 감싸 Compose의 값 해석을 확인하고, 실제 값을 명령 인자·로그·Git에 남기지 않는다.
 
@@ -521,7 +522,7 @@ sudo docker compose --env-file .env.aws -f compose.aws.yaml images
 sudo docker compose --env-file .env.aws -f compose.aws.yaml ps -a
 ```
 
-CD는 `git fetch --quiet origin main`으로 코드를 가져와 배포 SHA로 `checkout --detach`한 뒤, 새 이미지를 pull하고 컨테이너를 재생성하며 `.env.aws`의 `IMAGE_*` 값을 갱신한다. EC2의 detached HEAD는 정상적인 배포 상태이며, Actions 배포 전에 SSH에서 별도로 `git pull`할 필요는 없다. `compose up -d`는 이미지가 같아도 Compose 설정(환경변수, 볼륨, healthcheck 등)이 바뀐 서비스를 재생성한다. 예를 들어 Kafka healthcheck 간격을 바꾼 배포에서는 Kafka 컨테이너가 한 번 재시작된다. 데이터는 `kafka-data` 볼륨에 남고, backend·ai·fluent-bit은 Kafka가 다시 healthy가 될 때까지 기동을 기다린다. 이미지에 포함되는 `frontend/nginx.conf`는 호스트 파일 편집이나 컨테이너 `restart`만으로 교체되지 않는다. 환경변수 변경도 재생성이 필요하다. 호스트 Nginx 설정은 2절처럼 별도로 검사·reload한다.
+CD는 `git fetch --quiet origin main`으로 코드를 가져와 배포 SHA로 `checkout --detach`한 뒤, 새 이미지를 pull하고 컨테이너를 재생성하며 `.env.aws`의 `IMAGE_*` 값을 갱신한다. EC2의 detached HEAD는 정상적인 배포 상태이며, Actions 배포 전에 SSH에서 별도로 `git pull`할 필요는 없다. `compose up -d`는 이미지가 같아도 Compose 설정(환경변수, 볼륨, healthcheck 등)이 바뀐 서비스를 재생성한다. 예를 들어 Kafka healthcheck 간격을 바꾼 배포에서는 Kafka 컨테이너가 한 번 재시작된다. 데이터는 `kafka-data` 볼륨에 남고, backend·ai·fluent-bit은 Kafka가 다시 healthy가 될 때까지 기동을 기다린다. `ai-request-topic` 파티션을 1개에서 2개로 늘리는 첫 배포에서는 backend가 기동할 때 KafkaAdmin이 파티션을 추가한다. 그 전에 기동한 AI 소비자는 메타데이터 갱신 주기(kafka-python 기본 5분) 안에 재조정되어 두 파티션을 나눠 받는다. 측정 전에는 `ai-service-group`에 파티션 2개가 서로 다른 소비자로 배정됐는지 확인한다. 이미지에 포함되는 `frontend/nginx.conf`는 호스트 파일 편집이나 컨테이너 `restart`만으로 교체되지 않는다. 환경변수 변경도 재생성이 필요하다. 호스트 Nginx 설정은 2절처럼 별도로 검사·reload한다.
 
 ### 수동 복구와 롤백
 

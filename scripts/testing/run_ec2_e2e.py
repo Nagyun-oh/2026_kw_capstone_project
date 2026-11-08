@@ -10,11 +10,11 @@ import sys
 import time
 import urllib.error
 
-from ec2_load_policy import load_contract,selected_contract,assess,summarize_stage
+from ec2_load_policy import load_contract,selected_contract,assess,summarize_stage,knee_signals
 from ec2_login import read_credentials,login_ec2
 from ec2_watch import Ec2Guard,epoch_ms,load_observation_policy
 from ec2_db import SSHDatabase
-from e2e_core import fixture,client_record,epoch,ClockObservationError
+from e2e_core import fixture,client_record,epoch,ClockObservationError,parse_points
 from e2e_environment import select_environment
 from e2e_remote import SSHSettings,SSHCollection
 from guard import stop_load
@@ -75,9 +75,12 @@ class EC2Experiment(Experiment):
         self.cleanup_ok=False
         self.load_started=False
         self.drain_elapsed=None
+        self.log_id_floor=None
         # 계약 개정 3: 부하 중 lag 조회는 이 간격마다만 실행하고, 적체 해소 확인(drain)에서는 매번 실행한다.
         self.lag_interval=contract['workload']['lag_measurement_interval_seconds']
         self.force_lag=False
+        # 계약 개정 4: 단계 모드는 포화 뒤 적체가 길 수 있어 원복 전 처리 정리 확인만 더 기다린다.
+        self.recovery_drain_seconds=spec['workload']['recovery_drain_seconds']
         self.last_lag_at=None
 
     async def send_probe(self,phase,sequence):
@@ -87,6 +90,25 @@ class EC2Experiment(Experiment):
             if not await self.refresh_clock_observation():
                 raise
             return client_record(**error.observation,clock=self.clock_calibration)
+
+    async def read_client_points(self,points,*,partial=False):
+        # 계약 개정 6: k6 일반 요청의 교차 시계 구간 이탈은 중단하지 않고 요청 기록(clock_window)에 남긴다.
+        # 새 이탈이 보이면 드리프트 대응으로 기존 재보정을 먼저 시도한다(단계당 3회·300초 기한·불연속 중단 유지).
+        # probe(파이썬 정밀 시각)와 보정 만료는 지금처럼 중단한다. 서버 지연은 서버 시계만 쓰므로 영향이 없다.
+        if self.contract['clock_policy'].get('k6_background_window_mismatch')!='diagnostic':
+            return await super().read_client_points(points,partial=partial)
+        def parse():
+            return parse_points(points,partial=partial,clock=self.clock_calibration,background_window_mismatch='record')
+        try:
+            rows=parse()
+        except ClockObservationError:
+            if not await self.refresh_clock_observation():
+                raise
+            return parse()
+        fresh=[r for r in rows if r.get('clock_window') and (r['phase'],r['kind'],r['sequence']) not in self.seen_clients]
+        if fresh and await self.refresh_clock_observation():
+            rows=parse()
+        return rows
 
     async def refresh_clock_observation(self):
         count=getattr(self,'clock_observation_rechecks',0)
@@ -131,13 +153,21 @@ class EC2Experiment(Experiment):
     def should_collect_lag(self):
         if self.force_lag or not self.keys or self.last_lag_at is None:
             return True
+        # 계약 개정 5: 간격이 null이면 부하 중에는 조회하지 않는다(해소 확인의 강제 조회만).
+        if self.lag_interval is None:
+            return False
         return time.perf_counter()-self.last_lag_at>=self.lag_interval
 
     async def collect(self):
         async with self.collection_lock:
-            snap=await super().collect()
-            if snap is not None:
-                self.last_lag_at=time.perf_counter()
+            self.lag_requested=False
+            try:
+                snap=await super().collect()
+            finally:
+                # lag 조회를 요청한 수집이면 성공·실패와 관계없이 그 시각을 기록한다. 실패한 수집 직후
+                # 다음 표본이 CLI를 다시 실행해 부하 중 CLI가 겹치던 문제(2026/11/08 13 RPS)를 막는다.
+                if self.lag_requested:
+                    self.last_lag_at=time.perf_counter()
             completed={t['requestId'] for t in self.traces if t['stage']=='AI_RESULT_COMMITTED'}
             pending=[c for c in self.clients if c['requestId'] not in completed]
             oldest=max(((epoch_ms()-c['sent_ms'])/1000 for c in pending),default=0)
@@ -157,17 +187,17 @@ class EC2Experiment(Experiment):
             except asyncio.TimeoutError:
                 pass
 
-    async def drain(self,*,recovery=False):
+    async def drain(self,*,recovery=False,limit=60):
         self.force_lag=True
         try:
-            return await self._drain(recovery=recovery)
+            return await self._drain(recovery=recovery,limit=limit)
         finally:
             self.force_lag=False
 
-    async def _drain(self,*,recovery=False):
+    async def _drain(self,*,recovery=False,limit=60):
         started=time.perf_counter()
         zeros=0
-        while time.perf_counter()-started<60:
+        while time.perf_counter()-started<limit:
             if not recovery: self.check_abort()
             snap=await self.collect()
             ids={c['requestId'] for c in self.clients}
@@ -178,8 +208,8 @@ class EC2Experiment(Experiment):
             visible=all((alerts.get(r),s) in seen for r in probe_ids for s in ('AI','WAF'))
             zeros=zeros+1 if zero_lag(snap,self.keys) and ids<=completed and visible else 0
             self.drain_elapsed=time.perf_counter()-started
-            if zeros>=2 and self.drain_elapsed<=60: return True
-            if 60-self.drain_elapsed<10: break
+            if zeros>=2 and self.drain_elapsed<=limit: return True
+            if limit-self.drain_elapsed<10: break
             await asyncio.sleep(10)
         return False
 
@@ -223,7 +253,7 @@ class EC2Experiment(Experiment):
         self.setup.page=self.page
         if self.clients and not self.final_lag:
             # 뒤늦은 결과가 IP를 재등록할 수 있어 처리 정리 확인을 먼저 한다.
-            if not self.page or not await self.drain(recovery=True):
+            if not self.page or not await self.drain(recovery=True,limit=self.recovery_drain_seconds):
                 raise RuntimeError('RESTORE_HELD_PROCESSING_NOT_DRAINED')
         await self.setup.cleanup(allowed_request_ids={c['requestId'] for c in self.clients})
         self.cleanup_ok=True
@@ -261,6 +291,8 @@ class EC2Experiment(Experiment):
         self.record_remote_collection(before)
         self.keys=partition_keys(before['lag'])
         if not zero_lag(before['lag'],self.keys) or before['database']: raise RuntimeError('INITIAL_LAG_OR_RUN_COLLISION')
+        # 회차 시작 전 최대 로그 id. 이후 DB 수집은 이보다 큰 id만 읽는다(전체 JSON 스캔 제거, 시각 비의존).
+        self.log_id_floor=self.manifest['log_id_floor']=before['log_id_floor']
         self.manifest['app_sha']=before['app_sha']
         self.manifest['images']=sorted(r['service']+' '+r['image_id'] for r in before['resources']['states'])
         self.manifest['versions']=dict(python=sys.version.split()[0],playwright=version('playwright'),
@@ -313,7 +345,8 @@ class EC2Experiment(Experiment):
                 await self.database_observation('after')
                 await self.table_check()
                 after=await asyncio.to_thread(self.remote_collector.collect,self.manifest['id'],self.manifest['started_at'],
-                    [c['requestId'] for c in self.clients],mode='check',expected_keys=self.keys)
+                    [c['requestId'] for c in self.clients],mode='check',expected_keys=self.keys,
+                    log_id_floor=self.log_id_floor)
                 save(self.output/'remote-after-measurement.json',after)
                 self.record_remote_collection(after)
                 images=sorted(r['service']+' '+r['image_id'] for r in after['resources']['states'])
@@ -334,7 +367,8 @@ class EC2Experiment(Experiment):
 
 
 def report(m,r):
-    lines=[f"# 실험 기록: {format_record_time(m['planned_at']).split()[0]} — EC2 {'예비 측정' if m['mode']=='pilot' else '기준 측정'}",'',
+    title={'pilot':'예비 측정','step':'단계 부하'}.get(m['mode'],'기준 측정')
+    lines=[f"# 실험 기록: {format_record_time(m['planned_at']).split()[0]} — EC2 {title}",'',
         '[EC2 목차](../README.md) · [P8](../P8.md)','', '## 실행 정보',f"- ID: `{m['id']}`",
         f"- 실행 / 판정: {m['state']} / {r.get('verdict','NOT_EVALUATED')}",
         f"- 시작 / 종료: {format_record_time(m.get('started_at'))} / {format_record_time(m.get('ended_at'))}",
@@ -349,6 +383,12 @@ def report(m,r):
     def n(v): return '미측정' if v is None else str(round(v,3))
     for k,s in r.get('stats_ms',{}).items():
         lines.append('| '+' | '.join([k,str(s['count'])]+[n(s[t]) for t in ('avg_ms','p50_ms','p95_ms','p99_ms','max_ms')])+' |')
+    if r.get('knee_signals'):
+        lines += ['','- 한계 신호(단계 부하): '+json.dumps(r['knee_signals'],ensure_ascii=False)]
+    if r.get('clock_window_diagnostics'):
+        d=r['clock_window_diagnostics']
+        lines += ['',f"- 교차 시계 진단(k6 일반 요청, 중단하지 않음·서버 지연 판정과 무관): 구간 이탈 {d['outside']}건"
+                  f"(측정 {d['measurement_outside']}건), 최대 초과 {d['max_excess_ms']}ms"]
     lines += ['','- 입력·처리량: '+json.dumps(r.get('rates',{}),ensure_ascii=False),
         '- 정합성: '+json.dumps(r.get('counts',{}),ensure_ascii=False),
         *['- '+x for x in r.get('reasons',[])],
@@ -364,8 +404,9 @@ def main(argv=None, *, prepared_credentials=None):
     mode=p.add_mutually_exclusive_group(required=True)
     mode.add_argument('--dry-run',action='store_true')
     mode.add_argument('--execute',action='store_true')
-    p.add_argument('--mode',choices=('pilot','formal'),default='pilot')
-    p.add_argument('--rate',type=int,choices=(1,3,5),default=1)
+    p.add_argument('--mode',choices=('pilot','formal','step'),default='pilot')
+    # 허용 RPS는 계약에서 검증한다: pilot 1, formal 1·3·5, step 7·9·11·13(개정 4).
+    p.add_argument('--rate',type=int,default=1)
     p.add_argument('--round',type=int,default=1)
     p.add_argument('--ssh-host')
     p.add_argument('--identity-file',type=Path)
@@ -374,9 +415,12 @@ def main(argv=None, *, prepared_credentials=None):
     a=p.parse_args(argv)
     if not 1<=a.round<=99: p.error('회차는 1~99입니다.')
     contract,digest=load_contract()
-    spec=selected_contract(contract,a.mode,a.rate)
+    try:
+        spec=selected_contract(contract,a.mode,a.rate)
+    except ValueError:
+        p.error('계약에 없는 모드·RPS 조합입니다. pilot 1, formal 1·3·5, step 7·9·11·13만 허용합니다.')
     a.runtime_environment=select_environment('ec2')
-    scenario='ec2-pilot' if a.mode=='pilot' else f'ec2-e2e-rps{a.rate}'
+    scenario={'pilot':'ec2-pilot','step':f'ec2-step-rps{a.rate}'}.get(a.mode,f'ec2-e2e-rps{a.rate}')
     rid=datetime.now(KST).strftime('%Y%m%dT%H%M%S%z')+f'-{scenario}-r{a.round:02d}'
     probe,fixture_hash=fixture()
     m=dict(id=rid,schema='ec2-e2e-v1',environment='ec2',mode=a.mode,planned_at=now(),state='PLANNED',
@@ -418,6 +462,23 @@ def main(argv=None, *, prepared_credentials=None):
             if not experiment.restored and r['verdict']=='PASS':
                 r.update(verdict='INCONCLUSIVE',reasons=['원복 미확인'])
             r.update(resource_peaks=resource_peaks(experiment.resources),lag_maxima=lag_maxima(experiment.snapshots),guard=experiment.guard.summary())
+            # 계약 개정 6: k6 일반 요청의 교차 시계 구간 이탈을 숨기지 않고 건수·최대 초과량으로 남긴다.
+            outside=[c for c in experiment.clients if c.get('clock_window')]
+            r['clock_window_diagnostics']=dict(policy=contract['clock_policy'].get('k6_background_window_mismatch','abort'),
+                outside=len(outside),measurement_outside=sum(1 for c in outside if c['phase']=='measurement'),
+                max_excess_ms=max((c['clock_window']['excess_ms'] for c in outside),default=None),
+                samples=[dict(phase=c['phase'],sequence=c['sequence'],excess_ms=c['clock_window']['excess_ms'])
+                         for c in outside[:20]])
+            if a.mode=='step':
+                # 계약 개정 4: 송신 구간의 처리 완료 비율·미처리 기울기·서버 p95·해소 시간으로 한계 신호를 기록한다.
+                try:
+                    progress=output/'progress.jsonl'
+                    rows=[json.loads(line) for line in progress.read_text(encoding='utf-8').splitlines() if line.strip()] if progress.exists() else []
+                    r['knee_signals']=knee_signals(rows,rate=a.rate,expected=m['expected_measurement_requests'],
+                        stats_ms=r.get('stats_ms'),drain_seconds=experiment.drain_elapsed if experiment.final_lag else None,
+                        criteria=contract['knee_criteria'])
+                except (OSError,ValueError,KeyError,TypeError) as error:
+                    r['knee_signals']=dict(status='ERROR',error=type(error).__name__)
         else:
             m.update(state='BLOCKED',ended_at=now(),cleanup_ok=False,configuration_restored=False)
             r=dict(verdict='INCONCLUSIVE',reasons=['숨김 입력 또는 실행 준비 미완료'])

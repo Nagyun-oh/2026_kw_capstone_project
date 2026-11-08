@@ -204,9 +204,12 @@ class Experiment:
         if self.environment.name == 'ec2':
             if self.remote_collector is None:
                 raise RuntimeError('원격 수집 어댑터 설정이 필요합니다.')
+            # 이번 수집에서 lag 조회를 요청했는지 남긴다. 수집이 실패해도 EC2 실행기가 조회 주기를 지키는 데 쓴다.
+            include_lag = self.lag_requested = self.should_collect_lag()
             value = await asyncio.to_thread(self.remote_collector.collect, self.manifest['id'],
                 self.manifest['started_at'], {c['requestId'] for c in self.clients},
-                mode='pipeline', expected_keys=self.keys, include_lag=self.should_collect_lag())
+                mode='pipeline', expected_keys=self.keys, include_lag=include_lag,
+                log_id_floor=getattr(self, 'log_id_floor', None))
             self.record_remote_collection(value)
             return value['lag'], value['database'], value['traces']
         started = now()

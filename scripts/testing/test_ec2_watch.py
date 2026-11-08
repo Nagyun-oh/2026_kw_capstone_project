@@ -9,9 +9,9 @@ import time
 import unittest
 from unittest.mock import Mock,patch
 
-from ec2_watch import (Ec2Guard,WatchSession,calibrate,cpu_percent,ingress_in_clock_interval,
+from ec2_watch import (Ec2Guard,WatchSession,calibrate,clock_window_excess,cpu_percent,ingress_in_clock_interval,
                        load_observation_policy,epoch_ms)
-from e2e_core import client_record
+from e2e_core import ClockObservationError,client_record
 from e2e_remote import SSHSettings
 from run_ec2_watch import main
 
@@ -94,6 +94,35 @@ class ClockTests(unittest.TestCase):
         with self.assertRaises(ValueError): client_record(*args)
         with patch('ec2_watch.time.perf_counter',return_value=2):
             self.assertEqual(client_record(*args,clock=clock)['requestId'],'a'*32)
+
+    def test_window_excess_is_signed_distance_and_none_when_unjudgeable(self):
+        clock=calibrate([exchange()]*3)
+        self.assertLessEqual(clock_window_excess(1355,1000,1012,clock,monotonic=2),0)
+        self.assertAlmostEqual(clock_window_excess(2000,1000,1012,clock,monotonic=2),
+                               2000-(1012+clock['offset_upper_ms']))
+        self.assertIsNone(clock_window_excess(1355,1000,1012,clock,monotonic=302,max_age=300))
+        self.assertIsNone(clock_window_excess(float('nan'),1000,1012,clock,monotonic=2))
+
+    def test_contract_6_records_only_background_window_mismatch(self):
+        # 2026/11/08 11 RPS r03: k6 일반 요청 2건이 0.2~1.9ms 구간을 벗어나 회차 전체가 중단됐다.
+        clock=calibrate([exchange()]*3)
+        late={'x-request-id':'a'*32,'x-dualguard-request-start':'1.400'}  # 응답 수신(+오프셋 상한)보다 늦음
+        args=('measurement','background',7,late,200,12,1000,1012)
+        with patch('ec2_watch.time.perf_counter',return_value=2):
+            with self.assertRaises(ClockObservationError): client_record(*args,clock=clock)
+            row=client_record(*args,clock=clock,background_window_mismatch='record')
+            self.assertEqual(row['clock_window']['status'],'OUTSIDE')
+            self.assertGreater(row['clock_window']['excess_ms'],0)
+            inside=client_record('measurement','background',8,{'x-request-id':'b'*32,'x-dualguard-request-start':'1.355'},
+                                 200,12,1000,1012,clock=clock,background_window_mismatch='record')
+            self.assertNotIn('clock_window',inside)
+            with self.assertRaises(ClockObservationError):  # probe는 계속 엄격
+                client_record('measurement','probe',1,late,200,12,1000,1012,clock=clock,background_window_mismatch='record')
+            with self.assertRaises(ValueError):
+                client_record(*args,clock=clock,background_window_mismatch='ignore')
+        with patch('ec2_watch.time.perf_counter',return_value=400):  # 보정 만료는 기록 대상이 아니다
+            with self.assertRaises(ClockObservationError):
+                client_record(*args,clock=clock,background_window_mismatch='record')
 
     def test_cpu_uses_deltas_and_linux_steal_is_separate(self):
         self.assertEqual(cpu_percent(dict(total=10,idle=5),dict(total=30,idle=10))['busy_percent'],75)
