@@ -1,8 +1,8 @@
 # 로컬 Docker Compose 실행 및 배포 준비
 
-이 문서는 루트 [compose.yaml](../compose.yaml)의 현재 구성을 기준으로 작성했다. 모든 PowerShell 명령은 저장소 루트에서 실행한다. 실제 비밀번호, JWT 키, 개인별 볼륨 이름은 문서에 기록하지 않는다.
+이 문서는 루트 [compose.yaml](../../compose.yaml)의 현재 구성을 기준으로 작성했다. 모든 PowerShell 명령은 저장소 루트에서 실행한다. 실제 비밀번호, JWT 키, 개인별 볼륨 이름은 문서에 기록하지 않는다.
 
-AWS에서는 별도 [AWS EC2 배포 및 운영 문서](06_aws_deployment.md)와 `compose.aws.yaml`을 사용한다. 아래 검증 기록은 로컬 전환 당시의 기록이며 AWS 최신 결과와 구분한다.
+AWS에서는 별도 [AWS EC2 배포 및 운영 문서](aws_deployment.md)와 `compose.aws.yaml`을 사용한다. 아래 검증 기록은 로컬 전환 당시의 기록이며 AWS 최신 결과와 구분한다.
 
 ## 1. 적용 범위
 
@@ -322,7 +322,7 @@ docker compose --env-file .env -f compose.yaml up -d backend
 
 ### AI `KeyError: 'url_path'`, `'url_len'`
 
-> 저장소에서 제거된 이전 `AI/`(단일 모델) 기준 사례다. 현재 배포 대상인 `AI_new/`에는 해당하지 않는다. 당시 모델 기록은 [docs/archive/ai-v1](archive/ai-v1/)에 있다.
+> 저장소에서 제거된 이전 `AI/`(단일 모델) 기준 사례다. 현재 배포 대상인 `AI_new/`에는 해당하지 않는다. 당시 모델 기록은 [docs/archive/ai-v1](../archive/ai-v1/)에 있다.
 
 모델 로딩 성공 이후 피처 생성 단계에서 실패한 사례다. 현재 번들의 `features`는 23개이며 인코더는 `method`, `user_agent`, `url_path`, `file_extension`이다. `build_feature_row()`에서 일부 항목이 주석 처리돼 후속 인코딩·피처 선택 과정에서 키를 찾지 못했다.
 
@@ -365,7 +365,7 @@ docker exec security-ai-local python -c "import joblib; b=joblib.load('/app/mode
 | MySQL 경로 수정 후 백엔드 health | `UP` 확인 |
 | AI 피처 누락 수정 후 대시보드 | 원본 로그와 연결된 AI 탐지·블랙리스트 표시 및 사용자 동작 확인 |
 | 최종 수정 후 전체 중지·시작 및 기존 ID·새 요청 검증 | 절차 안내 완료, 최종 결과 기록 필요 |
-| AWS 배포 | 이 로컬 기록 시점에는 미진행. 이후 결과는 [AWS 문서](06_aws_deployment.md) 참고 |
+| AWS 배포 | 이 로컬 기록 시점에는 미진행. 이후 결과는 [AWS 문서](aws_deployment.md) 참고 |
 
 - Fluent Bit 읽기 위치(`access.db`, `audit.db`)와 버퍼는 `fluent-bit-state` 볼륨에 보존한다. 이 볼륨이 없던 이전 구성에서는 컨테이너가 재생성될 때마다 `Read_from_Head True`에 따라 `access.log` 전체가 다시 전송돼 로그·위협이 중복 저장됐다.
 - 볼륨을 처음 붙이는 기동(또는 `down -v`로 볼륨을 지운 뒤)은 상태가 비어 있어 기존 로그를 한 번 더 처음부터 보낸다. 백엔드에 중복 방지 키가 생기기 전까지는 아래 전환 절차로 기존 `access.log`를 먼저 보관한다.
@@ -378,13 +378,13 @@ docker exec security-ai-local python -c "import joblib; b=joblib.load('/app/mode
   ```
 
   `waf-audit.log`는 교체 대상이 아니므로 처음부터 다시 읽는다. 이 경로의 이벤트(`waf-detection-topic`)는 아직 저장하는 컨슈머가 없어 DB 중복은 생기지 않는다.
-- WAF는 `DetectionOnly`다. 공격 패턴은 탐지·기록만 하고, 블랙리스트 IP의 요청만 자동 동기화로 403 차단한다([waf/README.md](../waf/README.md#블랙리스트-자동-동기화)).
+- WAF는 `DetectionOnly`다. 공격 패턴은 탐지·기록만 하고, 블랙리스트 IP의 요청만 자동 동기화로 403 차단한다([waf/README.md](../../waf/README.md#블랙리스트-자동-동기화)).
 - AI 수정 사항이 로컬에만 남아 있으면 GitHub 코드로 같은 결과를 재현할 수 없다. 배포 전 팀원과 확인해 필요한 환경 변수 연결·피처 수정 사항을 반영한다.
 - Kafka는 단일 브로커·ZooKeeper 기반이다. KRaft 전환은 데이터 보존 여부와 업그레이드 경로를 정해 별도로 수행한다.
 
 ## 9. AWS 배포 전 준비
 
-아래는 로컬 전환 당시의 준비 목록이다. 실제 완료 상태와 남은 작업은 [AWS 문서](06_aws_deployment.md)를 기준으로 확인한다.
+아래는 로컬 전환 당시의 준비 목록이다. 실제 완료 상태와 남은 작업은 [AWS 문서](aws_deployment.md)를 기준으로 확인한다.
 
 현재 파일을 그대로 AWS용 최종 구성으로 사용하지 않는다.
 
@@ -404,5 +404,5 @@ docker exec security-ai-local python -c "import joblib; b=joblib.load('/app/mode
 
 - [Docker Compose 시작 순서](https://docs.docker.com/compose/how-tos/startup-order/)
 - [Docker Compose 볼륨](https://docs.docker.com/reference/compose-file/volumes/)
-- [프로젝트 WAF 문서](../waf/README.md)
-- [AI 서버 문서](../AI_new/README.md)
+- [프로젝트 WAF 문서](../../waf/README.md)
+- [AI 서버 문서](../../AI_new/README.md)

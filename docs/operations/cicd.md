@@ -1,6 +1,6 @@
 # CI/CD 파이프라인
 
-GitHub Actions로 테스트·빌드를 자동화하고, `develop`에서 검증한 변경을 `main`에 릴리스한 뒤 단일 EC2([06_aws_deployment.md](06_aws_deployment.md))에 수동 배포하는 운영 기준을 정리한다. `main` 머지만으로 자동 배포되지는 않는다.
+GitHub Actions로 테스트·빌드를 자동화하고, `develop`에서 검증한 변경을 `main`에 릴리스한 뒤 단일 EC2([06_aws_deployment.md](aws_deployment.md))에 수동 배포하는 운영 기준을 정리한다. `main` 머지만으로 자동 배포되지는 않는다.
 
 > 배포 브랜치를 `develop`에서 `main`으로 전환하려면 `deploy.yml`의 브랜치 검사·EC2 fetch 대상과 AWS IAM 신뢰 정책을 함께 변경해야 한다. 이 문서는 전환 후의 배포 기준이며, 문서 수정만으로 실제 설정은 변경되지 않는다. 전환 순서는 8장을 따른다.
 
@@ -8,10 +8,10 @@ GitHub Actions로 테스트·빌드를 자동화하고, `develop`에서 검증�
 
 | 구분 | 상태 | 파일 |
 | --- | --- | --- |
-| CI (테스트·빌드·AI 기동 확인) | 적용 | [.github/workflows/ci.yml](../.github/workflows/ci.yml) |
-| 모델 버전 고정·검증 | 적용 | [AI_new/models.lock.json](../AI_new/models.lock.json), [scripts/fetch_models.py](../scripts/fetch_models.py) |
+| CI (테스트·빌드·AI 기동 확인) | 적용 | [.github/workflows/ci.yml](../../.github/workflows/ci.yml) |
+| 모델 버전 고정·검증 | 적용 | [AI_new/models.lock.json](../../AI_new/models.lock.json), [scripts/fetch_models.py](../../scripts/fetch_models.py) |
 | AWS·GitHub 사전 설정 | 진행 필요 (4~5장) | - |
-| CD (ECR push → EC2 배포) | 수동 실행. main 배포 전 전환 설정 확인 (8장) | [.github/workflows/deploy.yml](../.github/workflows/deploy.yml), [scripts/deploy.sh](../scripts/deploy.sh) |
+| CD (ECR push → EC2 배포) | 수동 실행. main 배포 전 전환 설정 확인 (8장) | [.github/workflows/deploy.yml](../../.github/workflows/deploy.yml), [scripts/deploy.sh](../../scripts/deploy.sh) |
 
 **개발·릴리스·배포 흐름:**
 
@@ -280,7 +280,7 @@ CI·CodeQL의 `develop`·`main` 검사는 유지한다. 배포 브랜치를 바�
    `.env.aws`, `waf/logs`, 모델 `.pkl`은 Git 제외 대상이라 표시되지 않는다. 다른 파일이 보이면 먼저 정리한다.
 3. GitHub → Actions → **Deploy to EC2** → **Run workflow** → Branch `main`, `sha`는 비워 두고 실행. 새 배포에서 SHA를 입력하면 빌드를 생략하므로 임의로 입력하지 않는다. (Write 권한으로 실행 가능)
 4. 3개 job이 모두 성공하고 Summary에 `status: Success`가 표시되는지 확인한다.
-5. 대시보드 접속과 공격 요청 1건의 탐지 표시까지 확인한다. ([06 문서 6장](06_aws_deployment.md#6-전체-실행과-통합-검증))
+5. 대시보드 접속과 공격 요청 1건의 탐지 표시까지 확인한다. ([06 문서 6장](aws_deployment.md#6-전체-실행과-통합-검증))
 
 ### 롤백
 

@@ -53,7 +53,7 @@
 
 **현재 구성은 기존 로컬 MySQL 데이터, Kafka·Zookeeper 볼륨, `security-net` 네트워크를 재사용합니다.** 신규 PC에서 저장소만 복제하면 바로 실행되는 구성은 아닙니다. `.env` 설정, AI 모델 준비, 저장 공간 확인을 먼저 진행하세요.
 
-자세한 준비·실행·중지·재빌드·검증·문제 해결 절차는 [인프라 및 실행 문서](docs/05_infra_deployment.md)를 참고하세요.
+자세한 준비·실행·중지·재빌드·검증·문제 해결 절차는 [인프라 및 실행 문서](docs/operations/local_compose.md)를 참고하세요.
 
 준비와 기존 컨테이너 전환이 끝난 환경에서는 다음 명령을 사용합니다.
 
@@ -75,11 +75,11 @@ docker compose --env-file .env -f compose.yaml ps -a
 
 ## AWS 배포
 
-[compose.aws.yaml](compose.aws.yaml)을 사용하는 단일 EC2 개발·시연 배포 절차는 [AWS 배포 및 운영 문서](docs/06_aws_deployment.md)를 참고하세요. 코드·AI 모델 전달, 실제 환경변수 설정, DB 초기화, WAF 디렉터리 권한, 서비스 검증, EC2 중지·재시작 절차를 포함합니다.
+[compose.aws.yaml](compose.aws.yaml)을 사용하는 단일 EC2 개발·시연 배포 절차는 [AWS 배포 및 운영 문서](docs/operations/aws_deployment.md)를 참고하세요. 코드·AI 모델 전달, 실제 환경변수 설정, DB 초기화, WAF 디렉터리 권한, 서비스 검증, EC2 중지·재시작 절차를 포함합니다.
 
 2026-09-26 사용자 실행 결과로 외부 접근·AI 결과 조회 및 재시작 후 데이터 보존을 확인했습니다. 현재는 보안 그룹으로 접근 IP를 제한하는 시연 환경입니다. EC2에서 수정한 Nginx 프록시 주소를 저장소에도 반영해야 하는 후속 항목은 해당 문서에 명시했습니다.
 
-GitHub Actions CI(백엔드 테스트, 프론트 빌드, AI 이미지 기동 확인, WAF 스크립트 테스트)와 EC2 자동 배포를 위한 AWS 설정은 [CI/CD 문서](docs/07_cicd_pipeline.md)를 참고하세요.
+GitHub Actions CI(백엔드 테스트, 프론트 빌드, AI 이미지 기동 확인, WAF 스크립트 테스트)와 EC2 자동 배포를 위한 AWS 설정은 [CI/CD 문서](docs/operations/cicd.md)를 참고하세요.
 
 ## 주요 API
 

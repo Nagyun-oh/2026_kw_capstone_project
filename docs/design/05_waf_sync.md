@@ -1,7 +1,11 @@
-# WAF 동기화 상태 보고 API (합의 초안)
+# WAF 블랙리스트 동기화 상태 보고 계약
 
-> **상태**: 보안(WAF)·백엔드 합의용 초안. WAF 쪽 보고 전송은 이 문서대로 구현했다([waf/sync/blacklist-sync.sh](../waf/sync/blacklist-sync.sh)).
-> 백엔드 수신 API·저장·조회와 대시보드 표시는 아직 없다. 이번 보완에서 `INVALID_FORMAT` 보고와 #92의 안전한 복구를 WAF에 반영했다. [11. 변경 제안](#11-변경-제안-합의-필요)의 백엔드 항목은 후속 작업이다.
+> **상태(2026/11/08 코드 기준 확인)**: WAF·백엔드가 합의한 계약이며 양쪽 모두 구현됐다.
+> - WAF 보고 전송: [waf/sync/blacklist-sync.sh](../../waf/sync/blacklist-sync.sh)
+> - 백엔드 수신·저장: [WafSyncController](../../backend/src/main/java/com/example/security_log_system/controller/WafSyncController.java)(`POST /internal/waf/sync-status`), [WafSyncStatusService](../../backend/src/main/java/com/example/security_log_system/service/WafSyncStatusService.java), `waf_sync_status` 테이블([add-waf-sync-status.sql](../db/add-waf-sync-status.sql))
+> - 조회·표시: [WafSyncStatusController](../../backend/src/main/java/com/example/security_log_system/controller/WafSyncStatusController.java)(`GET /api/v1/waf/sync-status`), 대시보드 [WafSyncStatusPanel](../../frontend/src/components/WafSyncStatusPanel.js)
+>
+> 10·11절은 백엔드 구현 전에 남긴 합의 기록이라 그대로 보존한다. 11절 1번(보고 경로만 CSRF 예외)과 2번(`WAF_SYNC_STATUS_WRITE` 권한 분리)은 [WafSyncSecurityConfig](../../backend/src/main/java/com/example/security_log_system/config/WafSyncSecurityConfig.java)와 [WafSyncTokenFilter](../../backend/src/main/java/com/example/security_log_system/config/WafSyncTokenFilter.java)에 반영됐다. 설계 맥락은 [04 탐지](04_detection.md)·[06 백엔드](06_backend.md)·[08 보안](08_security.md)에 있다.
 
 ## 1. 목적과 범위
 
@@ -236,7 +240,9 @@ nginx가 실행 중이 아니어서 적용을 확인하지 못함:
 }
 ```
 
-## 10. 백엔드 구현 시 확인할 점 (현재 코드 기준)
+## 10. 백엔드 구현 시 확인할 점 (구현 전 기록)
+
+> 구현 전에 정리한 확인 목록이다. 현재 구현 상태는 문서 맨 위 상태 표시를 따른다.
 
 - **경로 허용**: `WafSyncSecurityConfig`는 `GET /internal/waf/blacklist`만 허용하고 나머지는 `denyAll`이다. `POST /internal/waf/sync-status`를 명시적으로 허용해야 한다.
 - **CSRF**: 이 보안 체인은 CSRF 보호를 유지한다(커밋 `5d2c3a6b`). WAF의 POST에는 CSRF 토큰이 없으므로 그대로 두면 403이 된다. 처리 방법은 [변경 제안](#11-변경-제안-합의-필요) 1번이다.
@@ -263,5 +269,16 @@ WAF 구현 중 확인한 사항이다. 3번은 이번 보완에서 WAF에 반영
 ## 12. 검증
 
 - 자동 테스트: `python3 -m unittest discover -s waf/tests -v`(CI `WAF script tests` 단계). 가짜 백엔드가 보고를 받아 본문·헤더·순서를 확인한다.
-- 실제 nginx(일회용 WAF 컨테이너 + 가짜 백엔드)에서 확인한 결과는 [waf/README.md](../waf/README.md#검증-결과-로컬)에 있다.
-- 실제 백엔드 API와의 연결은 백엔드 구현 후 확인한다.
+- 실제 nginx(일회용 WAF 컨테이너 + 가짜 백엔드)에서 확인한 결과는 [waf/README.md](../../waf/README.md#검증-결과-로컬)에 있다.
+- 실제 백엔드 API와의 연결: EC2 측정 실행기가 회차마다 차단 제외를 원복한 뒤 관리자 세션으로 `GET /api/v1/waf/sync-status`를 조회한다. 상태가 `APPLIED`이고 stale이 아닐 때까지 기다린다([run_ec2_connection.py](../../scripts/testing/run_ec2_connection.py) `sync_status`, [EC2 진행 목차](../testing/ec2/README.md)). 이 확인은 WAF 보고 → 백엔드 저장 → 조회 경로가 동작함을 보여 준다. 다만 모든 등록 IP의 실제 403 차단을 뜻하지는 않는다.
+
+## 13. 결정 · 대안 · 근거
+
+| 결정 | 검토한 대안 | 선택 근거 | 관련 문서·코드 |
+| --- | --- | --- | --- |
+| WAF가 백엔드 스냅샷을 주기적으로 가져온다(기본 10초) | 백엔드가 WAF에 설정을 밀어 넣음 | nginx 설정 검사·reload·복구를 WAF가 책임지고, 백엔드는 WAF 내부에 접근하지 않는다. 조회가 실패하면 마지막 정상 설정을 유지한다 | 2·6절, [blacklist-sync.sh](../../waf/sync/blacklist-sync.sh) |
+| 적용 확인은 version 일치(`attemptedVersion`·`appliedVersion`)로 판단 | 보고 수신만으로 적용 완료 표시 | DB 등록과 WAF 적용 사이의 지연·실패를 구분한다. 적용을 확인하지 못했으면 `null`로 보고한다 | 5·6절 |
+| 내부 API는 전용 토큰(`X-WAF-Sync-Token`)·STATELESS, 보고 경로만 CSRF 예외 | 관리자 세션 재사용, CSRF 전역 해제 | 브라우저 자격 증명이 없는 서버 간 호출이다. 관리자 API의 세션·CSRF 보호는 그대로 둔다. 조회와 쓰기 권한을 나눈다 | 11절 1·2번, [08 보안](08_security.md) |
+| WAF당 최신 상태 1행 저장(`waf_id` 기본 키, 보고 원문 JSON) | 모든 보고 이력 저장 | 10초마다 보고하면 WAF 한 대당 하루 8,640행이다. 화면에는 최신 상태만 필요하다 | 10절, [add-waf-sync-status.sql](../db/add-waf-sync-status.sql) |
+| stale 기준 60초(`app.waf-sync.stale-after-seconds`) | 주기에 가까운 짧은 기준 | 정상 주기는 약 10초다. reload 확인 시간 초과와 복구가 겹친 실패 주기 하나가 실제 nginx 재현에서 약 26초였다 | 7절, 11절 9번 |
+| 정상적인 빈 목록은 차단 해제, 조회·검증·reload 실패는 마지막 정상 설정 유지 | 실패 시 목록을 비움 | 조회 실패를 차단 해제로 오인하지 않는다. 보고 실패 때문에 적용한 차단을 되돌리지 않는다 | 6절, [AGENTS.md](../../AGENTS.md) 보존 동작 |
