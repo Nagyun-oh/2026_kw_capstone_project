@@ -307,9 +307,10 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8000/predict `
 }
 ```
 
-규칙 게이트가 판정하면 `reason`은 `[규칙] UNION SELECT 구문 [union select] · 공격 도구 User-Agent [sqlmap]`처럼
+규칙 게이트만 판정하면 `reason`은 `[규칙] UNION SELECT 구문 [union select] · 공격 도구 User-Agent [sqlmap]`처럼
 걸린 규칙과 매칭된 문자열이 되고, `explanation.rules`에 같은 내용이, `toward_attack`·`toward_normal`에는
-같은 요청을 3모델이 어떻게 봤는지가 들어갑니다.
+같은 요청을 3모델이 어떻게 봤는지가 들어갑니다. 규칙에 걸렸어도 3모델 점수가 임계값 이상이면
+`[모델] SQL 키워드 … · 규칙도 일치: UNION SELECT 구문`처럼 모델 근거를 먼저 보여 줍니다.
 
 카프카가 연결되면 `ai-request-topic`을 컨슈밍해서 자동으로 판정 후 `ai-result-topic`에
 결과를 보냅니다(HTTP API와 동일한 판정 로직 공유).
@@ -330,8 +331,10 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8000/predict `
 
 **판정 출처** (`decision_source`)
 
-- `rule`: 규칙 게이트가 판정. `reason`은 걸린 규칙과 매칭된 문자열이며, 규칙이 곧 판정 근거입니다.
-- `model`: 3모델이 판정. `reason`은 아래 기여도 상위 3개와 근거 문자열입니다.
+- `rule`: 규칙 게이트만 판정(3모델 점수는 임계값 미만). `reason`은 걸린 규칙과 매칭된 문자열이며, 규칙이 곧 판정 근거입니다.
+- `model`: 3모델 점수가 임계값 이상. `reason`은 아래 기여도 상위 3개와 근거 문자열이고, 규칙도 함께 걸렸다면
+  끝에 `규칙도 일치: …`를 붙입니다. 이때는 패턴 근거가 규칙으로 확인됐으므로 `검토 권장` 표시는 붙이지 않습니다.
+- 어느 쪽이든 탐지 여부와 점수는 같습니다. 바뀌는 것은 근거를 무엇으로 보여 주느냐뿐입니다.
 
 **기여도 분해 (TreeSHAP)** — 최종 판정 로짓은 세 모델 로짓의 가중합이고, 트리·스키마 모델
 (HistGradientBoosting)의 로짓은 TreeSHAP으로 '기준값 + 피처별 기여'로 정확히 나뉩니다.

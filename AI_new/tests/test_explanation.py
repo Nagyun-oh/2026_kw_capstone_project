@@ -33,6 +33,10 @@ MODEL_ATTACK = {"method": "GET",
 RULE_ATTACK = {"method": "GET", "url_path": "/rest/products/search",
                "query_params": "q=1' union select id,email,password from users--", "body_content": "",
                "user_agent": "sqlmap/1.7", "ip_address": "10.0.0.3", "log_id": 3}
+# 규칙 게이트에도 걸리고 3모델도 임계값을 넘는 요청 (모델 점수 0.998)
+BOTH_ATTACK = {"method": "GET", "url_path": "/rest/products/search",
+               "query_params": "q=%27))%20UNION%20SELECT%20NULL--", "body_content": "",
+               "user_agent": "Mozilla/5.0", "ip_address": "10.0.0.4", "log_id": 4}
 
 
 @pytest.mark.parametrize("args", [
@@ -117,6 +121,19 @@ def test_rule_decision_shows_rule_and_evidence(server):
     assert result.reason.startswith("[규칙] ")
     assert "union select" in result.reason and "sqlmap" in result.reason
     assert {"union_select", "scanner_ua"} <= {r["rule"] for r in result.explanation["rules"]}
+    assert result.explanation["review_recommended"] is False
+    # 이 요청은 3모델 점수가 임계값 아래라 규칙 근거로 남는다
+    assert result.explanation["logit"] < result.explanation["threshold_logit"]
+
+
+def test_rule_hit_with_model_attack_shows_model_reason(server):
+    result = predict(server, BOTH_ATTACK)
+    assert result.decision_source == "model"
+    assert result.reason.startswith("[모델] ")
+    assert result.explanation["toward_attack"][0]["display"] in result.reason
+    assert "규칙도 일치: UNION SELECT 구문" in result.reason
+    assert result.explanation["logit"] >= result.explanation["threshold_logit"]
+    assert "union_select" in {r["rule"] for r in result.explanation["rules"]}
     assert result.explanation["review_recommended"] is False
 
 

@@ -235,9 +235,12 @@ class EnsembleExplainer:
         toward_attack = [self._item(request, tree_row, schema_row, *c) for c in attack]
         toward_normal = [self._item(request, tree_row, schema_row, *c) for c in normal]
 
-        source = "rule" if hits else "model"
+        # 규칙 게이트에 걸렸어도 3모델 로짓이 임계값 이상이면 모델이 독립적으로도 공격으로 본 것이므로
+        # 모델 근거(기여도 상위 피처)를 보여 준다. 판정·점수는 run_predict에서 끝났고 표시만 고른다.
+        source = "model" if not hits or parts["logit"] >= self.threshold_logit else "rule"
         share = pattern_share(parts["tree_shap"])
-        review = source == "model" and share is not None and share < REVIEW_PATTERN_SHARE
+        # 규칙이 함께 걸렸다면 패턴 근거가 이미 확인된 것이라 '구조 위주' 검토 표시는 붙이지 않는다
+        review = source == "model" and not hits and share is not None and share < REVIEW_PATTERN_SHARE
         rules = [self._rule(request, name, description) for name, description in hits]
 
         model_score = 1.0 / (1.0 + math.exp(-parts["logit"]))
@@ -298,6 +301,8 @@ class EnsembleExplainer:
         parts = [item["display"] + (f" [{_evidence_text(item['evidence'])}]" if item["evidence"] else "")
                  + f" {item['contribution']:+.1f}" for item in toward_attack[:TOP_K_REASON]]
         text = "[모델] " + (" · ".join(parts) if parts else "단일 피처로 설명되지 않는 판정")
+        if rules:
+            text += " · 규칙도 일치: " + ", ".join(r["description"] for r in rules)
         if review:
             text += " · 검토 권장: 구조 특성 위주 판정"
         return _clip(text)

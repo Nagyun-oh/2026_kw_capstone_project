@@ -131,7 +131,7 @@ class ThreatResponse(BaseModel):
     threat_score: float   # 3모델 소프트보팅 결합 확률 (0.0 ~ 1.0)
     ip_address:   str     # 공격이면 실제 IP, 정상이면 "0.0.0.0"
     reason:       str     # 왜 위협인지 (정상이면 "-"). 공격이면 "[규칙] …" 또는 "[모델] 피처 +기여 …"
-    decision_source: str | None = None  # "rule"(규칙 게이트) / "model"(3모델 판정), 정상이면 null
+    decision_source: str | None = None  # "rule"(규칙 게이트만) / "model"(3모델 점수가 임계값 이상, 규칙이 함께 걸려도 포함), 정상이면 null
     explanation: dict | None = None     # 판정 근거 분해 (ensemble_explainer.py), 정상·설명 실패면 null
 
 
