@@ -73,6 +73,7 @@
 | 무단 API 호출 | 공개 3개 경로(CSRF 조회, health, 로그인) 외 전부 `hasRole("ADMIN")`. 미인증 401, 권한 부족 403 | `SecurityConfig` |
 | CSRF | `HttpSessionCsrfTokenRepository`. 예외는 SockJS 전송 `/ws-security/**`와 내부 보고 `/internal/waf/sync-status`뿐. STOMP CONNECT에도 토큰을 넣는다 | `SecurityConfig`, `useWebSocket.js` |
 | 세션 고정·탈취 | 로그인 시 세션 ID 변경, 로그인 전 CSRF 토큰 폐기. 쿠키 HttpOnly·SameSite=Lax·Secure(운영), 비활성 만료 30분 | `AuthService`, `application.yml` |
+| 비밀번호 무차별 대입 | 사용자 이름별로 15분 안에 5번 실패하면 15분 동안 비밀번호 검사 없이 429·`Retry-After`로 거절(2026/11/08) | `LoginAttemptLimiter`, `AuthService`, `AuthController` |
 | 비밀번호 유출 | BCrypt 저장. 운영 초기 관리자는 관리자가 없을 때만 생성, 8자 이상·72바이트 이하, 비밀번호·해시 로그 미출력 | `ProdAdminInitializer` |
 | 교차 출처 요청 | CORS는 `CORS_ALLOWED_ORIGINS`만 허용(자격 증명 포함) | `SecurityConfig`, `WebSocketConfig` |
 | 실시간 알림 무단 구독 | 핸드셰이크에 인증 principal·기존 세션 필요, CONNECT·`/topic/threats` 구독만 ADMIN 허용, 클라이언트 발행 차단, 세션 종료 시 소켓 종료(1008) | `WebSocketSecurityConfig`, `security/` |
@@ -133,7 +134,7 @@
 4. **HTTPS 종료 위치**: TLS는 호스트 Nginx에서 끝난다. 이후 프론트↔backend, WAF↔backend(토큰 포함), backend↔MySQL, Kafka 구간은 단일 호스트 Docker 네트워크 안의 평문 통신이다.
 5. **서비스 간 인증 없음**: Kafka 리스너는 PLAINTEXT이고 AI HTTP API는 무인증이다. 같은 Docker 네트워크의 컨테이너가 침해되면 메시지 주입이 가능하며, 포트 비공개와 네트워크 격리에만 의존한다.
 6. **요청 본문 저장**: WAF access 로그 형식이 `request_body` 전체를 남겨 `network_logs.raw_log`와 `ai_request_outbox.payload`에 저장된다. 헤더 5종 외의 헤더, 본문, 쿼리 문자열은 마스킹하지 않으며 보존 기간·삭제 정책이 없다. DLT 메시지에도 원문이 남는다(파이프라인 DLT 보관 7일).
-7. **로그인 시도 제한 없음**: 계정 잠금·속도 제한 코드가 없다. 대시보드 443 접근을 보안 그룹으로 제한하는 운영 설정에 의존한다.
+7. **로그인 실패 제한은 사용자 이름 기준**(2026/11/08 추가): 15분 안에 5번 실패하면 15분 동안 429로 거절한다([06_backend.md](06_backend.md) 4절). 공격자가 특정 관리자 계정을 일시적으로 잠글 수 있고(자동 해제), 백엔드 메모리에 있어 재시작하면 초기화된다. IP 기준 제한은 프록시 뒤라 하지 않는다.
 8. **단일 공유 토큰**: 하나의 정적 토큰이 조회·보고 권한을 모두 가지며 교체 자동화가 없다. backend와 WAF가 같은 값을 써야 하므로 함께 바꿔야 한다.
 9. **제외 IP 의존**: 게이트웨이·신뢰 프록시 IP는 차단에서 빠진다. 호스트 Nginx의 `X-Forwarded-For` 덮어쓰기나 `WAF_TRUSTED_PROXY` 설정이 어긋나면 요청이 게이트웨이 IP로 기록돼 차단·자동 등록이 동작하지 않을 수 있다.
 10. **세션 메모리 저장**: backend 재시작 시 로그아웃되고, 여러 인스턴스 간 세션 공유를 지원하지 않는다. IPv6는 표기 정규화를 하지 않는다.

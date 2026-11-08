@@ -8,14 +8,17 @@
 
 ## 1. 테이블 수와 스키마 파일의 범위
 
-`security-db-schema.sql`은 **8개** 테이블을 만든다. CI가 이어서 적용하는 추가 SQL 3개가 테이블 **3개**와 `network_logs.request_id`를 더해 전체는 **11개**다.
+`security-db-schema.sql` 하나가 새 DB의 테이블 **9개**를 모두 만든다(2026/11/08 정리).
 
 | 구분 | 테이블 |
 | --- | --- |
-| `security-db-schema.sql`(8개) | `admin_users`, `detected_threats`, `ip_blacklist`, `network_logs`, `SPRING_SESSION`, `SPRING_SESSION_ATTRIBUTES`, `waf_sync_status`, `ai_request_outbox` |
-| 추가 SQL(3개) | `waf_detections`(`add-waf-detections.sql`), `request_correlations`(`add-request-correlation.sql`, `network_logs.request_id`·UNIQUE 포함), `request_alerts`(`add-request-alerts.sql`) |
+| 핵심·운영 | `admin_users`, `detected_threats`, `ip_blacklist`, `network_logs`(`request_id` UNIQUE 포함), `waf_sync_status`, `ai_request_outbox` |
+| 요청 연결·WAF 탐지·알림 | `request_correlations`, `waf_detections`, `request_alerts` |
 
-스키마 파일만으로는 엔티티와 맞지 않는다(`network_logs.request_id`, `waf_detections` 없음). [CI](../../.github/workflows/ci.yml)는 스키마 → `add-waf-detections.sql` → `add-request-correlation.sql` → `add-request-alerts.sql` 순서로 적용한다. `compose.aws.yaml`은 빈 볼륨의 최초 초기화 때 스키마 파일 하나만 `01-schema.sql`로 실행한다. 따라서 새 EC2 DB에는 나머지 3개를 백엔드 기동 전에 직접 적용해야 한다. 누락하면 `validate`가 실패할 것으로 예상한다(실행 확인 안 함).
+- **정리 전 문제:** 처음에는 스키마 파일에 `waf_detections`·`request_correlations`·`request_alerts`와 `network_logs.request_id`가 없었다. CI만 추가 SQL 3개를 이어서 적용했고, `compose.aws.yaml`은 빈 볼륨을 초기화할 때 스키마 파일 하나만 `01-schema.sql`로 실행한다. 그래서 새 EC2 DB는 `validate`에서 실패할 상태였다.
+- **정리 후:** 세 테이블과 컬럼을 스키마 파일에 넣었다. [CI](../../.github/workflows/ci.yml)도 이제 스키마 파일 하나만 적용하므로, 이 파일만으로 엔티티 검증이 통과하는지 PR마다 확인된다.
+- **기존 DB:** 기존 DB에는 해당 `add-*.sql`을 한 번만 적용하는 방식을 그대로 쓴다(5절).
+- **세션 테이블 제거:** 쓰지 않던 `SPRING_SESSION`·`SPRING_SESSION_ATTRIBUTES`는 새 DB 스키마에서 뺐다. 세션은 서버 메모리에 있고 `spring-session` 의존성이 없다. 이미 만들어진 DB의 두 테이블은 남아 있어도 동작에 영향이 없다. 지우려면 [drop-unused-spring-session.sql](../db/drop-unused-spring-session.sql)을 확인 후 직접 적용한다.
 
 ## 2. ERD
 
@@ -27,7 +30,6 @@ erDiagram
     detected_threats ||--o| waf_detections : "threat_id, UNIQUE"
     detected_threats |o--o{ ip_blacklist : "source_threat_id, NULL 허용"
     network_logs ||--o| ai_request_outbox : "log_id, PK이자 FK"
-    SPRING_SESSION ||--o{ SPRING_SESSION_ATTRIBUTES : "ON DELETE CASCADE"
     request_correlations ||..o| network_logs : "request_id 논리 연결"
     request_correlations ||..o| waf_detections : "request_id 논리 연결"
     request_correlations ||..o| request_alerts : "alert_key request 접두"
@@ -103,15 +105,6 @@ erDiagram
         varchar password "BCrypt 해시"
         varchar role
     }
-    SPRING_SESSION {
-        char PRIMARY_ID PK
-        char SESSION_ID UK
-        bigint EXPIRY_TIME
-    }
-    SPRING_SESSION_ATTRIBUTES {
-        char SESSION_PRIMARY_ID PK, FK
-        varchar ATTRIBUTE_NAME PK
-    }
 ```
 
 ## 3. 테이블별 목적
@@ -127,7 +120,6 @@ erDiagram
 | `ip_blacklist` | 수동·자동 차단 IP와 원인 위협. WAF 스냅샷의 원천 | JPA `IpBlacklist` |
 | `waf_sync_status` | WAF별 마지막 동기화 보고 원문과 수신 시각 | JPA `WafSyncStatus` + 네이티브 upsert |
 | `admin_users` | 관리자 계정(BCrypt 해시, 역할) | JPA `AdminUser` |
-| `SPRING_SESSION`, `SPRING_SESSION_ATTRIBUTES` | Spring Session JDBC 표준 테이블. `spring-session` 의존성이 없어 현재 사용하지 않는다 | 없음 |
 
 원본 로그(`network_logs`)와 분석 결과(`detected_threats`)를 분리하고, 출처별 상세는 별도 테이블(`waf_detections`)에 둔다. 새 탐지 출처를 추가해도 공통 목록 구조는 유지된다.
 
@@ -155,15 +147,16 @@ erDiagram
 
 | 파일 | 추가 커밋 날짜 | 목적 | 새 DB에 실행 |
 | --- | --- | --- | --- |
-| `add-waf-detections.sql` | 2026/10/18 | `waf_detections` 생성 | 필요(CI 2번째) |
-| `add-request-correlation.sql` | 2026/10/18 | `network_logs.request_id` + UNIQUE, `request_correlations` 생성 | 필요(CI 3번째) |
-| `add-request-alerts.sql` | 2026/10/18 | `request_alerts` 생성 | 필요(CI 4번째) |
+| `add-waf-detections.sql` | 2026/10/18 | `waf_detections` 생성 | 불필요(2026/11/08부터 스키마 포함) |
+| `add-request-correlation.sql` | 2026/10/18 | `network_logs.request_id` + UNIQUE, `request_correlations` 생성 | 불필요(2026/11/08부터 스키마 포함) |
+| `add-request-alerts.sql` | 2026/10/18 | `request_alerts` 생성 | 불필요(2026/11/08부터 스키마 포함) |
 | `alter-network-logs-request-url.sql` | 2026/10/21 | `request_url` VARCHAR(255) → TEXT | 불필요(스키마에 TEXT) |
 | `add-waf-sync-status.sql` | 2026/10/27 | `waf_sync_status` 생성 | 불필요(스키마 포함, 재실행 시 오류) |
 | `add-ai-request-outbox.sql` | 2026/11/05 | `ai_request_outbox` 생성 | 불필요(스키마 포함, 재실행 시 오류) |
 | `add-network-logs-created-at-index.sql` | 2026/11/07 | 온라인 DDL(`ALGORITHM=INPLACE, LOCK=NONE`, `lock_wait_timeout=5`)로 인덱스 추가. 사전 확인 쿼리·되돌리기 문 포함 | 불필요(스키마 포함) |
+| `drop-unused-spring-session.sql` | 2026/11/08 | 쓰지 않는 `SPRING_SESSION` 두 테이블 삭제(선택) | 불필요(새 스키마에 없음) |
 
-- **새 DB**: 스키마 → `add-waf-detections.sql` → `add-request-correlation.sql` → `add-request-alerts.sql`(CI와 같은 순서). 나머지 4개는 이미 반영돼 있어 실행하지 않는다.
+- **새 DB**: `security-db-schema.sql` 하나만 실행한다. 위 표의 추가 SQL은 모두 이미 반영돼 있어 실행하지 않는다(재실행하면 중복 테이블·컬럼 오류). CI가 같은 방식으로 적용해 검증한다.
 - **기존 DB**: `SHOW TABLES`, `SHOW INDEX`, `information_schema`로 현재 구조를 먼저 확인하고 빠진 변경만 위 표의 날짜 순으로 적용한다. 초기 스키마나 추가 SQL을 일괄 재실행하지 않는다. `waf_detections`는 `detected_threats`, `ai_request_outbox`는 `network_logs`를 참조하므로 기준 테이블이 먼저 있어야 한다.
 - 로컬과 EC2의 적용 여부를 각각 확인·기록한다. 앱 이미지 롤백은 DB를 되돌리지 않는다. 운영 SQL 실행 절차는 [../operations/aws_deployment.md](../operations/aws_deployment.md)를 따른다.
 
@@ -188,7 +181,6 @@ erDiagram
 | `ai_request_outbox`·`request_alerts`의 시각 컬럼 | DB 함수 `UTC_TIMESTAMP(6)` |
 | `waf_sync_status.received_at` | `Clock.systemUTC()` |
 | `ip_blacklist.expired_at` | 코드에서 설정하지 않는다(만료 정책 미구현) |
-| `SPRING_SESSION`의 시각 | epoch 밀리초 BIGINT(미사용 테이블) |
 
 - API는 UTC 오프셋을 붙여 응답하고 화면은 `Asia/Seoul`로 표시한다([06_backend.md](06_backend.md) 5절).
 - **DB 원문 값의 시간대는 기록 방법에 따라 다르다(EC2 확인, 2026/11/08).** JPA로 저장한 `network_logs.created_at`은 DB 안에서 KST 벽시계 값으로 보인다. 예를 들어 log 36476의 원문은 `12:53:39.646`인데, 같은 요청의 DG_TRACE 로그 커밋 시각은 `03:53:39.655Z`였다. DB `time_zone`은 `SYSTEM`(UTC)이었다([수집 쿼리 진단 증거](../testing/ec2/evidence/20261108-collection-query-plan.json)). 반면 `UTC_TIMESTAMP(6)`로 쓰는 outbox·알림 시각의 원문은 UTC다.
@@ -207,7 +199,7 @@ erDiagram
 
 - `ip_blacklist.ip_address`에 UNIQUE가 없다. 중복 방지는 `BlacklistService.isBlocked` 조회에 의존하므로 같은 IP의 서로 다른 요청이 동시에 자동 등록되면 중복 행이 생길 수 있다(재현 안 함).
 - 보존 기간·정리 작업이 없다. `network_logs`, `detected_threats`, `ai_request_outbox`(`SENT` 행 유지), `request_alerts`, `request_correlations`가 계속 늘어난다.
-- `raw_log`가 TEXT 상한(65,535바이트)을 넘는 원문을 어떻게 처리하는지는 (미확인)이다. `SPRING_SESSION` 두 테이블은 스키마에만 있고 쓰이지 않는다.
+- `raw_log`가 TEXT 상한(65,535바이트)을 넘는 원문을 어떻게 처리하는지는 (미확인)이다.
 - 새 DB 초기화가 스키마 파일 하나로 끝나지 않는다(1절). 스키마 파일 통합은 별도 작업이다.
 
 ## 결정 · 대안 · 근거

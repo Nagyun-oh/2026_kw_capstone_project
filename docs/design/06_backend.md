@@ -72,6 +72,10 @@
 
 - 토큰 필터: 설정 토큰이 32자 미만이면 기동 실패, 비어 있으면 모든 내부 요청이 401이다. 비교는 `MessageDigest.isEqual`(상수 시간)이다.
 - 로그인: `AuthService.loginWithSession`이 인증 후 `ChangeSessionIdAuthenticationStrategy`(세션 고정 방지)와 `CsrfAuthenticationStrategy`(로그인 전 CSRF 토큰 폐기)를 적용하고 세션에 명시 저장한다. 비밀번호는 `BCryptPasswordEncoder`로 검증한다.
+- 로그인 실패 제한(2026/11/08): [`LoginAttemptLimiter`](../../backend/src/main/java/com/example/security_log_system/service/LoginAttemptLimiter.java)가 사용자 이름별로 실패를 센다.
+  - 기본값: 15분 안에 5번 실패하면 15분 동안 잠근다. 잠긴 동안은 비밀번호를 검사하지 않고 `429 Too Many Requests`와 `Retry-After`(초)를 돌려준다. 성공하면 기록을 지운다.
+  - 사용자 이름은 대소문자·앞뒤 공백을 구분하지 않는다. 클라이언트 IP는 기준으로 쓰지 않는다(프록시 뒤라 원격 주소가 사용자 IP가 아니고, 임의의 `X-Forwarded-For`를 신뢰하지 않음).
+  - 백엔드 1개의 메모리에 두므로 재시작하면 초기화된다. 사용자 이름 기준이라 공격자가 계정을 일시적으로 잠글 수는 있다(잠금은 자동 해제).
 - 로그아웃: `POST /api/v1/auth/logout` → 세션 무효화, `JSESSIONID` 삭제, 204. 폼 로그인·HTTP Basic은 끈다.
 - 쿠키·세션: `JSESSIONID`, HttpOnly, SameSite=Lax, Secure(`SESSION_COOKIE_SECURE`, 기본 true, local 프로필 false), 비활성 만료 30분. `spring-session` 의존성이 없어 세션은 서블릿 메모리에 있고 재시작하면 로그아웃된다.
 - 초기 관리자: local 프로필 `LocalAdminInitializer`, prod 프로필 `ProdAdminInitializer`(`app.bootstrap-admin.enabled=true`이고 `ROLE_ADMIN`이 없을 때만, 비밀번호 8자 이상·UTF-8 72바이트 이하). `POST /api/v1/auth/register`도 관리자만 호출한다.
@@ -150,6 +154,7 @@
 | `spring.kafka.bootstrap-servers` | `KAFKA_BOOTSTRAP_SERVERS` | local `localhost:9092`, prod 필수 | `kafka:29092` |
 | `app.cors.allowed-origins` | `CORS_ALLOWED_ORIGINS` | local `http://localhost:3000`, prod 필수 | 필수 |
 | `app.bootstrap-admin.*` | `APP_BOOTSTRAP_ADMIN_ENABLED` · `_USERNAME` · `_PASSWORD` | false, 빈 값 | 기본 false |
+| `app.auth.login-limit.max-failures` · `window-seconds` · `lock-seconds` | `APP_AUTH_LOGINLIMIT_MAXFAILURES` · `_WINDOWSECONDS` · `_LOCKSECONDS` | 5, 900, 900 | 전달하지 않음(기본값) |
 | `app.kafka.waf.enabled` · `event-zone` | `WAF_CONSUMER_ENABLED`, `WAF_EVENT_ZONE` | false, `UTC` | 같음 |
 | `app.waf-sync.token` | `WAF_SYNC_TOKEN` | 빈 값(내부 API 전부 401) | WAF와 같은 값 |
 | `app.waf-sync.expected-waf-id` · `stale-after-seconds` | `WAF_ID`, `WAF_SYNC_STALE_AFTER_SECONDS` | `local-waf-1`, 60 | `aws-waf-1`, 60 |
@@ -163,7 +168,9 @@
 - `app.alerts.*`는 `application*.yml`에 없고 코드 기본값과 Compose 환경 변수(완화 바인딩)로만 정해진다.
 - `ai_request_outbox` 등록은 `AI_OUTBOX_ENABLED`와 무관하게 항상 일어난다. 이 값은 발행기 생성 여부만 정한다.
 - `spring.flyway.*` 설정은 있지만 Flyway 의존성과 `db/migration` 디렉터리가 없어 동작하지 않는다.
-- `application-local.yml`·`application-prod.yml`의 `management` 블록은 `spring:` 아래에 들어가 있어 적용되지 않는다. 실제 노출은 공통 설정의 `health`(상세 `never`)뿐이다.
+- `application-local.yml`·`application-prod.yml`의 `management` 블록은 원래 `spring:` 아래에 들어가 있어 적용되지 않았다. 2026/11/08에 최상위로 옮겼다.
+  - prod: 공통 설정과 같은 `health`(상세 `never`)만 노출해 동작 변화가 없다.
+  - local: `health`·`info`·`metrics`·`prometheus`를 노출한다. `health` 외 경로는 `SecurityConfig`가 관리자 로그인을 요구한다.
 
 ## 10. 테스트 구성
 

@@ -90,7 +90,7 @@ EC2 t3.large(2 vCPU/8GiB, gp3 50GiB, Ubuntu 24.04 LTS, 서울 리전) 한 대에
 - **호스트 Nginx(Git 밖)**: 대시보드 도메인의 443을 `127.0.0.1:3000`으로, Juice Shop용 호스트명을 `127.0.0.1:8081`(WAF)로 보낸다. Juice Shop 경로에서는 클라이언트가 보낸 `X-Forwarded-For`를 `$remote_addr`로 덮어쓴다.
 - **실제 IP 복원**: WAF는 `SET_REAL_IP_FROM=${WAF_TRUSTED_PROXY}`(Docker 게이트웨이)가 보낸 `X-Forwarded-For`만 신뢰한다. 8081을 외부에 열면 IP 위조가 가능하므로 loopback 바인딩을 유지한다.
 - **내부 포트**: backend·frontend·ai·waf는 loopback에만 바인딩하고 DB·Kafka·Zookeeper는 호스트 포트를 열지 않는다.
-- **저장소**: 볼륨 `mysql-data`·`kafka-data`·`zookeeper-data`·`zookeeper-log`·`fluent-bit-state`·`waf-blacklist-state`, 바인드 `./waf/logs`. 새 DB는 첫 기동 때 [security-db-schema.sql](../db/security-db-schema.sql)만 자동 실행한다. `docs/db/`의 추가 SQL(`add-waf-detections`·`add-request-correlation`·`add-request-alerts`)은 자동 실행되지 않는다(CI는 스키마 뒤에 순서대로 적용). 상세는 [07 데이터베이스](07_database.md).
+- **저장소**: 볼륨 `mysql-data`·`kafka-data`·`zookeeper-data`·`zookeeper-log`·`fluent-bit-state`·`waf-blacklist-state`, 바인드 `./waf/logs`. 새 DB는 첫 기동 때 [security-db-schema.sql](../db/security-db-schema.sql) 하나만 자동 실행하며, 이 파일이 테이블 9개를 모두 만든다(2026/11/08 정리, CI도 같은 파일만 적용해 검증). `docs/db/`의 추가 SQL은 기존 DB용이다([07_database.md](07_database.md) 1·5절).
 - **배포**: `deploy.yml`(수동 `workflow_dispatch`)이 앱 이미지 3개를 ECR에 git SHA 태그로 올리고, SSM으로 [deploy.sh](../../scripts/deploy.sh)를 실행한다. deploy.sh는 이미지를 받아 `up -d --no-build` 후 backend·AI·frontend 상태를 확인한다. 절차는 [AWS 배포](../operations/aws_deployment.md)·[CI/CD](../operations/cicd.md).
 
 ## 6. 로컬과 AWS 차이
