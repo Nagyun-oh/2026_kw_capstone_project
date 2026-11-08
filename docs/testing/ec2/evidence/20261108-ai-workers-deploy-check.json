@@ -1,0 +1,123 @@
+{
+  "schema": "dualguard-ai-workers-deploy-check-v1",
+  "before_deploy": {
+    "at": "2026-11-08T05:47:55.336083+00:00",
+    "torch_fresh_process": {
+      "torch": "2.8.0+cpu",
+      "threads": 1,
+      "interop": 1,
+      "cpus": 2,
+      "env": {
+        "OMP_NUM_THREADS": false,
+        "MKL_NUM_THREADS": false,
+        "TORCH_NUM_THREADS": false
+      }
+    },
+    "uvicorn_processes": [
+      {
+        "pid": 1,
+        "threads": 11
+      },
+      {
+        "pid": 5092,
+        "threads": 1
+      }
+    ],
+    "nproc": "2",
+    "ai_stats": {
+      "CPUPerc": "2.17%",
+      "MemUsage": "627.8MiB / 7.633GiB",
+      "MemPerc": "8.03%"
+    },
+    "host_meminfo": [
+      "MemTotal:        8003820 kB",
+      "MemAvailable:    4708328 kB"
+    ]
+  },
+  "after_deploy": {
+    "at": "2026-11-08T06:10:23.717398+00:00",
+    "head": "1ec9c858318c6087f5c33799d707e21deacd90da",
+    "contains_change": true,
+    "services": [
+      "ai|Up 2 minutes (healthy)",
+      "backend|Up 2 minutes",
+      "db|Up 5 hours (healthy)",
+      "fluent-bit|Up 5 hours",
+      "frontend|Up 2 minutes",
+      "juiceshop|Up 5 hours",
+      "kafka|Up 4 hours (healthy)",
+      "waf|Up 44 minutes (healthy)",
+      "zookeeper|Up 5 hours"
+    ],
+    "containers": {
+      "backend": {
+        "started_at": "2026-11-08T06:07:48.840071344Z",
+        "restart_count": 0,
+        "image": "sha256:f5fd557606ac"
+      },
+      "ai": {
+        "started_at": "2026-11-08T06:07:48.574088842Z",
+        "restart_count": 0,
+        "image": "sha256:c7193c36851d"
+      },
+      "kafka": {
+        "started_at": "2026-11-08T02:06:48.83960941Z",
+        "restart_count": 0,
+        "image": "sha256:06e5d17d6c51"
+      }
+    },
+    "ai_processes": [
+      {
+        "pid": 1,
+        "ppid": 0,
+        "rss_mib": 30,
+        "kind": "uvicorn-master"
+      },
+      {
+        "pid": 7,
+        "ppid": 1,
+        "rss_mib": 17,
+        "kind": "worker"
+      },
+      {
+        "pid": 8,
+        "ppid": 1,
+        "rss_mib": 716,
+        "kind": "worker"
+      },
+      {
+        "pid": 9,
+        "ppid": 1,
+        "rss_mib": 715,
+        "kind": "worker"
+      },
+      {
+        "pid": 98,
+        "ppid": 0,
+        "rss_mib": 2,
+        "kind": "worker"
+      }
+    ],
+    "ai_thread_env": "1 1",
+    "ai_stats": {
+      "CPUPerc": "2.14%",
+      "MemUsage": "1.215GiB / 7.633GiB",
+      "MemPerc": "15.91%"
+    },
+    "ai_health": {
+      "status": "healthy",
+      "model_loaded": true
+    },
+    "topic_describe": [
+      "Topic: ai-request-topic\tTopicId: xbLDWJshSTioenjs3tHpxg\tPartitionCount: 2\tReplicationFactor: 1\tConfigs: ",
+      "\tTopic: ai-request-topic\tPartition: 0\tLeader: 1\tReplicas: 1\tIsr: 1",
+      "\tTopic: ai-request-topic\tPartition: 1\tLeader: 1\tReplicas: 1\tIsr: 1"
+    ],
+    "group_describe": [
+      "GROUP            TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                             HOST            CLIENT-ID",
+      "ai-service-group ai-request-topic 1          0               0               0               kafka-python-2.2.3-8575cb10-7628-4b19-8691-8982916ffa2d /<ipv4>     kafka-python-2.2.3",
+      "ai-service-group ai-request-topic 0          48049           48049           0               kafka-python-2.2.3-741ddadf-8e51-423c-8895-0df0cfb37157 /<ipv4>     kafka-python-2.2.3"
+    ],
+    "host_mem_available": "MemAvailable:    4180884 kB"
+  }
+}
